@@ -1,0 +1,88 @@
+#define MODBUS_SERIAL_OUT_BUFFER_LENGTH 2048
+#define MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK MODBUS_SERIAL_OUT_BUFFER_LENGTH - 1 
+#define MODBUS_SOCKET_MAX_NUMBERS 8
+#define MODBUS_SLAVE_SOCKET_NUMBERS 4				' numbers sockets for conneting to modbus slave TCP units
+#define MODBUS_RULES_ID_NUMBERS 8
+#define MODBUS_RULES_PORT_NUMBERS 4
+#define MODBUS_TCP_SOCKET_TYPE 0
+#define MODBUS_SERIAL_SOCKET_TYPE 128
+#define MODBUS_SOCKET_TYPE_FLAG 128
+#define MODBUS_SOCKET_MASK 127
+#define MODBUS_BUFFER_EMPTY_FLAG 255
+
+#define MODBUS_SERIAL_TIMEOUT 3
+#define MODBUS_TCP_TIMEOUT 3
+
+declare function CRC16(byref puchMsg as string, usDataLen as word) as word
+declare function LRC8(byref puchMsg as string, usDataLen as word) as byte
+
+declare overrun_buffer as boolean
+declare modbus_tcp_established as boolean
+declare modbus_tcp_est_counter as byte
+declare modbus_tcp_connecting as boolean
+declare modbus_tcp_closing as boolean
+
+declare modbus_socks_number as byte
+declare modbus_socks(MODBUS_SOCKET_MAX_NUMBERS) as byte
+declare modbus_slave_socks(MODBUS_SLAVE_SOCKET_NUMBERS) as byte
+
+enum MODBUS_SERIALTYPE
+	
+	MODBUS_SERIAL_MASTER_RTU,
+	MODBUS_SERIAL_MASTER_ASCII,
+	MODBUS_SERIAL_SLAVE_RTU,
+	MODBUS_SERIAL_SLAVE_ASCII
+
+end enum
+
+' Operation status for serial channel
+type MODBUS_SERIALCHANNELOPERATION
+	
+	SerialType as MODBUS_SERIALTYPE
+	OperationInProgress as boolean
+	SourceU as byte
+	TransactionID as word
+	ShiftID as char
+	TimeOut as long
+	
+end type
+
+' Operation status for TCP socket
+type MODBUS_TCPSOCKETOPERATION
+	
+	Socket as byte
+	Connected as boolean
+	OperationInProgress as boolean
+	SourceU as byte
+	TransactionID as word
+	TransactionIDOriginal as word
+	ShiftID as char
+	TimeOut as long
+	
+end type
+
+declare ModBusSerialChannelsOperation(NUM_SERIAL_PORTS) as MODBUS_SERIALCHANNELOPERATION
+declare ModBusTCPSocketsOperation(MODBUS_SLAVE_SOCKET_NUMBERS) as MODBUS_TCPSOCKETOPERATION
+
+declare function modbus_initialize() as boolean
+
+declare sub modbus_send_request(byref flagsSerial as byte, byref flagsSocket as word, byref data as string, sourceU as byte, destinationU as byte, shiftID as char)
+declare sub modbus_send_request_to_serial(byref data as string, sourceU as byte, destination as byte, shiftID as char, timeout as long)
+declare sub modbus_send_request_to_tcp(byref data as string, sourceU as byte, destination as byte, shiftID as char, timeout as long)
+declare sub modbus_send_responce(byref data as string, sourceU as byte, destinationU as byte, shiftID as char)
+declare sub modbus_send_responce_to_serial(byref data as string, sourceU as byte, destination as byte, shiftID as char)
+declare sub modbus_send_responce_to_tcp(byref data as string, sourceU as byte, destination as byte, shiftID as char)
+declare sub modbus_send_serial_ascii(byref packet as string, channelSerial as byte, shiftID as char)
+declare sub modbus_send_serial_rtu(byref packet as string, channelSerial as byte, shiftID as char)
+declare function modbus_packet_ascii_to_bin(byref data_ascii as string) as string
+declare sub modbus_send_tcp(byref data as string, destination as byte, transaction as word, shiftID as char)
+declare sub modbus_store_packet(byref data as string, sourceU as byte, destinationU as byte, shiftID as char)
+
+declare sub modbus_tcp_receive(byref data as string, channelTCP as byte, portTCP as word)
+declare sub modbus_serial_receive(byref data as string, channelSerial as byte)
+
+declare sub modbus_timeout()
+
+#if DEV_DEBUG_PRINT
+	declare sub modbus_debug_dump(byref data as string)
+#endif

@@ -1,0 +1,1005 @@
+include "global.tbh"
+
+public dim overrun_buffer as boolean
+public dim modbus_tcp_established as boolean
+public dim modbus_tcp_est_counter as byte
+public dim modbus_tcp_connecting as boolean
+public dim modbus_tcp_closing as boolean
+
+public dim modbus_socks_number as byte
+public dim modbus_socks(MODBUS_SOCKET_MAX_NUMBERS) as byte
+public dim modbus_slave_socks(MODBUS_SLAVE_SOCKET_NUMBERS) as byte
+
+' Buffer for output MODBUS packets
+dim modbus_out_buffer(MODBUS_SERIAL_OUT_BUFFER_LENGTH) as byte
+dim modbus_out_buffer_head as word
+dim modbus_out_buffer_length as word
+
+	' ROUTE
+type MODBUS_ROUTE_ID
+
+	IdFrom as byte
+	IdTo as byte
+	IdShift as char
+	ChannelU as byte
+	
+end type
+
+type MODBUS_ROUTE_PORT
+	
+	TCPPort as word
+	IdShift as char
+	ChannelU as byte
+	
+end type
+
+type MODBUS_SLAVE_CONNECTION
+	
+	TCPAddress as string(15)
+	TCPPort as word
+
+end type
+
+dim ModBusRouteId(MODBUS_RULES_ID_NUMBERS) as MODBUS_ROUTE_ID
+dim ModBusRoutePort(MODBUS_RULES_PORT_NUMBERS) as MODBUS_ROUTE_PORT
+
+dim ModBusSlaveDevices(MODBUS_SLAVE_SOCKET_NUMBERS) as MODBUS_SLAVE_CONNECTION
+
+dim ModBusSerialChannelsOperation(NUM_SERIAL_PORTS) as MODBUS_SERIALCHANNELOPERATION
+dim ModBusTCPSocketsOperation(MODBUS_SLAVE_SOCKET_NUMBERS) as MODBUS_TCPSOCKETOPERATION
+
+function modbus_get_nibble(nibble as byte) as string(2)
+	
+	if nibble < 10 then
+		modbus_get_nibble = chr(32 + 16 + nibble)
+	else
+		modbus_get_nibble = chr(32 + 16 + 7 + nibble)
+	end if
+	
+end function
+
+function modbus_hex(bt as byte) as string(3)
+	
+	dim res as string
+	
+	res = modbus_get_nibble((bt shr 4) and 15)
+	res = res + modbus_get_nibble(bt and 15)
+	modbus_hex = res
+	
+end function
+	
+' MODBUS GENERAL 
+function modbus_initialize() as boolean
+	
+	dim i as byte
+	dim ports as string(25)
+	dim result as boolean
+	
+	result = true
+
+	#if DEV_DEBUG_PRINT
+		dev_debugprint("sys.freebuffpages " + str(sys.freebuffpages))
+	#endif
+	
+	overrun_buffer = false
+	modbus_tcp_est_counter = 0
+	modbus_tcp_established = false
+	modbus_tcp_connecting = false
+	modbus_tcp_closing = false
+
+	modbus_out_buffer_head = 0
+	modbus_out_buffer_length = 0
+	
+	for i = 0 to NUM_SERIAL_PORTS - 1
+
+		ModBusSerialChannelsOperation(i).SerialType = val(stg_get("RI",i))
+		ModBusSerialChannelsOperation(i).TransactionID = 0
+		ModBusSerialChannelsOperation(i).OperationInProgress = false
+		ModBusSerialChannelsOperation(i).SourceU = 255
+		ModBusSerialChannelsOperation(i).ShiftID = 0
+		ModBusSerialChannelsOperation(i).TimeOut = 0
+		
+	next
+
+	for i = 0 to MODBUS_SLAVE_SOCKET_NUMBERS - 1
+		
+		ModBusSlaveDevices(i).TCPAddress = stg_get("RK",i)
+		ModBusSlaveDevices(i).TCPPort = stg_get("RL",i)
+
+		if ModBusSlaveDevices(i).TCPAddress <> "0.0.0.0" then
+			modbus_slave_socks(i) = sock_get("MBO" + str(i))
+			sock.num = modbus_slave_socks(i)
+			#if DEV_DEBUG_PRINT
+				dev_debugprint("ModBus TCP outgoing connection. Socket " + str(modbus_slave_socks(i)))
+			#endif
+			if sock.txbuffrq(1) <> 1 or sock.rxbuffrq(1) <> 1 then
+				result = false
+			end if
+			sys.buffalloc	
+			#if DEV_DEBUG_PRINT
+				dev_debugprint("sys.freebuffpages " + str(sys.freebuffpages))
+			#endif
+		else 
+			modbus_slave_socks(i) = 255
+		end if
+
+		ModBusTCPSocketsOperation(i).Socket = modbus_slave_socks(i)
+		ModBusTCPSocketsOperation(i).Connected = false
+		ModBusTCPSocketsOperation(i).OperationInProgress = false
+		ModBusTCPSocketsOperation(i).SourceU = 255
+		ModBusTCPSocketsOperation(i).TransactionID = 0
+		ModBusTCPSocketsOperation(i).TransactionIDOriginal = 0
+		ModBusTCPSocketsOperation(i).ShiftID = 0
+		ModBusTCPSocketsOperation(i).TimeOut = 0
+	next i
+
+	for i = 0 to MODBUS_RULES_PORT_NUMBERS - 1
+		
+		ModBusRoutePort(i).TCPPort = val(stg_get("RF",i))
+		ModBusRoutePort(i).IdShift = val(stg_get("RG",i))
+		ModBusRoutePort(i).ChannelU = val(stg_get("RH",i))
+
+	next i
+	
+	for i = 0 to MODBUS_RULES_ID_NUMBERS - 1
+
+		ModBusRouteId(i).IdFrom = val(stg_get("RA",i))
+		ModBusRouteId(i).IdTo = val(stg_get("RB",i))
+		ModBusRouteId(i).IdShift = val(stg_get("RD",i))
+		ModBusRouteId(i).ChannelU = val(stg_get("RE",i))
+		if ModBusRouteId(i).ChannelU > 3 and ModBusRouteId(i).ChannelU < 8 then
+			ModBusRouteId(i).ChannelU = modbus_slave_socks(ModBusRouteId(i).ChannelU - 4) or MODBUS_TCP_SOCKET_TYPE
+		else 
+			ModBusRouteId(i).ChannelU = ModBusRouteId(i).ChannelU or MODBUS_SERIAL_SOCKET_TYPE
+		end if
+
+	next i
+
+	' Get list of TCP Ports
+	ports = stg_get("RJ",0)
+	for i = 1 to 3
+		if val(stg_get("RJ",i)) <> 0 then
+			ports = ports + "," + stg_get("RJ",i)
+		end if
+	next i
+	
+	' MODBUS TCP
+	modbus_socks_number = (sys.freebuffpages - 14) / 2
+	if modbus_socks_number > MODBUS_SOCKET_MAX_NUMBERS then modbus_socks_number = MODBUS_SOCKET_MAX_NUMBERS
+	#if DEV_DEBUG_PRINT
+		dev_debugprint("modbus_socks_number " + str(modbus_socks_number))
+	#endif
+	for i = 0 to modbus_socks_number - 1
+		modbus_socks(i) = sock_get("MBI" + str(i))
+		sock.num = modbus_socks(i)
+		sock.protocol = PL_SOCK_PROTOCOL_TCP
+		sock.localportlist = ports
+		sock.connectiontout = 600
+		sock.allowedinterfaces = "NET,WLN,PPP"
+		sock.inconmode = PL_SOCK_INCONMODE_ANY_IP_ANY_PORT
+		sock.reconmode = PL_SOCK_RECONMODE_0
+		if sock.txbuffrq(1) <> 1 or sock.rxbuffrq(1) <> 1 then
+			result = false
+		end if
+		sys.buffalloc	
+		#if DEV_DEBUG_PRINT
+			dev_debugprint("sys.freebuffpages " + str(sys.freebuffpages))
+		#endif
+	next i
+
+	modbus_initialize = result
+
+end function
+
+function modbus_out_buffer_empty_length() as word
+	
+	modbus_out_buffer_empty_length = MODBUS_SERIAL_OUT_BUFFER_LENGTH - modbus_out_buffer_length
+	
+end function
+
+function modbus_out_buffer_is_full() as boolean
+	
+	if modbus_out_buffer_empty_length() = 0  then
+		modbus_out_buffer_is_full = true
+	else
+		modbus_out_buffer_is_full = false
+	end if
+
+end function
+
+sub modbus_out_buffer_add(data as byte)
+
+	if modbus_out_buffer_is_full() <> true then
+		
+		modbus_out_buffer(modbus_out_buffer_head) = data
+		modbus_out_buffer_head = (modbus_out_buffer_head + 1) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK
+		modbus_out_buffer_length = modbus_out_buffer_length + 1
+
+	end if
+end sub
+
+function modbus_out_buffer_get() as byte
+	
+	if modbus_out_buffer_length > 0  then
+		
+		modbus_out_buffer_get = modbus_out_buffer((modbus_out_buffer_head - modbus_out_buffer_length) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK)
+		modbus_out_buffer_length = modbus_out_buffer_length - 1
+
+	end if
+end function
+
+sub modbus_out_buffer_garbage()
+
+	dim i, length as word
+	
+	while((modbus_out_buffer_length > 0) and (modbus_out_buffer((modbus_out_buffer_head - modbus_out_buffer_length + 1) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK)) = 255)
+		modbus_out_buffer_get()				' get channelU FROM
+		modbus_out_buffer_get()				' get channelU TO
+		modbus_out_buffer_get()				' get shiftID 
+		length = modbus_out_buffer_get()	' get Length
+		for i = 1 to length
+			modbus_out_buffer_get()	' get data
+		next i
+		#if DEV_DEBUG_PRINT
+			dev_debugprint("ModBus. Buffer Operate: Garbaged packet, H: " + str(modbus_out_buffer_head) + ", L: " + str(modbus_out_buffer_length))
+		#endif
+	wend
+	
+end sub
+
+sub modbus_buffer_operate(channelU as byte)
+	dim pointerData, i, j, k, l as word
+	dim data as string
+	dim sourceU, destinationU as byte
+	dim shiftID as char
+	dim serials as byte
+	dim sockets as word
+	
+	serials = 0
+	sockets = 0
+	data = ""
+	if modbus_out_buffer_length > 0  then
+
+		' Looking OutBuffer for right channelU
+		j = modbus_out_buffer_length
+		i = modbus_out_buffer_head - j and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK
+		while (j > 0) 
+			if modbus_out_buffer((i + 1) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK) = channelU then	' check destinationU field
+				
+				' Founded packet for right destinationU
+
+				sourceU = modbus_out_buffer(i and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK) 			' Get SourceU field
+				destinationU = modbus_out_buffer((i + 1) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK) 	' Get DestinationU field
+				shiftID = modbus_out_buffer((i + 2) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK) 		' Get shiftID
+				k = modbus_out_buffer((i + 3) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK) 			' get length
+				pointerData = (i + 4) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK
+				modbus_out_buffer((i + 1) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK) = MODBUS_BUFFER_EMPTY_FLAG										' Marking packet is delete
+				for l = 0 to k - 1
+					data = data + chr(modbus_out_buffer((pointerData + l) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK))
+				next l
+				
+				modbus_send_request(serials, sockets, data, sourceU, destinationU, shiftID)
+
+				exit while
+				
+			else
+				j = j - 4 - modbus_out_buffer((i + 3) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK)
+				i = (i + 4 + modbus_out_buffer((i + 3) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK)) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK
+			end if
+		wend
+	end if
+
+	modbus_out_buffer_garbage()
+
+end sub
+
+sub modbus_timeout()
+	
+	dim i as byte
+	
+	' Check OUT connection
+	for i = 0 to MODBUS_SLAVE_SOCKET_NUMBERS - 1
+		if ModBusTCPSocketsOperation(i).Socket <> 255 then
+			if ModBusTCPSocketsOperation(i).Connected = false then
+				sock.num = ModBusTCPSocketsOperation(i).Socket
+				sock.protocol = PL_SOCK_PROTOCOL_TCP
+				sock.connectiontout = 600
+				sock.allowedinterfaces = "NET,WLN,PPP"
+				sock.targetip = ModBusSlaveDevices(i).TCPAddress
+				sock.targetport = ModBusSlaveDevices(i).TCPPort
+				sock.connect()
+			end if
+		end if
+	next i
+
+	for i = 0 to NUM_SERIAL_PORTS - 1
+		if ModBusSerialChannelsOperation(i).OperationInProgress = true  then
+			if ModBusSerialChannelsOperation(i).TimeOut <=  sys.timercount then
+				' TimeOut
+				#if DEV_DEBUG_PRINT
+					dev_debugprint("ModBus. Channel Serial timeout : " + str(i))
+				#endif
+				ModBusSerialChannelsOperation(i).OperationInProgress = false
+				modbus_buffer_operate(i or MODBUS_SERIAL_SOCKET_TYPE)
+			end if
+		end if
+	next
+	
+	for i = 0 to MODBUS_SLAVE_SOCKET_NUMBERS - 1
+		if ModBusTCPSocketsOperation(i).OperationInProgress = true  then
+			if ModBusTCPSocketsOperation(i).TimeOut <=  sys.timercount then
+				' TimeOut
+				#if DEV_DEBUG_PRINT
+					dev_debugprint("ModBus. Channel Socket timeout : " + str(i))
+				#endif
+				ModBusTCPSocketsOperation(i).OperationInProgress = false
+				modbus_buffer_operate(ModBusTCPSocketsOperation(i).Socket or MODBUS_TCP_SOCKET_TYPE)
+			end if
+		end if
+	next
+	
+end sub
+
+' Send Requests
+sub modbus_send_request(byref flagsSerial as byte, byref flagsSocket as word, byref data as string, sourceU as byte, destinationU as byte, shiftID as char)
+	
+	dim source as byte
+	dim destination as byte
+	dim sbit as word
+	
+	source = sourceU and not MODBUS_SERIAL_SOCKET_TYPE
+	destination = destinationU and not MODBUS_SERIAL_SOCKET_TYPE
+	
+	sbit = 1 shl (destination + 1)
+	
+	if (destinationU and MODBUS_SOCKET_TYPE_FLAG) = MODBUS_SERIAL_SOCKET_TYPE then
+		' Destination is SERIAL
+		if (flagsSerial and sbit) = 0  then
+			flagsSerial = flagsSerial or sbit
+			modbus_send_request_to_serial(data, sourceU, destination, shiftID, sys.timercount + MODBUS_SERIAL_TIMEOUT)
+		end if
+	else
+		' Destination is TCP
+		if (flagsSocket and sbit) = 0  then
+			flagsSocket = flagsSocket or sbit
+			modbus_send_request_to_tcp(data, sourceU, destination, shiftID, sys.timercount + MODBUS_TCP_TIMEOUT)
+		end if
+	end if
+	
+end sub
+
+sub modbus_send_request_to_serial(byref data as string, sourceU as byte, destination as byte, shiftID as char, timeout as long)
+
+	dim i as byte
+	dim transaction as word
+	dim data_for_send as string
+	dim clientid as byte
+
+	if ModBusSerialChannelsOperation(destination).SerialType = MODBUS_SERIAL_SLAVE_RTU or
+		ModBusSerialChannelsOperation(destination).SerialType = MODBUS_SERIAL_SLAVE_ASCII then
+		if port_in_use(destination) = YES then
+			if ModBusSerialChannelsOperation(destination).OperationInProgress = true then
+				' SERIAL is in USE
+				' Store MODBUS packet to buffer
+				
+				#if DEV_DEBUG_PRINT
+					dev_debugprint("ModBus Store packet to buffer. H: " + str(modbus_out_buffer_head) + ", L: " + str(modbus_out_buffer_length))
+				#endif
+				modbus_store_packet(data, sourceU, destination or MODBUS_SERIAL_SOCKET_TYPE, shiftID)
+				
+			else
+				' SERIAL is free
+				if (sourceU and MODBUS_SOCKET_TYPE_FLAG) = MODBUS_SERIAL_SOCKET_TYPE then
+					' Source is SERIAL
+					' SERIAL -> SERIAL
+					transaction = 0
+					data_for_send = data
+					
+				else
+					' Source is TCP
+					' TCP -> SERIAL
+					transaction = 256 * asc(mid(data, 1, 1)) + asc(mid(data, 2, 1))
+					data_for_send = mid(data, 7, 256 * asc(mid(data, 5, 1)) + asc(mid(data, 6, 1)))
+					
+				end if
+
+				if asc(mid(data_for_send, 1, 1)) <> 255 then		' if packet is BROADCAST - no responce waiting
+
+					ModBusSerialChannelsOperation(destination).TransactionID = transaction
+					ModBusSerialChannelsOperation(destination).OperationInProgress = true
+					ModBusSerialChannelsOperation(destination).TimeOut = timeout
+					ModBusSerialChannelsOperation(destination).SourceU = sourceU
+					ModBusSerialChannelsOperation(destination).ShiftID = shiftID
+				
+				else
+					#if DEV_DEBUG_PRINT
+						dev_debugprint("BROADCAST")
+					#endif
+				end if
+
+				#if PER_CHANNEL_STATUS_INDICATION=0
+					data_transmission_event(0) = YES
+				#else
+					data_transmission_event(destination) = YES
+				#endif
+
+				if ModBusSerialChannelsOperation(destination).SerialType = MODBUS_SERIAL_SLAVE_RTU then
+					modbus_send_serial_rtu(data_for_send, destination, shiftID)
+				else if ModBusSerialChannelsOperation(destination).SerialType = MODBUS_SERIAL_SLAVE_ASCII then
+					modbus_send_serial_ascii(data_for_send, destination, shiftID)
+				end if
+			end if
+		else
+			#if DEV_DEBUG_PRINT
+				dev_debugprint("Serial port not in use")
+			#endif
+		end if
+	else
+		#if DEV_DEBUG_PRINT
+			dev_debugprint("Serial port not in SLAVE mode")
+		#endif
+	end if
+end sub
+
+sub modbus_send_request_to_tcp(byref data as string, sourceU as byte, destination as byte, shiftID as char, timeout as long)
+	
+	dim i as byte
+	dim transaction as word
+	dim data_for_send as string
+
+	for i = 0 to MODBUS_SLAVE_SOCKET_NUMBERS - 1
+		if ModBusTCPSocketsOperation(i).Socket = destination then
+			if ModBusTCPSocketsOperation(i).OperationInProgress = true then
+				' TCP is in USE
+				' Store MODBUS packet to buffer
+
+				modbus_store_packet(data, sourceU, destination or MODBUS_TCP_SOCKET_TYPE, shiftID)
+				
+				#if DEV_DEBUG_PRINT
+					dev_debugprint("ModBus Store packet to buffer. H: " + str(modbus_out_buffer_head) + ", L: " + str(modbus_out_buffer_length))
+				#endif
+				
+			else
+				' TCP is free
+				if (sourceU and MODBUS_SOCKET_TYPE_FLAG) = MODBUS_SERIAL_SOCKET_TYPE then
+					' Source is SERIAL
+					' SERIAL -> TCP
+					transaction = 0
+					data_for_send = data
+					
+				else
+					' Source is TCP
+					' TCP -> TCP
+					transaction = 256 * asc(mid(data, 1, 1)) + asc(mid(data, 2, 1))
+					data_for_send = mid(data, 7, 256 * asc(mid(data, 5, 1)) + asc(mid(data, 6, 1)))
+					
+				end if
+
+					ModBusTCPSocketsOperation(i).TransactionID = ModBusTCPSocketsOperation(i).TransactionID + 1
+
+				if asc(mid(data_for_send, 1, 1)) <> 255 then ' if packet is BROADCAST - don't responce wait
+					
+					ModBusTCPSocketsOperation(i).TransactionID = ModBusTCPSocketsOperation(i).TransactionID + 1
+					ModBusTCPSocketsOperation(i).TransactionIDOriginal = transaction
+					ModBusTCPSocketsOperation(i).OperationInProgress = true
+					ModBusTCPSocketsOperation(i).TimeOut = timeout
+					ModBusTCPSocketsOperation(i).SourceU = sourceU
+					ModBusTCPSocketsOperation(i).ShiftID = shiftID
+
+				else
+					#if DEV_DEBUG_PRINT
+						dev_debugprint("BROADCAST")
+					#endif
+				end if
+				
+				modbus_send_tcp(data_for_send, destination, ModBusTCPSocketsOperation(i).TransactionID, shiftID)
+			end if
+			exit for
+		end if
+	next i
+end sub
+
+' Send Responce
+sub modbus_send_responce(byref data as string, sourceU as byte, destinationU as byte, shiftID as char)
+	
+	dim source as byte
+	dim destination as byte
+
+	source = sourceU and not MODBUS_SERIAL_SOCKET_TYPE
+	destination = destinationU and not MODBUS_SERIAL_SOCKET_TYPE
+
+	if (destinationU and MODBUS_SOCKET_TYPE_FLAG) = MODBUS_SERIAL_SOCKET_TYPE then
+		' Destination is SERIAL
+		modbus_send_responce_to_serial(data, sourceU, destination, shiftID)
+	else
+		' Destination is TCP
+		modbus_send_responce_to_tcp(data, sourceU, destination, shiftID)
+	end if
+	
+end sub
+
+sub modbus_send_responce_to_serial(byref data as string, sourceU as byte, destination as byte, shiftID as char)
+
+	dim i as byte
+	dim data_for_send as string
+
+	' SERIAL is free
+	if (sourceU and MODBUS_SOCKET_TYPE_FLAG) = MODBUS_SERIAL_SOCKET_TYPE then
+		' Source is SERIAL
+		' SERIAL -> SERIAL
+		data_for_send = data
+		
+	else
+		' Source is TCP
+		' TCP -> SERIAL
+		data_for_send = mid(data, 7, 256 * asc(mid(data, 5, 1)) + asc(mid(data, 6, 1)))
+		
+	end if
+
+	#if PER_CHANNEL_STATUS_INDICATION=0
+		data_transmission_event(0) = YES
+	#else
+		data_transmission_event(destination) = YES
+	#endif
+
+	ModBusSerialChannelsOperation(destination).OperationInProgress = false
+	if ModBusSerialChannelsOperation(destination).SerialType = MODBUS_SERIAL_MASTER_RTU then
+		modbus_send_serial_rtu(data_for_send, destination, shiftID)
+	else
+		modbus_send_serial_ascii(data_for_send, destination, shiftID)
+	end if
+end sub
+
+sub modbus_send_responce_to_tcp(byref data as string, sourceU as byte, destination as byte, shiftID as char)
+	
+	dim i as byte
+	dim transaction as word
+	dim data_for_send as string
+
+	if (sourceU and MODBUS_SOCKET_TYPE_FLAG) = MODBUS_SERIAL_SOCKET_TYPE then
+		' SERIAL source
+		if ModBusSerialChannelsOperation(sourceU and not MODBUS_SOCKET_TYPE_FLAG).SourceU = (destination or MODBUS_TCP_SOCKET_TYPE) then
+			transaction = ModBusSerialChannelsOperation(sourceU and not MODBUS_SOCKET_TYPE_FLAG).TransactionID
+			data_for_send = data
+			ModBusSerialChannelsOperation(sourceU and not MODBUS_SOCKET_TYPE_FLAG).OperationInProgress = false
+			modbus_send_tcp(data_for_send, destination, transaction, shiftID)
+		end if
+	else
+		' TCP source
+		for i = 0 to MODBUS_SLAVE_SOCKET_NUMBERS - 1
+			if ModBusTCPSocketsOperation(i).SourceU = (destination or MODBUS_TCP_SOCKET_TYPE) then
+				transaction = ModBusTCPSocketsOperation(i).TransactionIDOriginal
+				data_for_send = mid(data, 7, 256 * asc(mid(data, 5, 1)) + asc(mid(data, 6, 1)))
+
+				ModBusTCPSocketsOperation(i).OperationInProgress = false
+				modbus_send_tcp(data_for_send, destination, transaction, shiftID)
+				exit for
+			end if
+		next i
+	end if
+end sub
+
+sub modbus_send_serial_ascii(byref packet as string, channelSerial as byte, shiftID as char)
+	
+	dim modbus_str as string
+	dim i as byte
+	dim lrc as byte
+	dim client_id as byte
+	
+	'Change ID
+	if shiftID <> 0 then
+		client_id = asc(mid(packet, 1, 1))
+		client_id = client_id + shiftID
+		insert(packet, 1, chr(client_id))
+	end if
+
+	' Calc LRC
+	lrc = LRC8(packet, len(packet))
+	
+	modbus_str = ":"
+	
+	for i = 1 to len(packet)
+		modbus_str = modbus_str + modbus_hex(asc(mid(packet, i, 1)))
+	next i
+	
+	modbus_str = modbus_str + modbus_hex(lrc) + chr(CR) + chr(LF)
+	
+	ser.num = channelSerial
+	ser.enabled = YES
+	ser.setdata(modbus_str)
+	ser.send
+
+	#if DEV_DEBUG_PRINT
+		dev_debugprint("MODBUS ASCII Send to Channel: " + str(channelSerial))
+		modbus_debug_dump(modbus_str)
+	#endif
+
+end sub
+
+sub modbus_send_serial_rtu(byref packet as string, channelSerial as byte, shiftID as char)
+	
+	dim modbus_str as string
+	dim crc as word
+	dim client_id as byte
+	
+	'Change ID
+	'Change ID
+	if shiftID <> 0 then
+		client_id = asc(mid(packet, 1, 1))
+		client_id = client_id + shiftID
+		insert(packet, 1, chr(client_id))
+	end if
+	
+	' Calc CRC16
+	crc = CRC16(packet, len(packet))
+
+	modbus_str = packet + chr(crc shr 8) + chr(crc and 255)
+	ser.num = channelSerial
+	ser.enabled = YES
+	ser.setdata(modbus_str)
+	ser.send
+
+	#if DEV_DEBUG_PRINT
+		dev_debugprint("MODBUS RTU Send to Channel: " + str(channelSerial))
+		modbus_debug_dump(modbus_str)
+	#endif
+
+end sub
+
+function modbus_packet_ascii_to_bin(byref data_ascii as string) as string
+
+	dim sym as char
+	dim ev as boolean
+	dim ev_sym as byte
+	dim i as byte
+	dim sbin as string
+	
+	'Translate from ASCII to RTU
+	sbin = ""
+	ev = false
+	for i = 1 to len(data_ascii)
+		sym = asc(mid(data_ascii, i, 1))
+		if sym >= asc("0") and sym <= asc("9") then
+			if ev = false  then
+				ev_sym = sym - asc("0")
+				ev = true
+			else
+				sbin = sbin + chr((ev_sym shl 4) or (sym - asc("0")))
+				ev = false
+			end if
+		else
+			if sym >= asc("A") and sym <= asc("F") then
+				if ev = false  then
+					ev_sym = sym - asc("A") + 10
+					ev = true
+				else
+					sbin = sbin + chr((ev_sym shl 4) or (sym - asc("A") + 10))
+					ev = false
+				end if
+			end if
+		end if
+	next i
+
+	modbus_packet_ascii_to_bin = sbin 
+
+end function
+
+sub modbus_send_tcp(byref data as string, destination as byte, transaction as word, shiftID as char)
+
+	dim data_for_send as string
+	dim client_id as byte
+	
+	' Create TCP packet
+	' Transaction ID
+	data_for_send = chr(transaction shr 8) + chr(transaction and 255)
+	' Type data ID
+	data_for_send = data_for_send + chr(0) + chr(0)
+	' Length ADU
+	data_for_send = data_for_send + chr((len(data)) shr 8) + chr((len(data)) and 255)
+	
+	'Change ID
+	if shiftID <> 0 then
+		client_id = asc(mid(data, 1, 1))
+		client_id = client_id + shiftID
+		insert(data, 1, chr(client_id))
+	end if
+	
+	data_for_send = data_for_send + data
+
+	#if DEV_DEBUG_PRINT
+		dev_debugprint("ModBus TCP packet send. Socket: " + str(destination))
+		modbus_debug_dump(data_for_send)
+	#endif
+	sock.num = destination
+	sock.setdata(data_for_send)
+	sock.send()
+
+end sub
+
+sub modbus_store_packet(byref data as string, sourceU as byte, destinationU as byte, shiftID as char)
+
+	dim i as byte
+	
+	if modbus_out_buffer_empty_length() >= len(data) + 4  then
+	
+		modbus_out_buffer_add(sourceU)
+		modbus_out_buffer_add(destinationU)
+		modbus_out_buffer_add(shiftID)
+		modbus_out_buffer_add(len(data))
+		for i = 1 to len(data)
+			modbus_out_buffer_add(asc(mid(data, i, 1)))
+		next i
+
+		overrun_buffer = false
+	else
+		overrun_buffer = true
+		
+		#if DEV_DEBUG_PRINT
+			dev_debugprint("ModBus Buffer is full!")
+		#endif
+	end if
+
+end sub
+
+sub modbus_broadcast_operate(byref data as string, channelU as byte)
+
+	dim i as byte
+	dim serials as byte
+	dim sockets as word
+	
+	serials = 0
+	sockets = 0
+	
+	for i = 0 to MODBUS_SLAVE_SOCKET_NUMBERS - 1
+		if ModBusTCPSocketsOperation(i).Socket <> 255 then
+			modbus_send_request(serials, sockets, data, channelU, ModBusTCPSocketsOperation(i).Socket or MODBUS_TCP_SOCKET_TYPE, 0)
+		end if
+	next i
+
+	for i = 0 to NUM_SERIAL_PORTS - 1
+		if port_in_use(i) = YES then
+			if ModBusSerialChannelsOperation(i).SerialType = MODBUS_SERIAL_SLAVE_RTU or 
+			   ModBusSerialChannelsOperation(i).SerialType = MODBUS_SERIAL_SLAVE_ASCII then
+				modbus_send_request(serials, sockets, data, channelU, i or MODBUS_SERIAL_SOCKET_TYPE, 0)
+			end if
+		end if
+	next
+	
+end sub
+
+' MODBUS TCP GENERAL
+
+sub modbus_tcp_receive(byref data as string, channelTCP as byte, portTCP as word)
+	dim dest_channel as byte
+	dim i, j as byte
+	dim serials as byte
+	dim sockets as word
+	dim clientid as byte
+	dim port as boolean
+	
+	#if DEV_DEBUG_PRINT
+		dev_debugprint("ModBus TCP packet received. Channel : " + str(channelTCP) + ", Port : " + str(portTCP))
+		modbus_debug_dump(data)
+	#endif
+
+	if len(data) > 0 then
+		if asc(mid(data, 3, 1)) = 0 and asc(mid(data, 4, 1)) = 0 then	' test MODBUS Protocol ID
+			
+			' Get serial channel(s) for routing request
+			clientid = asc(mid(data, 7, 1))
+			serials = 0
+			sockets = 0
+			if clientid <> 255 then
+				for i = 0 to modbus_socks_number - 1
+					if modbus_socks(i) = channelTCP then
+						' MASTER channel
+						port = false
+						for j = 0 to MODBUS_RULES_PORT_NUMBERS - 1
+							if portTCP = ModBusRoutePort(j).TCPPort then
+								modbus_send_request(serials, sockets, data, channelTCP or MODBUS_TCP_SOCKET_TYPE, ModBusRoutePort(j).ChannelU, ModBusRoutePort(j).IdShift)
+								port = true
+							end if
+						next i
+						
+						if port = false then
+							for j = 0 to MODBUS_RULES_ID_NUMBERS - 1
+								if ModBusRouteId(j).IdFrom <> 0 and ModBusRouteId(j).IdTo <> 0 then
+									if clientid >= ModBusRouteId(j).IdFrom and clientid <= ModBusRouteId(j).IdTo  then
+										modbus_send_request(serials, sockets, data, channelTCP or MODBUS_TCP_SOCKET_TYPE, ModBusRouteId(j).ChannelU, ModBusRouteId(j).IdShift)
+									end if
+								end if
+							next j
+						end if
+
+						exit for
+					end if
+				next i
+				
+				for i = 0 to MODBUS_SLAVE_SOCKET_NUMBERS - 1
+					if modbus_slave_socks(i) = channelTCP then
+						' SLAVE channel
+						for j = 0 to MODBUS_SLAVE_SOCKET_NUMBERS - 1
+							if ModBusTCPSocketsOperation(j).Socket = channelTCP then
+								if ModBusTCPSocketsOperation(j).OperationInProgress = true then
+								
+									modbus_send_responce(data, channelTCP or MODBUS_TCP_SOCKET_TYPE, ModBusTCPSocketsOperation(j).SourceU, 0 - ModBusTCPSocketsOperation(j).ShiftID)
+									
+									ModBusTCPSocketsOperation(j).OperationInProgress = false
+									modbus_buffer_operate(channelTCP or MODBUS_TCP_SOCKET_TYPE)
+								end if
+							end if
+						next j
+					end if
+				next i
+			else		' BROADCAST packet
+				modbus_broadcast_operate(data, channelTCP or MODBUS_TCP_SOCKET_TYPE)
+			end if
+
+		end if
+	end if
+end sub
+
+sub modbus_serial_receive(byref data as string, channelSerial as byte)
+	
+	dim serials as byte
+	dim sockets as word
+	dim clientid as byte
+	dim i as byte
+	dim serial_master as byte
+	dim channelU as byte
+
+	#if DEV_DEBUG_PRINT
+		dev_debugprint("MODBUS Serial Receive")
+		modbus_debug_dump(data)
+	#endif
+
+	select case ModBusSerialChannelsOperation(channelSerial).SerialType
+	case MODBUS_SERIAL_MASTER_RTU:
+		' Check CRC
+		dim crc as word
+		crc = CRC16(data, len(data)-2)
+		
+		if asc(mid(data, len(data)-1, 1)) = (crc shr 8) and asc(mid(data, len(data), 1)) = (crc and 255) then
+			' CRC is OK
+			if asc(mid(data, 3, 1)) = 0 and asc(mid(data, 4, 1)) = 0 then	' test MODBUS Protocol ID
+				
+				' Get serial channel(s) for routing request
+				clientid = asc(mid(data, 1, 1))
+				serials = 0
+				sockets = 0
+				if clientid <> 255 then
+					for i = 0 to MODBUS_RULES_ID_NUMBERS - 1
+						if ModBusRouteId(i).IdFrom <> 0 and ModBusRouteId(i).IdTo <> 0 then
+							if clientid >= ModBusRouteId(i).IdFrom and clientid <= ModBusRouteId(i).IdTo  then
+								modbus_send_request(serials, sockets, left(data, len(data) - 2), channelSerial or MODBUS_SERIAL_SOCKET_TYPE, ModBusRouteId(i).ChannelU, ModBusRouteId(i).IdShift)
+							end if
+						end if
+					next i	
+				else			' BROADCAST packet
+					modbus_broadcast_operate(data, channelSerial or MODBUS_SERIAL_SOCKET_TYPE)
+				end if
+				
+			end if
+		else
+			' CRC is error
+			#if DEV_DEBUG_PRINT
+				dev_debugprint("MODBUS MASTER RTU Packet CRC is Error")
+			#endif
+		end if
+		
+	case MODBUS_SERIAL_MASTER_ASCII:
+		if (left(data, 1) = ":") then
+			if (right(data, 2) = (chr(CR) + chr(LF))) then
+				' MODBUS ASCII packet received
+				dim i as byte
+				dim lrc as byte
+				dim data_bin as string
+
+				data_bin = modbus_packet_ascii_to_bin(data)
+				
+				' Check LRC
+				lrc = 0
+				for i = 1 to len(data_bin)
+					lrc = lrc + asc(mid(data_bin, i, 1))
+				next i
+				
+				if lrc = 0 then
+					' IRC is OK
+					' Get serial channel(s) for routing request
+					clientid = asc(mid(data_bin, 1, 1))
+					serials = 0
+					sockets = 0
+					if clientid <> 255 then
+						for i = 0 to MODBUS_RULES_ID_NUMBERS - 1
+							if ModBusRouteId(i).IdFrom <> 0 and ModBusRouteId(i).IdTo <> 0 then
+								if clientid >= ModBusRouteId(i).IdFrom and clientid <= ModBusRouteId(i).IdTo  then
+									modbus_send_request(serials, sockets, left(data_bin, len(data_bin) - 1), channelSerial or MODBUS_SERIAL_SOCKET_TYPE, ModBusRouteId(i).ChannelU, ModBusRouteId(i).IdShift)
+								end if
+							end if
+						next i	
+					else			' BROADCAST packet
+						modbus_broadcast_operate(data, channelSerial or MODBUS_SERIAL_SOCKET_TYPE)
+					end if
+				else
+					' LRC is error
+					#if DEV_DEBUG_PRINT
+						dev_debugprint("MODBUS MASTER ASCII Packet LRC is Error")
+					#endif
+				end if
+				
+			end if
+		end if
+
+	case MODBUS_SERIAL_SLAVE_RTU:
+		' Check CRC
+		dim crc as word
+		crc = CRC16(data, len(data)-2)
+		
+		if asc(mid(data, len(data)-1, 1)) = (crc shr 8) and asc(mid(data, len(data), 1)) = (crc and 255) then
+			' CRC is OK
+			if ModBusSerialChannelsOperation(channelSerial).OperationInProgress = true then
+				modbus_send_responce(left(data, len(data) - 2), channelSerial or MODBUS_SERIAL_SOCKET_TYPE, ModBusSerialChannelsOperation(channelSerial).SourceU, 0 - ModBusSerialChannelsOperation(channelSerial).ShiftID)
+				
+				ModBusSerialChannelsOperation(channelSerial).OperationInProgress = false
+				modbus_buffer_operate(channelSerial or MODBUS_SERIAL_SOCKET_TYPE)
+			end if
+		else
+			' CRC is error
+			#if DEV_DEBUG_PRINT
+				dev_debugprint("MODBUS SLAVE RTU Packet CRC is Error")
+			#endif
+		end if
+
+	case MODBUS_SERIAL_SLAVE_ASCII:
+		if (left(data, 1) = ":") then
+			if (right(data, 2) = (chr(CR) + chr(LF))) then
+				' MODBUS ASCII packet received
+				dim i as byte
+				dim lrc as byte
+				dim data_bin as string
+
+				data_bin = modbus_packet_ascii_to_bin(data)
+				
+				' Check LRC
+				lrc = 0
+				for i = 1 to len(data_bin)
+					lrc = lrc + asc(mid(data_bin, i, 1))
+				next i
+				
+				if lrc = 0 then
+					' LRC is OK
+					if ModBusSerialChannelsOperation(channelSerial).OperationInProgress = true then
+						modbus_send_responce(left(data_bin, len(data_bin) - 1), channelSerial or MODBUS_SERIAL_SOCKET_TYPE, ModBusSerialChannelsOperation(channelSerial).SourceU, 0 - ModBusSerialChannelsOperation(channelSerial).ShiftID)
+						
+						ModBusSerialChannelsOperation(channelSerial).OperationInProgress = false
+						modbus_buffer_operate(channelSerial or MODBUS_SERIAL_SOCKET_TYPE)
+					end if
+				else
+					' LRC is error
+					#if DEV_DEBUG_PRINT
+						dev_debugprint("MODBUS SLAVE ASCII Packet LRC is Error")
+					#endif
+				end if
+				
+			end if
+		end if
+
+	end select
+	
+end sub
+
+#if DEV_DEBUG_PRINT
+
+	sub modbus_debug_dump(byref data as string)
+		
+		dim i as integer
+		dim res as string
+		
+		res = ""
+		for i = 1 to len(data)
+			res = res + modbus_hex(asc(mid(data, i, 1))) + " "
+		next i
+		dev_debugprint("Length " + str(len(data)) + " : " + res)
+		
+	end sub
+#endif

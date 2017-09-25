@@ -1,0 +1,30 @@
+bit0	multi-port configuration
+bit1	multi-channel configuration, particulars depend on bits 11 and 12 
+bit2	Power on pin 9 available
+bit3	Wi-Fi available
+bit4	GPRS available
+bit5	serial port modes are 232, 485, and 422
+bit6	serial port modes are full-duplex and half-duples
+bit7	multi-channel RS232/422/485 configuration
+bit8	have 2 serial ports
+bit9	have 3 serial ports
+bit10	have 4 serial ports
+bit11	serial port 1 supports 232, 485, 422 so multi-channel configuration is only enabled for 232 (this bit works together with bit 1)
+bit12	serial port 1 doesn't support 232, 485, 422 so multi-channel configuration is always enabled (this bit works together with bit 1)
+
+
+bits2109876543210
+
+>>&b0000000000000	RF	TCP Port									S,I,5	^
+>>&b0000000000000	RG	ID shift									S,I,-3	^
+>>&b0000100000001	RH	Destination									B,L,0-Serial 1;1-Serial 2;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
+>>&b0001000000001	RH	Destination									B,L,0-Serial 1;1-Serial 2;2-Serial 3;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
+>>&b0010000000001	RH	Destination									B,L,0-Serial 1;1-Serial 2;2-Serial 3;3-Serial 4;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
+
+>>&b0100100000010	RH	Destination									B,L,0-Serial 1;1-Serial 2;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
+>>&b0101000000010	RH	Destination									B,L,0-Serial 1;1-Serial 2;2-Serial 3;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
+>>&b0110000000010	RH	Destination									B,L,0-Serial 1;1-Serial 2;2-Serial 3;3-Serial 4;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
+
+>>&b1000100000010	RH	Destination									B,L,0-Serial 1;1-Serial 2;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
+>>&b1001000000010	RH	Destination									B,L,0-Serial 1;1-Serial 2;2-Serial 3;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
+>>&b1010000000010	RH	Destination									B,L,0-Serial 1;1-Serial 2;2-Serial 3;3-Serial 4;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
