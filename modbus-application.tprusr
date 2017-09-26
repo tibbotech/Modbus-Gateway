@@ -3,7 +3,7 @@ watch=port_in_use, ModBusTCPSocketsOperation
 [file1]
 line=36
 cursor=4087
-opened=active
+opened=yes
 bookmarks=
 breakpoints=
 [file2]
@@ -193,9 +193,9 @@ opened=no
 bookmarks=
 breakpoints=
 [file33]
-line=204
-cursor=7507
-opened=yes
+line=462
+cursor=14292
+opened=active
 bookmarks=
 breakpoints=
 [file34]
