@@ -10,8 +10,8 @@
 #define MODBUS_SOCKET_MASK 127
 #define MODBUS_BUFFER_EMPTY_FLAG 255
 
-#define MODBUS_SERIAL_TIMEOUT 3
-#define MODBUS_TCP_TIMEOUT 3
+#define MODBUS_SERIAL_TIMEOUT 2
+#define MODBUS_TCP_TIMEOUT 2
 
 declare function CRC16(byref puchMsg as string, usDataLen as word) as word
 declare function LRC8(byref puchMsg as string, usDataLen as word) as byte
@@ -24,6 +24,7 @@ declare modbus_tcp_closing as boolean
 
 declare modbus_socks_number as byte
 declare modbus_socks(MODBUS_SOCKET_MAX_NUMBERS) as byte
+declare modbus_socks_last_transaction(MODBUS_SOCKET_MAX_NUMBERS) as word
 declare modbus_slave_socks(MODBUS_SLAVE_SOCKET_NUMBERS) as byte
 
 enum MODBUS_SERIALTYPE
@@ -59,7 +60,7 @@ type MODBUS_TCPSOCKETOPERATION
 	ShiftID as char
 	TimeOut as long
 	
-end type
+end type 
 
 declare ModBusSerialChannelsOperation(NUM_SERIAL_PORTS) as MODBUS_SERIALCHANNELOPERATION
 declare ModBusTCPSocketsOperation(MODBUS_SLAVE_SOCKET_NUMBERS) as MODBUS_TCPSOCKETOPERATION

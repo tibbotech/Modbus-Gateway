@@ -8,6 +8,7 @@ public dim modbus_tcp_closing as boolean
 
 public dim modbus_socks_number as byte
 public dim modbus_socks(MODBUS_SOCKET_MAX_NUMBERS) as byte
+public dim modbus_socks_last_transaction(MODBUS_SOCKET_MAX_NUMBERS) as word
 public dim modbus_slave_socks(MODBUS_SLAVE_SOCKET_NUMBERS) as byte
 
 ' Buffer for output MODBUS packets
@@ -171,6 +172,7 @@ function modbus_initialize() as boolean
 	#endif
 	for i = 0 to modbus_socks_number - 1
 		modbus_socks(i) = sock_get("MBI" + str(i))
+		modbus_socks_last_transaction(i) = 0
 		sock.num = modbus_socks(i)
 		sock.protocol = PL_SOCK_PROTOCOL_TCP
 		sock.localportlist = ports
@@ -266,8 +268,8 @@ sub modbus_buffer_operate(channelU as byte)
 		while (j > 0) 
 			if modbus_out_buffer((i + 1) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK) = channelU then	' check destinationU field
 				
-				' Founded packet for right destinationU
-
+				' Found packet for right destinationU
+				
 				sourceU = modbus_out_buffer(i and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK) 			' Get SourceU field
 				destinationU = modbus_out_buffer((i + 1) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK) 	' Get DestinationU field
 				shiftID = modbus_out_buffer((i + 2) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK) 		' Get shiftID
@@ -278,9 +280,21 @@ sub modbus_buffer_operate(channelU as byte)
 					data = data + chr(modbus_out_buffer((pointerData + l) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK))
 				next l
 				
-				modbus_send_request(serials, sockets, data, sourceU, destinationU, shiftID)
-
-				exit while
+				'	Compare stored transaction ID or current transaction ID
+				if ((sourceU and MODBUS_SOCKET_TYPE_FLAG) = MODBUS_TCP_SOCKET_TYPE) and (asc(mid(data, 7, 1)) <> 255) then
+					for l = 0 to MODBUS_SOCKET_MAX_NUMBERS - 1
+						if modbus_socks(l) = sourceU then
+							exit for
+						end if
+					next i
+					if modbus_socks_last_transaction(l) = 256 * asc(mid(data, 1, 1)) + asc(mid(data, 2, 1)) then
+						modbus_send_request(serials, sockets, data, sourceU, destinationU, shiftID)
+						exit while
+					end if
+				else
+					modbus_send_request(serials, sockets, data, sourceU, destinationU, shiftID)
+					exit while
+				end if
 				
 			else
 				j = j - 4 - modbus_out_buffer((i + 3) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK)
@@ -776,6 +790,14 @@ sub modbus_tcp_receive(byref data as string, channelTCP as byte, portTCP as word
 	dim sockets as word
 	dim clientid as byte
 	dim port as boolean
+	dim index as byte
+	
+	for i = 0 to MODBUS_SOCKET_MAX_NUMBERS - 1
+		if modbus_socks(i) = channelTCP then
+			index = i
+			exit for
+		end if
+	next i
 	
 	#if DEV_DEBUG_PRINT
 		dev_debugprint("ModBus TCP packet received. Channel : " + str(channelTCP) + ", Port : " + str(portTCP))
@@ -796,6 +818,7 @@ sub modbus_tcp_receive(byref data as string, channelTCP as byte, portTCP as word
 						port = false
 						for j = 0 to MODBUS_RULES_PORT_NUMBERS - 1
 							if portTCP = ModBusRoutePort(j).TCPPort then
+								modbus_socks_last_transaction(index) = 256 * asc(mid(data, 1, 1)) + asc(mid(data, 2, 1))
 								modbus_send_request(serials, sockets, data, channelTCP or MODBUS_TCP_SOCKET_TYPE, ModBusRoutePort(j).ChannelU, ModBusRoutePort(j).IdShift)
 								port = true
 							end if
@@ -805,6 +828,7 @@ sub modbus_tcp_receive(byref data as string, channelTCP as byte, portTCP as word
 							for j = 0 to MODBUS_RULES_ID_NUMBERS - 1
 								if ModBusRouteId(j).IdFrom <> 0 and ModBusRouteId(j).IdTo <> 0 then
 									if clientid >= ModBusRouteId(j).IdFrom and clientid <= ModBusRouteId(j).IdTo  then
+										modbus_socks_last_transaction(index) = 256 * asc(mid(data, 1, 1)) + asc(mid(data, 2, 1))
 										modbus_send_request(serials, sockets, data, channelTCP or MODBUS_TCP_SOCKET_TYPE, ModBusRouteId(j).ChannelU, ModBusRouteId(j).IdShift)
 									end if
 								end if
