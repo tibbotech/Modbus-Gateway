@@ -11,6 +11,8 @@ public dim modbus_socks(MODBUS_SOCKET_MAX_NUMBERS) as byte
 public dim modbus_socks_last_transaction(MODBUS_SOCKET_MAX_NUMBERS) as word
 public dim modbus_slave_socks(MODBUS_SLAVE_SOCKET_NUMBERS) as byte
 
+public dim modbus_serial_timeout(NUM_SERIAL_PORTS) as byte
+
 ' Buffer for output MODBUS packets
 dim modbus_out_buffer(MODBUS_SERIAL_OUT_BUFFER_LENGTH) as byte
 dim modbus_out_buffer_head as word
@@ -99,6 +101,7 @@ function modbus_initialize() as boolean
 		ModBusSerialChannelsOperation(i).SourceU = 255
 		ModBusSerialChannelsOperation(i).ShiftID = 0
 		ModBusSerialChannelsOperation(i).TimeOut = 0
+		modbus_serial_timeout(i) = val(stg_get("CT",i))
 		
 	next
 
@@ -139,7 +142,11 @@ function modbus_initialize() as boolean
 		ModBusRoutePort(i).TCPPort = val(stg_get("RF",i))
 		ModBusRoutePort(i).IdShift = val(stg_get("RG",i))
 		ModBusRoutePort(i).ChannelU = val(stg_get("RH",i))
-
+		if ModBusRoutePort(i).ChannelU > 3 and ModBusRoutePort(i).ChannelU < 8 then
+			ModBusRoutePort(i).ChannelU = modbus_slave_socks(ModBusRoutePort(i).ChannelU - 4) or MODBUS_TCP_SOCKET_TYPE
+		else 
+			ModBusRoutePort(i).ChannelU = ModBusRoutePort(i).ChannelU or MODBUS_SERIAL_SOCKET_TYPE
+		end if
 	next i
 	
 	for i = 0 to MODBUS_RULES_ID_NUMBERS - 1
@@ -370,7 +377,7 @@ sub modbus_send_request(byref flagsSerial as byte, byref flagsSocket as word, by
 		' Destination is SERIAL
 		if (flagsSerial and sbit) = 0  then
 			flagsSerial = flagsSerial or sbit
-			modbus_send_request_to_serial(data, sourceU, destination, shiftID, sys.timercount + MODBUS_SERIAL_TIMEOUT)
+			modbus_send_request_to_serial(data, sourceU, destination, shiftID, sys.timercount + modbus_serial_timeout(destination))
 		end if
 	else
 		' Destination is TCP
@@ -818,9 +825,11 @@ sub modbus_tcp_receive(byref data as string, channelTCP as byte, portTCP as word
 						port = false
 						for j = 0 to MODBUS_RULES_PORT_NUMBERS - 1
 							if portTCP = ModBusRoutePort(j).TCPPort then
-								modbus_socks_last_transaction(index) = 256 * asc(mid(data, 1, 1)) + asc(mid(data, 2, 1))
-								modbus_send_request(serials, sockets, data, channelTCP or MODBUS_TCP_SOCKET_TYPE, ModBusRoutePort(j).ChannelU, ModBusRoutePort(j).IdShift)
-								port = true
+								if ModBusRoutePort(j).ChannelU <> 255 then
+									modbus_socks_last_transaction(index) = 256 * asc(mid(data, 1, 1)) + asc(mid(data, 2, 1))
+									modbus_send_request(serials, sockets, data, channelTCP or MODBUS_TCP_SOCKET_TYPE, ModBusRoutePort(j).ChannelU, ModBusRoutePort(j).IdShift)
+									port = true
+								end if
 							end if
 						next i
 						

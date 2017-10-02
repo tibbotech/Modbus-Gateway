@@ -1,7 +1,7 @@
 'SUPPORTED PLATFORMS & RELATED CAPABILITIES--------------------------
 
 #define DHCP_DEBUG_PRINT 0
-#define DEV_DEBUG_PRINT 1
+#define DEV_DEBUG_PRINT 0
 
 #define SIMULATE_ETHER_OFF_BY_BUTTON 0 'set to 1 to use button for simulating unplugged Ethernet cable
 

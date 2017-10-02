@@ -10,7 +10,6 @@
 #define MODBUS_SOCKET_MASK 127
 #define MODBUS_BUFFER_EMPTY_FLAG 255
 
-#define MODBUS_SERIAL_TIMEOUT 2
 #define MODBUS_TCP_TIMEOUT 2
 
 declare function CRC16(byref puchMsg as string, usDataLen as word) as word
