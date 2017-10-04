@@ -52,6 +52,7 @@ bits5432109876543210
 >>&b0000000000010000	I=GP;D=GPRS access point name;T=STRING;C=EDIT;MAXLEN=16;S=GE!=0?"e":"i";F=R*
 
 >>&b0000000000000000	I=$CHANNEL1;D=Ch1;T=GROUP
+>>&b0000000000000000	I=RI;D=MODBUS Serial Type;T=INT;C=STATIC;O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
 >>&b0000000000000000	I=CT;D=Connection timeout (1/2 sec);T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=CT>255?"Maximum timeout is 255 1/2 sec":""
 >>&b0000000000100000	I=SI;D=Serial interface for channel 1;T=INT;C=STATIC;O=0- Full-duplex (RS232)/0/1- Half-duplex (RS485)/1/2- Full-duplex (RS422)/2
 >>&b0000000001000000	I=SI;D=Serial interface for channel 1;T=INT;C=STATIC;O=0- Full-duplex/0/1- Half-duplex/1
@@ -62,6 +63,7 @@ bits5432109876543210
 >>&b0000000000000000	I=MD;D=Max intercharacter delay;T=INT;C=EDIT/SPIN/0/1/1/10;V=MD>255?"Maximum intercharacter delay is 255":""
 
 >>&b0000000010000000	I=$CHANNEL2;D=Ch2;T=GROUP
+>>&b0000000010000000	I=RI@2;D=MODBUS Serial Type;T=INT;C=STATIC;O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
 >>&b0000000010000000	I=CT@2;D=Connection timeout (1/2 sec);T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=CT@2>255?"Maximum timeout is 255 1/2 sec":""
 >>&b0000000010100000	I=SI@2;D=Serial interface;T=INT;C=STATIC;O=0- Full-duplex (RS232)/0/1- Half-duplex (RS485)/1/2- Full-duplex (RS422)/2
 >>&b0000000011000000	I=SI@2;D=Serial interface;T=INT;C=STATIC;O=0- Full-duplex/0/1- Half-duplex/1
@@ -72,6 +74,7 @@ bits5432109876543210
 >>&b0000000010000000	I=MD@2;D=Max intercharacter delay;T=INT;C=EDIT/SPIN/0/1/1/10;V=MD@2>255?"Maximum intercharacter delay is 255":""
 
 >>&b0000000110000000	I=$CHANNEL3;D=Ch3;T=GROUP
+>>&b0000000110000000	I=RI@3;D=MODBUS Serial Type;T=INT;C=STATIC;O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
 >>&b0000000110000000	I=CT@3;D=Connection timeout (1/2 sec);T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=CT@3>255?"Maximum timeout is 255 1/2 sec":""
 >>&b0000000110100000	I=SI@3;D=Serial interface;T=INT;C=STATIC;O=0- Full-duplex (RS232)/0/1- Half-duplex (RS485)/1/2- Full-duplex (RS422)/2
 >>&b0000000111000000	I=SI@3;D=Serial interface;T=INT;C=STATIC;O=0- Full-duplex/0/1- Half-duplex/1
@@ -82,6 +85,7 @@ bits5432109876543210
 >>&b0000000110000000	I=MD@3;D=Max intercharacter delay;T=INT;C=EDIT/SPIN/0/1/1/10;V=MD@3>255?"Maximum intercharacter delay is 255":""
 
 >>&b0000001110000000	I=$CHANNEL4;D=Ch4;T=GROUP
+>>&b0000001110000000	I=RI@4;D=MODBUS Serial Type;T=INT;C=STATIC;O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
 >>&b0000001110000000	I=CT@4;D=Connection timeout (1/2 sec);T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=CT@4>255?"Maximum timeout is 255 1/2 sec":""
 >>&b0000001110100000	I=SI@4;D=Serial interface;T=INT;C=STATIC;O=0- Full-duplex (RS232)/0/1- Half-duplex (RS485)/1/2- Full-duplex (RS422)/2
 >>&b0000001111000000	I=SI@4;D=Serial interface;T=INT;C=STATIC;O=0- Full-duplex/0/1- Half-duplex/1
@@ -172,3 +176,4 @@ bits5432109876543210
 >>&b0000000000000000	I=RL@3;E=1;D=TCP Port;T=INT;C=EDIT
 >>&b0000000000000000	I=RK@4;D=4- TCP IP-address;T=STRING;C=IPCTRL;S=DH==1?"a":"e";F=R*
 >>&b0000000000000000	I=RL@4;E=1;D=TCP Port;T=INT;C=EDIT
+ 
