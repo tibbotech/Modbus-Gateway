@@ -1,11 +1,11 @@
 [project]
 version=1
-platform=DS1102W
+platform=TPP2W(G2)
 src_lib_ver=2_00
 name=modbus_application
 output=mb_application.tpc
-debug=on
-defines=/dLCD_TYPE=SOLOMON_SSD1305 /dOBJECT_LCD=LCD_ENABLED /dOBJECT_FD=FD_ENABLED /dOBJECT_WLN=WLN_ENABLED /dOBJECT_KP=KP_ENABLED
+debug=off
+defines=/dOBJECT_LCD=LCD_ENABLED /dOBJECT_FD=FD_ENABLED /dOBJECT_KP=KP_ENABLED /dOBJECT_WLN=WLN_ENABLED /dLCD_TYPE=SOLOMON_SSD1305
 transport=udp_winpcap
 [address1]
 platform=DS1100
@@ -90,11 +90,15 @@ address=0.1.2.3.8.201
 [address21]
 platform=TPP3W(G2)
 transport=udp_winpcap
-address=0.1.2.3.4.231
+address=0.36.119.82.191.240
 [address22]
 platform=SIMULATOR
 transport=udp_winpcap
 address=0.17.107.27.190.187
+[address23]
+platform=TPP2W(G2)
+transport=udp_winpcap
+address=0.36.119.82.191.246
 [file1]
 path=main.tbs
 type=basic
@@ -689,5 +693,17 @@ path=html_config_slave.txt
 type=text
 format=
 condition=
+locked=no
+location=project
+[file77]
+path=snmp.tbh
+type=header
+format=
+locked=no
+location=project
+[file78]
+path=snmp.tbs
+type=basic
+format=
 locked=no
 location=project

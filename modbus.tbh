@@ -10,7 +10,14 @@
 #define MODBUS_SOCKET_MASK 127
 #define MODBUS_BUFFER_EMPTY_FLAG 255
 
+#define MODBUS_TCP_EXEPTION_FLAG 128
+#define MODBUS_TCP_EXEPTION_ROUTE_ERROR 10
+#define MODBUS_TCP_EXEPTION_TIMEOUT 11
+
 #define MODBUS_TCP_TIMEOUT 2
+
+#define MODBUS_MONITOR_DIRECTION_IN	false
+#define MODBUS_MONITOR_DIRECTION_OUT true
 
 declare function CRC16(byref puchMsg as string, usDataLen as word) as word
 declare function LRC8(byref puchMsg as string, usDataLen as word) as byte
@@ -26,12 +33,26 @@ declare modbus_socks(MODBUS_SOCKET_MAX_NUMBERS) as byte
 declare modbus_socks_last_transaction(MODBUS_SOCKET_MAX_NUMBERS) as word
 declare modbus_slave_socks(MODBUS_SLAVE_SOCKET_NUMBERS) as byte
 
+declare modbus_monitor as boolean
+
 enum MODBUS_SERIALTYPE
 	
 	MODBUS_SERIAL_MASTER_RTU,
 	MODBUS_SERIAL_MASTER_ASCII,
 	MODBUS_SERIAL_SLAVE_RTU,
 	MODBUS_SERIAL_SLAVE_ASCII
+
+end enum
+
+enum MODBUS_MONITOR_PACKET_TYPE
+	
+	MODBUS_TCP_REQUEST,
+	MODBUS_TCP_RESPONCE,
+	MODBUS_TCP_EXCEPTION,
+	MODBUS_RTU_REQUEST,
+	MODBUS_RTU_RESPONCE,
+	MODBUS_ASCII_REQUEST,
+	MODBUS_ASCII_RESPONCE
 
 end enum
 
@@ -42,20 +63,32 @@ type MODBUS_SERIALCHANNELOPERATION
 	OperationInProgress as boolean
 	SourceU as byte
 	TransactionID as word
+	ClientID as byte
+	Func as byte
 	ShiftID as char
 	TimeOut as long
 	
 end type
 
+enum MODBUS_SLAVE_TCP_CONNECT
+	
+	MODBUS_SLAVE_TCP_DISCONNECT,
+	MODBUS_SLAVE_TCP_CONNECTING,
+	MODBUS_SLAVE_TCP_CONNECTED
+
+end enum
+
 ' Operation status for TCP socket
 type MODBUS_TCPSOCKETOPERATION
 	
 	Socket as byte
-	Connected as boolean
+	Connected as MODBUS_SLAVE_TCP_CONNECT
 	OperationInProgress as boolean
 	SourceU as byte
 	TransactionID as word
-	TransactionIDOriginal as word
+	TransactionIDNew as word
+	ClientID as byte
+	Func as byte
 	ShiftID as char
 	TimeOut as long
 	
@@ -72,16 +105,18 @@ declare sub modbus_send_request_to_tcp(byref data as string, sourceU as byte, de
 declare sub modbus_send_responce(byref data as string, sourceU as byte, destinationU as byte, shiftID as char)
 declare sub modbus_send_responce_to_serial(byref data as string, sourceU as byte, destination as byte, shiftID as char)
 declare sub modbus_send_responce_to_tcp(byref data as string, sourceU as byte, destination as byte, shiftID as char)
-declare sub modbus_send_serial_ascii(byref packet as string, channelSerial as byte, shiftID as char)
-declare sub modbus_send_serial_rtu(byref packet as string, channelSerial as byte, shiftID as char)
+declare sub modbus_send_serial_ascii(byref packet as string, channelSerial as byte, shiftID as char, pType as MODBUS_MONITOR_PACKET_TYPE)
+declare sub modbus_send_serial_rtu(byref packet as string, channelSerial as byte, shiftID as char, pType as MODBUS_MONITOR_PACKET_TYPE)
 declare function modbus_packet_ascii_to_bin(byref data_ascii as string) as string
-declare sub modbus_send_tcp(byref data as string, destination as byte, transaction as word, shiftID as char)
+declare sub modbus_send_tcp(byref data as string, destination as byte, transaction as word, shiftID as char, pType as MODBUS_MONITOR_PACKET_TYPE)
 declare sub modbus_store_packet(byref data as string, sourceU as byte, destinationU as byte, shiftID as char)
 
 declare sub modbus_tcp_receive(byref data as string, channelTCP as byte, portTCP as word)
 declare sub modbus_serial_receive(byref data as string, channelSerial as byte)
 
 declare sub modbus_timeout()
+
+declare sub modbus_monitor_send(byref data as string, sourceU as byte, direction as boolean, pType as MODBUS_MONITOR_PACKET_TYPE)
 
 #if DEV_DEBUG_PRINT
 	declare sub modbus_debug_dump(byref data as string)

@@ -15,9 +15,9 @@ bit12	serial port 1 doesn't support 232, 485, 422 so multi-channel configuration
 
 bits2109876543210
 
->>&b0000000000000	RA	ID from									S,I,3	^
->>&b0000000000000	RB	ID to									S,I,3	^
->>&b0000000000000	RD	ID shift								S,I,-3	^
+>>&b0000000000000	RA	ID From									S,I,3	^
+>>&b0000000000000	RB	ID To									S,I,3	^
+>>&b0000000000000	RD	ID Shift								S,I,-3	^
 >>&b0000100000001	RE	Destination								B,L,0-Serial 1;1-Serial 2;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
 >>&b0001000000001	RE	Destination								B,L,0-Serial 1;1-Serial 2;2-Serial 3;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
 >>&b0010000000001	RE	Destination								B,L,0-Serial 1;1-Serial 2;2-Serial 3;3-Serial 4;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^

@@ -12,11 +12,18 @@ public dim modbus_socks_last_transaction(MODBUS_SOCKET_MAX_NUMBERS) as word
 public dim modbus_slave_socks(MODBUS_SLAVE_SOCKET_NUMBERS) as byte
 
 public dim modbus_serial_timeout(NUM_SERIAL_PORTS) as byte
+'public dim modbus_tcp_timeout(MODBUS_SLAVE_SOCKET_NUMBERS) as byte
 
 ' Buffer for output MODBUS packets
 dim modbus_out_buffer(MODBUS_SERIAL_OUT_BUFFER_LENGTH) as byte
 dim modbus_out_buffer_head as word
 dim modbus_out_buffer_length as word
+
+' Flag for MODBUS TCP exeption
+dim modbus_tcp_exeption as boolean
+
+' Flag for MODBUS monitor
+dim modbus_monitor as boolean
 
 	' ROUTE
 type MODBUS_ROUTE_ID
@@ -74,7 +81,7 @@ end function
 ' MODBUS GENERAL 
 function modbus_initialize() as boolean
 	
-	dim i as byte
+	dim i, j as byte
 	dim ports as string(25)
 	dim result as boolean
 	
@@ -93,6 +100,9 @@ function modbus_initialize() as boolean
 	modbus_out_buffer_head = 0
 	modbus_out_buffer_length = 0
 	
+	modbus_tcp_exeption = val(stg_get("RN",0))
+	modbus_monitor = false
+
 	for i = 0 to NUM_SERIAL_PORTS - 1
 
 		ModBusSerialChannelsOperation(i).SerialType = val(stg_get("RI",i))
@@ -109,6 +119,7 @@ function modbus_initialize() as boolean
 		
 		ModBusSlaveDevices(i).TCPAddress = stg_get("RK",i)
 		ModBusSlaveDevices(i).TCPPort = stg_get("RL",i)
+		'modbus_tcp_timeout(i) = MODBUS_TCP_TIMEOUT
 
 		if ModBusSlaveDevices(i).TCPAddress <> "0.0.0.0" then
 			modbus_slave_socks(i) = sock_get("MBO" + str(i))
@@ -128,11 +139,11 @@ function modbus_initialize() as boolean
 		end if
 
 		ModBusTCPSocketsOperation(i).Socket = modbus_slave_socks(i)
-		ModBusTCPSocketsOperation(i).Connected = false
+		ModBusTCPSocketsOperation(i).Connected = MODBUS_SLAVE_TCP_DISCONNECT
 		ModBusTCPSocketsOperation(i).OperationInProgress = false
 		ModBusTCPSocketsOperation(i).SourceU = 255
 		ModBusTCPSocketsOperation(i).TransactionID = 0
-		ModBusTCPSocketsOperation(i).TransactionIDOriginal = 0
+		ModBusTCPSocketsOperation(i).TransactionIDNew = 0
 		ModBusTCPSocketsOperation(i).ShiftID = 0
 		ModBusTCPSocketsOperation(i).TimeOut = 0
 	next i
@@ -316,19 +327,24 @@ end sub
 
 sub modbus_timeout()
 	
-	dim i as byte
+	dim i, j as byte
+	dim data_for_send as string(3)
 	
 	' Check OUT connection
 	for i = 0 to MODBUS_SLAVE_SOCKET_NUMBERS - 1
 		if ModBusTCPSocketsOperation(i).Socket <> 255 then
-			if ModBusTCPSocketsOperation(i).Connected = false then
+			if ModBusTCPSocketsOperation(i).Connected = MODBUS_SLAVE_TCP_DISCONNECT then
 				sock.num = ModBusTCPSocketsOperation(i).Socket
 				sock.protocol = PL_SOCK_PROTOCOL_TCP
 				sock.connectiontout = 600
 				sock.allowedinterfaces = "NET,WLN,PPP"
 				sock.targetip = ModBusSlaveDevices(i).TCPAddress
 				sock.targetport = ModBusSlaveDevices(i).TCPPort
+				ModBusTCPSocketsOperation(i).Connected = MODBUS_SLAVE_TCP_CONNECTING
 				sock.connect()
+				#if DEV_DEBUG_PRINT
+					dev_debugprint("ModBus. Connecting" + str(ModBusTCPSocketsOperation(i).Socket))
+				#endif
 			end if
 		end if
 	next i
@@ -341,6 +357,24 @@ sub modbus_timeout()
 					dev_debugprint("ModBus. Channel Serial timeout : " + str(i))
 				#endif
 				ModBusSerialChannelsOperation(i).OperationInProgress = false
+				' Check TCP exeption need
+				if modbus_tcp_exeption = true then
+					if (ModBusSerialChannelsOperation(i).SourceU and MODBUS_SOCKET_TYPE_FLAG) = MODBUS_TCP_SOCKET_TYPE then
+						' Send Modbus TCP exeption TIMEOUT - 0B
+						for j = 0 to MODBUS_SOCKET_MAX_NUMBERS - 1
+							if modbus_socks(j) = ModBusSerialChannelsOperation(i).SourceU and not MODBUS_SOCKET_TYPE_FLAG then
+								exit for
+							end if
+						next j
+						if modbus_socks_last_transaction(j) = ModBusSerialChannelsOperation(i).TransactionID then
+							data_for_send = chr(ModBusSerialChannelsOperation(i).ClientID) + chr(ModBusSerialChannelsOperation(i).Func or MODBUS_TCP_EXEPTION_FLAG) + chr(MODBUS_TCP_EXEPTION_TIMEOUT)
+							modbus_send_tcp(data_for_send, ModBusSerialChannelsOperation(i).SourceU and not MODBUS_SOCKET_TYPE_FLAG, ModBusSerialChannelsOperation(i).TransactionID, 0, MODBUS_TCP_EXCEPTION)
+							#if DEV_DEBUG_PRINT
+								dev_debugprint("  Send TCP Exeption ")
+							#endif
+						end if
+					end if
+				end if
 				modbus_buffer_operate(i or MODBUS_SERIAL_SOCKET_TYPE)
 			end if
 		end if
@@ -354,6 +388,24 @@ sub modbus_timeout()
 					dev_debugprint("ModBus. Channel Socket timeout : " + str(i))
 				#endif
 				ModBusTCPSocketsOperation(i).OperationInProgress = false
+				' Check TCP exeption need
+				if modbus_tcp_exeption = true then
+					if (ModBusTCPSocketsOperation(i).SourceU and MODBUS_SOCKET_TYPE_FLAG) = MODBUS_TCP_SOCKET_TYPE then
+						' Send Modbus TCP exeption TIMEOUT - 0B 
+						for j = 0 to MODBUS_SOCKET_MAX_NUMBERS - 1
+							if modbus_socks(j) = ModBusTCPSocketsOperation(i).SourceU and not MODBUS_SOCKET_TYPE_FLAG then
+								exit for
+							end if
+						next j
+						if modbus_socks_last_transaction(j) = ModBusTCPSocketsOperation(i).TransactionID then
+							data_for_send = chr(ModBusTCPSocketsOperation(i).ClientID) + chr(ModBusTCPSocketsOperation(i).Func or MODBUS_TCP_EXEPTION_FLAG) + chr(MODBUS_TCP_EXEPTION_TIMEOUT)
+							modbus_send_tcp(data_for_send, ModBusTCPSocketsOperation(i).SourceU and not MODBUS_SOCKET_TYPE_FLAG, ModBusTCPSocketsOperation(i).TransactionID, 0, MODBUS_TCP_EXCEPTION)
+							#if DEV_DEBUG_PRINT
+								dev_debugprint("  Send TCP Exeption ")
+							#endif
+						end if
+					end if
+				end if
 				modbus_buffer_operate(ModBusTCPSocketsOperation(i).Socket or MODBUS_TCP_SOCKET_TYPE)
 			end if
 		end if
@@ -427,6 +479,8 @@ sub modbus_send_request_to_serial(byref data as string, sourceU as byte, destina
 				if asc(mid(data_for_send, 1, 1)) <> 255 then		' if packet is BROADCAST - no responce waiting
 
 					ModBusSerialChannelsOperation(destination).TransactionID = transaction
+					ModBusSerialChannelsOperation(destination).ClientID = asc(left(data_for_send, 1))
+					ModBusSerialChannelsOperation(destination).Func = asc(mid(data_for_send, 2, 1))
 					ModBusSerialChannelsOperation(destination).OperationInProgress = true
 					ModBusSerialChannelsOperation(destination).TimeOut = timeout
 					ModBusSerialChannelsOperation(destination).SourceU = sourceU
@@ -445,9 +499,9 @@ sub modbus_send_request_to_serial(byref data as string, sourceU as byte, destina
 				#endif
 
 				if ModBusSerialChannelsOperation(destination).SerialType = MODBUS_SERIAL_SLAVE_RTU then
-					modbus_send_serial_rtu(data_for_send, destination, shiftID)
+					modbus_send_serial_rtu(data_for_send, destination, shiftID, MODBUS_RTU_REQUEST)
 				else if ModBusSerialChannelsOperation(destination).SerialType = MODBUS_SERIAL_SLAVE_ASCII then
-					modbus_send_serial_ascii(data_for_send, destination, shiftID)
+					modbus_send_serial_ascii(data_for_send, destination, shiftID, MODBUS_ASCII_REQUEST)
 				end if
 			end if
 		else
@@ -500,8 +554,10 @@ sub modbus_send_request_to_tcp(byref data as string, sourceU as byte, destinatio
 
 				if asc(mid(data_for_send, 1, 1)) <> 255 then ' if packet is BROADCAST - don't responce wait
 					
-					ModBusTCPSocketsOperation(i).TransactionID = ModBusTCPSocketsOperation(i).TransactionID + 1
-					ModBusTCPSocketsOperation(i).TransactionIDOriginal = transaction
+					ModBusTCPSocketsOperation(i).TransactionID = transaction
+					ModBusTCPSocketsOperation(i).TransactionIDNew = ModBusTCPSocketsOperation(i).TransactionID + 1
+					ModBusTCPSocketsOperation(i).ClientID = asc(left(data_for_send, 1))
+					ModBusTCPSocketsOperation(i).Func = asc(mid(data_for_send, 2, 1))
 					ModBusTCPSocketsOperation(i).OperationInProgress = true
 					ModBusTCPSocketsOperation(i).TimeOut = timeout
 					ModBusTCPSocketsOperation(i).SourceU = sourceU
@@ -513,7 +569,7 @@ sub modbus_send_request_to_tcp(byref data as string, sourceU as byte, destinatio
 					#endif
 				end if
 				
-				modbus_send_tcp(data_for_send, destination, ModBusTCPSocketsOperation(i).TransactionID, shiftID)
+				modbus_send_tcp(data_for_send, destination, ModBusTCPSocketsOperation(i).TransactionIDNew, shiftID, MODBUS_TCP_REQUEST)
 			end if
 			exit for
 		end if
@@ -565,9 +621,9 @@ sub modbus_send_responce_to_serial(byref data as string, sourceU as byte, destin
 
 	ModBusSerialChannelsOperation(destination).OperationInProgress = false
 	if ModBusSerialChannelsOperation(destination).SerialType = MODBUS_SERIAL_MASTER_RTU then
-		modbus_send_serial_rtu(data_for_send, destination, shiftID)
+		modbus_send_serial_rtu(data_for_send, destination, shiftID, MODBUS_RTU_RESPONCE)
 	else
-		modbus_send_serial_ascii(data_for_send, destination, shiftID)
+		modbus_send_serial_ascii(data_for_send, destination, shiftID, MODBUS_ASCII_RESPONCE)
 	end if
 end sub
 
@@ -583,87 +639,110 @@ sub modbus_send_responce_to_tcp(byref data as string, sourceU as byte, destinati
 			transaction = ModBusSerialChannelsOperation(sourceU and not MODBUS_SOCKET_TYPE_FLAG).TransactionID
 			data_for_send = data
 			ModBusSerialChannelsOperation(sourceU and not MODBUS_SOCKET_TYPE_FLAG).OperationInProgress = false
-			modbus_send_tcp(data_for_send, destination, transaction, shiftID)
+			modbus_send_tcp(data_for_send, destination, transaction, shiftID, MODBUS_TCP_RESPONCE)
 		end if
 	else
 		' TCP source
 		for i = 0 to MODBUS_SLAVE_SOCKET_NUMBERS - 1
 			if ModBusTCPSocketsOperation(i).SourceU = (destination or MODBUS_TCP_SOCKET_TYPE) then
-				transaction = ModBusTCPSocketsOperation(i).TransactionIDOriginal
+				transaction = ModBusTCPSocketsOperation(i).TransactionID
 				data_for_send = mid(data, 7, 256 * asc(mid(data, 5, 1)) + asc(mid(data, 6, 1)))
 
 				ModBusTCPSocketsOperation(i).OperationInProgress = false
-				modbus_send_tcp(data_for_send, destination, transaction, shiftID)
+				modbus_send_tcp(data_for_send, destination, transaction, shiftID, MODBUS_TCP_RESPONCE)
 				exit for
 			end if
 		next i
 	end if
 end sub
 
-sub modbus_send_serial_ascii(byref packet as string, channelSerial as byte, shiftID as char)
+sub modbus_send_serial_ascii(byref packet as string, channelSerial as byte, shiftID as char, pType as MODBUS_MONITOR_PACKET_TYPE)
 	
 	dim modbus_str as string
 	dim i as byte
 	dim lrc as byte
 	dim client_id as byte
 	
-	'Change ID
-	if shiftID <> 0 then
-		client_id = asc(mid(packet, 1, 1))
-		client_id = client_id + shiftID
-		insert(packet, 1, chr(client_id))
+	if port_in_use(channelSerial) = YES then
+		'Change ID
+		if shiftID <> 0 then
+			client_id = asc(mid(packet, 1, 1))
+			client_id = client_id + shiftID
+			insert(packet, 1, chr(client_id))
+		end if
+
+		' Calc LRC
+		lrc = LRC8(packet, len(packet))
+		
+		modbus_str = ":"
+		
+		for i = 1 to len(packet)
+			modbus_str = modbus_str + modbus_hex(asc(mid(packet, i, 1)))
+		next i
+		
+		modbus_str = modbus_str + modbus_hex(lrc) + chr(CR) + chr(LF)
+		
+		ser.num = channelSerial
+		ser.enabled = YES
+		ser.setdata(modbus_str)
+		ser.send
+		
+		' Check MONITOR mode
+		if modbus_monitor = true then
+			modbus_monitor_send(modbus_str, channelSerial or MODBUS_SERIAL_SOCKET_TYPE, MODBUS_MONITOR_DIRECTION_OUT, pType)
+		end if
+
+
+		#if DEV_DEBUG_PRINT
+			dev_debugprint("MODBUS ASCII Send to Channel: " + str(channelSerial))
+			modbus_debug_dump(modbus_str)
+		#endif
+	else
+		#if DEV_DEBUG_PRINT
+			dev_debugprint("MODBUS ASCII NOT Send to Channel: " + str(channelSerial))
+		#endif
 	end if
-
-	' Calc LRC
-	lrc = LRC8(packet, len(packet))
-	
-	modbus_str = ":"
-	
-	for i = 1 to len(packet)
-		modbus_str = modbus_str + modbus_hex(asc(mid(packet, i, 1)))
-	next i
-	
-	modbus_str = modbus_str + modbus_hex(lrc) + chr(CR) + chr(LF)
-	
-	ser.num = channelSerial
-	ser.enabled = YES
-	ser.setdata(modbus_str)
-	ser.send
-
-	#if DEV_DEBUG_PRINT
-		dev_debugprint("MODBUS ASCII Send to Channel: " + str(channelSerial))
-		modbus_debug_dump(modbus_str)
-	#endif
 
 end sub
 
-sub modbus_send_serial_rtu(byref packet as string, channelSerial as byte, shiftID as char)
+sub modbus_send_serial_rtu(byref packet as string, channelSerial as byte, shiftID as char, pType as MODBUS_MONITOR_PACKET_TYPE)
 	
 	dim modbus_str as string
 	dim crc as word
 	dim client_id as byte
 	
-	'Change ID
-	'Change ID
-	if shiftID <> 0 then
-		client_id = asc(mid(packet, 1, 1))
-		client_id = client_id + shiftID
-		insert(packet, 1, chr(client_id))
+	if port_in_use(channelSerial) = YES then
+		'Change ID
+		'Change ID
+		if shiftID <> 0 then
+			client_id = asc(mid(packet, 1, 1))
+			client_id = client_id + shiftID
+			insert(packet, 1, chr(client_id))
+		end if
+		
+		' Calc CRC16
+		crc = CRC16(packet, len(packet))
+
+		modbus_str = packet + chr(crc shr 8) + chr(crc and 255)
+		ser.num = channelSerial
+		ser.enabled = YES
+		ser.setdata(modbus_str)
+		ser.send
+
+		' Check MONITOR mode
+		if modbus_monitor = true then
+			modbus_monitor_send(modbus_str, channelSerial or MODBUS_SERIAL_SOCKET_TYPE, MODBUS_MONITOR_DIRECTION_OUT, pType)
+		end if
+
+		#if DEV_DEBUG_PRINT
+			dev_debugprint("MODBUS RTU Send to Channel: " + str(channelSerial))
+			modbus_debug_dump(modbus_str)
+		#endif
+	else
+		#if DEV_DEBUG_PRINT
+			dev_debugprint("MODBUS RTU NOT Send to Channel: " + str(channelSerial))
+		#endif
 	end if
-	
-	' Calc CRC16
-	crc = CRC16(packet, len(packet))
-
-	modbus_str = packet + chr(crc shr 8) + chr(crc and 255)
-	ser.num = channelSerial
-	ser.enabled = YES
-	ser.setdata(modbus_str)
-	ser.send
-
-	#if DEV_DEBUG_PRINT
-		dev_debugprint("MODBUS RTU Send to Channel: " + str(channelSerial))
-		modbus_debug_dump(modbus_str)
-	#endif
 
 end sub
 
@@ -705,7 +784,7 @@ function modbus_packet_ascii_to_bin(byref data_ascii as string) as string
 
 end function
 
-sub modbus_send_tcp(byref data as string, destination as byte, transaction as word, shiftID as char)
+sub modbus_send_tcp(byref data as string, destination as byte, transaction as word, shiftID as char, pType as MODBUS_MONITOR_PACKET_TYPE)
 
 	dim data_for_send as string
 	dim client_id as byte
@@ -734,6 +813,11 @@ sub modbus_send_tcp(byref data as string, destination as byte, transaction as wo
 	sock.num = destination
 	sock.setdata(data_for_send)
 	sock.send()
+
+	' Check MONITOR mode
+	if modbus_monitor = true then
+		modbus_monitor_send(data_for_send, destination or MODBUS_TCP_SOCKET_TYPE, MODBUS_MONITOR_DIRECTION_OUT, pType)
+	end if
 
 end sub
 
@@ -796,8 +880,9 @@ sub modbus_tcp_receive(byref data as string, channelTCP as byte, portTCP as word
 	dim serials as byte
 	dim sockets as word
 	dim clientid as byte
-	dim port as boolean
+	dim port, ind as boolean
 	dim index as byte
+	dim data_for_exeption as string(3)
 	
 	for i = 0 to MODBUS_SOCKET_MAX_NUMBERS - 1
 		if modbus_socks(i) = channelTCP then
@@ -822,7 +907,12 @@ sub modbus_tcp_receive(byref data as string, channelTCP as byte, portTCP as word
 				for i = 0 to modbus_socks_number - 1
 					if modbus_socks(i) = channelTCP then
 						' MASTER channel
+						' Check MONITOR mode
+						if modbus_monitor = true then
+							modbus_monitor_send(data, channelTCP, MODBUS_MONITOR_DIRECTION_IN, MODBUS_TCP_REQUEST)
+						end if
 						port = false
+						ind = false
 						for j = 0 to MODBUS_RULES_PORT_NUMBERS - 1
 							if portTCP = ModBusRoutePort(j).TCPPort then
 								if ModBusRoutePort(j).ChannelU <> 255 then
@@ -839,11 +929,22 @@ sub modbus_tcp_receive(byref data as string, channelTCP as byte, portTCP as word
 									if clientid >= ModBusRouteId(j).IdFrom and clientid <= ModBusRouteId(j).IdTo  then
 										modbus_socks_last_transaction(index) = 256 * asc(mid(data, 1, 1)) + asc(mid(data, 2, 1))
 										modbus_send_request(serials, sockets, data, channelTCP or MODBUS_TCP_SOCKET_TYPE, ModBusRouteId(j).ChannelU, ModBusRouteId(j).IdShift)
+										ind = true
 									end if
 								end if
 							next j
-						end if
 
+							if (ind = false) and (modbus_tcp_exeption = true )then
+								' generate Modbus TCP exeption Route Error - 0A
+								data_for_exeption = mid(data, 7, 1) + chr(asc(mid(data, 8, 1)) or MODBUS_TCP_EXEPTION_FLAG) + chr(MODBUS_TCP_EXEPTION_ROUTE_ERROR)
+								modbus_send_tcp(data_for_exeption, channelTCP and not MODBUS_SOCKET_TYPE_FLAG, 256 * asc(mid(data, 1, 1)) + asc(mid(data, 2, 1)), 0, MODBUS_TCP_EXCEPTION)
+								#if DEV_DEBUG_PRINT
+									dev_debugprint("  Send TCP Exeption TIMEOUT")
+								#endif
+							end if
+
+						end if
+						
 						exit for
 					end if
 				next i
@@ -851,6 +952,10 @@ sub modbus_tcp_receive(byref data as string, channelTCP as byte, portTCP as word
 				for i = 0 to MODBUS_SLAVE_SOCKET_NUMBERS - 1
 					if modbus_slave_socks(i) = channelTCP then
 						' SLAVE channel
+						' Check MONITOR mode
+						if modbus_monitor = true then
+							modbus_monitor_send(data, channelTCP, MODBUS_MONITOR_DIRECTION_IN, MODBUS_TCP_RESPONCE)
+						end if
 						for j = 0 to MODBUS_SLAVE_SOCKET_NUMBERS - 1
 							if ModBusTCPSocketsOperation(j).Socket = channelTCP then
 								if ModBusTCPSocketsOperation(j).OperationInProgress = true then
@@ -865,6 +970,10 @@ sub modbus_tcp_receive(byref data as string, channelTCP as byte, portTCP as word
 					end if
 				next i
 			else		' BROADCAST packet
+				' Check MONITOR mode
+				if modbus_monitor = true then
+					modbus_monitor_send(data, channelTCP, MODBUS_MONITOR_DIRECTION_IN, MODBUS_TCP_REQUEST)
+				end if
 				modbus_broadcast_operate(data, channelTCP or MODBUS_TCP_SOCKET_TYPE)
 			end if
 
@@ -888,30 +997,31 @@ sub modbus_serial_receive(byref data as string, channelSerial as byte)
 
 	select case ModBusSerialChannelsOperation(channelSerial).SerialType
 	case MODBUS_SERIAL_MASTER_RTU:
+		' Check MONITOR mode
+		if modbus_monitor = true then
+			modbus_monitor_send(data, channelSerial or MODBUS_SERIAL_SOCKET_TYPE, MODBUS_MONITOR_DIRECTION_IN, MODBUS_RTU_REQUEST)
+		end if
+
 		' Check CRC
 		dim crc as word
 		crc = CRC16(data, len(data)-2)
 		
 		if asc(mid(data, len(data)-1, 1)) = (crc shr 8) and asc(mid(data, len(data), 1)) = (crc and 255) then
 			' CRC is OK
-			if asc(mid(data, 3, 1)) = 0 and asc(mid(data, 4, 1)) = 0 then	' test MODBUS Protocol ID
-				
-				' Get serial channel(s) for routing request
-				clientid = asc(mid(data, 1, 1))
-				serials = 0
-				sockets = 0
-				if clientid <> 255 then
-					for i = 0 to MODBUS_RULES_ID_NUMBERS - 1
-						if ModBusRouteId(i).IdFrom <> 0 and ModBusRouteId(i).IdTo <> 0 then
-							if clientid >= ModBusRouteId(i).IdFrom and clientid <= ModBusRouteId(i).IdTo  then
-								modbus_send_request(serials, sockets, left(data, len(data) - 2), channelSerial or MODBUS_SERIAL_SOCKET_TYPE, ModBusRouteId(i).ChannelU, ModBusRouteId(i).IdShift)
-							end if
+			' Get serial channel(s) for routing request
+			clientid = asc(mid(data, 1, 1))
+			serials = 0
+			sockets = 0
+			if clientid <> 255 then
+				for i = 0 to MODBUS_RULES_ID_NUMBERS - 1
+					if ModBusRouteId(i).IdFrom <> 0 and ModBusRouteId(i).IdTo <> 0 then
+						if clientid >= ModBusRouteId(i).IdFrom and clientid <= ModBusRouteId(i).IdTo  then
+							modbus_send_request(serials, sockets, left(data, len(data) - 2), channelSerial or MODBUS_SERIAL_SOCKET_TYPE, ModBusRouteId(i).ChannelU, ModBusRouteId(i).IdShift)
 						end if
-					next i	
-				else			' BROADCAST packet
-					modbus_broadcast_operate(data, channelSerial or MODBUS_SERIAL_SOCKET_TYPE)
-				end if
-				
+					end if
+				next i	
+			else			' BROADCAST packet
+				modbus_broadcast_operate(data, channelSerial or MODBUS_SERIAL_SOCKET_TYPE)
 			end if
 		else
 			' CRC is error
@@ -921,6 +1031,11 @@ sub modbus_serial_receive(byref data as string, channelSerial as byte)
 		end if
 		
 	case MODBUS_SERIAL_MASTER_ASCII:
+		' Check MONITOR mode
+		if modbus_monitor = true then
+			modbus_monitor_send(data, channelSerial or MODBUS_SERIAL_SOCKET_TYPE, MODBUS_MONITOR_DIRECTION_IN, MODBUS_ASCII_REQUEST)
+		end if
+
 		if (left(data, 1) = ":") then
 			if (right(data, 2) = (chr(CR) + chr(LF))) then
 				' MODBUS ASCII packet received
@@ -964,6 +1079,11 @@ sub modbus_serial_receive(byref data as string, channelSerial as byte)
 		end if
 
 	case MODBUS_SERIAL_SLAVE_RTU:
+		' Check MONITOR mode
+		if modbus_monitor = true then
+			modbus_monitor_send(data, channelSerial or MODBUS_SERIAL_SOCKET_TYPE, MODBUS_MONITOR_DIRECTION_IN, MODBUS_RTU_RESPONCE)
+		end if
+
 		' Check CRC
 		dim crc as word
 		crc = CRC16(data, len(data)-2)
@@ -984,6 +1104,11 @@ sub modbus_serial_receive(byref data as string, channelSerial as byte)
 		end if
 
 	case MODBUS_SERIAL_SLAVE_ASCII:
+		' Check MONITOR mode
+		if modbus_monitor = true then
+			modbus_monitor_send(data, channelSerial or MODBUS_SERIAL_SOCKET_TYPE, MODBUS_MONITOR_DIRECTION_IN, MODBUS_ASCII_RESPONCE)
+		end if
+
 		if (left(data, 1) = ":") then
 			if (right(data, 2) = (chr(CR) + chr(LF))) then
 				' MODBUS ASCII packet received
@@ -1018,6 +1143,67 @@ sub modbus_serial_receive(byref data as string, channelSerial as byte)
 		end if
 
 	end select
+	
+end sub
+
+sub modbus_monitor_send(byref data as string, sourceU as byte, direction as boolean, pType as MODBUS_MONITOR_PACKET_TYPE)
+
+	' --- Monitor data ---
+	' Size Packet 2 bytes
+	' Direction 1 byte
+	' SourceU 1 byte
+	' If SourceU = TCP then added IP:PORT string with chr(0) terminated
+	' MODBUS data packet
+	
+	dim sizePacket as word
+	dim sock_num as byte
+	dim _str as string(4)
+	dim _ip as string(22)
+	dim _header as string(2)
+	
+	sock_num = sock.num
+
+	if SourceU < MODBUS_SOCKET_TYPE_FLAG then 
+		' TCP
+		sock.num = sourceU
+		_ip = sock.remoteip + ":" + str(sock.remoteport) + chr(0)
+		sizePacket = len(data) + 4 + len(_ip)
+	else
+		sizePacket = len(data) + 4
+	end if
+	
+	sock.num = sock_telnet
+	
+	_header = chr(&hff) + chr(&h00)
+	
+	_str = chr(sizePacket and &hff) + chr((sizePacket shr 8) and &hff)
+
+	if direction = true then
+		_str = _str + chr(&h80 or pType)
+	else
+		_str = _str + chr(&h00 or pType)
+	end if
+	_str = _str + chr(sourceU)
+	
+	' Check TX buffer free space
+	if SourceU < MODBUS_SOCKET_TYPE_FLAG then 
+		if sock.txfree < (len(data) + 4 + len(_ip) + 2) then exit sub
+	else
+		if sock.txfree < (len(data) + 4 + 2) then exit sub
+	end if
+
+	sock.setdata(_header)
+	sock.setdata(_str)
+	
+	if SourceU < MODBUS_SOCKET_TYPE_FLAG then 
+		sock.setdata(_ip)
+	end if
+	
+	sock.setdata(data)
+	
+	sock.send()
+	
+	sock.num = sock_num
 	
 end sub
 

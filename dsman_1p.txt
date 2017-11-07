@@ -9,6 +9,7 @@
 >>&b00000000	I=RJ@2;D=TCP Port 2;T=INT;C=EDIT
 >>&b00000000	I=RJ@3;D=TCP Port 3;T=INT;C=EDIT
 >>&b00000000	I=RJ@4;D=TCP Port 4;T=INT;C=EDIT
+>>&b00000000	I=RN;D=Modbus TCP exeption;T=INT;C=STATIC;O=0- Disable/0/1- Enable/1
 
 >>&b00001000	I=$WI-FI;D=Wi-Fi;T=GROUP
 >>&b00001000	I=WE;D=Wi-Fi Mode;T=INT;C=STATIC;O=0- Disabled/0/1- Enabled (on demand)/1/2- Enabled (permanently)/2

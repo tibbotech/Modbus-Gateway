@@ -1,0 +1,319 @@
+include "global.tbh"
+
+dim snmp_enable as boolean
+dim sock_snmp as byte
+
+function snmp_initialize() as boolean
+	
+	snmp_enable = val(stg_get("SN",0))	' Get SN - SNMP Enable setting value
+	
+	snmp_initialize = snmp_enable
+
+end function
+
+sub snmp_receive(byref data as string)
+	
+	dim length as byte
+	dim value_dw as dword
+	dim value_b as byte
+	dim value_str as string(20)
+	dim lenValue as byte
+	dim pos as byte
+	
+	if len(data) > 0 then 
+		length = len(data)
+		' Check SNMP packet
+		if asc(mid(data, 1, 1)) = SNMP_SEQUENCE then
+			' Yes! SNMP packet detected
+			pos = 2
+			if asc(mid(data, pos, 1)) + 2 = len(data) then
+				' Length packet is correct
+				#if DEV_DEBUG_PRINT
+					dev_debugprint("SNMP packet")
+					modbus_debug_dump(data)
+				#endif
+
+				' Check SNMP version
+				pos = 3
+				if snmp_get_integer(data, pos, lenValue, value_dw, length) = true then
+					pos = pos + 2 + lenValue
+					if value_dw >= 0 and value_dw < 2 then
+						' SNMP version is 1 or 2
+
+						' Check password
+						if snmp_get_string(data, pos, lenValue, value_str, length) = true then
+							if value_str = "public" then
+								' Password is OK
+								
+								' Check command 
+								pos = pos + 2 + lenValue
+								if snmp_get_command(data, pos, value_b, length) = true then
+									select case value_b
+									case SNMP_GET_REQUEST_PDU:
+										#if DEV_DEBUG_PRINT
+											dev_debugprint("SNMP command SNMP_GET_REQUEST_PDU")
+										#endif
+										
+										if snmp_get_command_sequence(data, pos, length) = true then
+											
+										end if
+									
+									case SNMP_GET_RESPONCE_PDU:
+										#if DEV_DEBUG_PRINT
+											dev_debugprint("SNMP command SNMP_GET_RESPONCE_PDU")
+										#endif
+									
+									case SNMP_SET_REQUEST_PDU:
+										#if DEV_DEBUG_PRINT
+											dev_debugprint("SNMP command SNMP_SET_REQUEST_PDU")
+										#endif
+
+									case else:
+										#if DEV_DEBUG_PRINT
+											dev_debugprint("SNMP command UNKNOWN")
+										#endif
+										
+									end select
+								end if
+								
+							else
+								#if DEV_DEBUG_PRINT
+									dev_debugprint("SNMP wrong password")
+								#endif
+							end if
+						end if
+					else
+						#if DEV_DEBUG_PRINT
+							dev_debugprint("SNMP wrong version")
+						#endif
+					end if
+				end if
+			else
+				#if DEV_DEBUG_PRINT
+					dev_debugprint("SNMP packet length is wrong")
+				#endif
+			end if
+		else
+			#if DEV_DEBUG_PRINT
+				dev_debugprint("SNMP packet is not SEQUENCE type")
+			#endif
+		end if
+	end if
+
+end sub
+
+function snmp_is_integer(byref data as string, pos as byte) as boolean
+
+	if asc(mid(data, pos, 1)) = SNMP_INTEGER then
+		snmp_is_integer = true
+	else
+		snmp_is_integer = false
+	end if
+	
+end function
+
+function snmp_get_integer(byref data as string, pos as byte, byref length as byte, byref value as dword, lengthPacket as byte) as boolean
+	
+	dim _value as dword
+	dim _length as byte
+	dim i as byte
+	
+	_value = 0
+	value = 0
+	length = 0
+	snmp_get_integer = false
+
+	if lengthPacket >= pos + 1 then
+		if snmp_is_integer(data, pos) = true then
+			_length = asc(mid(data, pos + 1, 1))
+			if lengthPacket >= pos + 1 + _length then
+				if _length > 0 and _length < 5 then
+					for i = 1 to _length
+						_value = _value * 256
+						_value = _value + asc(mid(data, pos + 1 + i, 1))
+					next i
+
+					value = _value
+					length = _length
+					snmp_get_integer = true
+
+				else
+					#if DEV_DEBUG_PRINT
+						dev_debugprint("SNMP Integer Value - length is not correct")
+					#endif
+				end if
+			else
+				#if DEV_DEBUG_PRINT
+					dev_debugprint("SNMP Integer Value - packet length is not correct")
+				#endif
+			end if
+		else
+			#if DEV_DEBUG_PRINT
+				dev_debugprint("SNMP Integer Value - type is not correct")
+			#endif
+		end if
+	else
+		#if DEV_DEBUG_PRINT
+			dev_debugprint("SNMP Integer Value - packet length is not correct")
+		#endif
+	end if
+
+end function
+
+function snmp_is_string(byref data as string, pos as byte) as boolean
+
+	if asc(mid(data, pos, 1)) = SNMP_OCTET_STRING then
+		snmp_is_string = true
+	else
+		snmp_is_string = false
+	end if
+	
+end function
+
+function snmp_get_string(byref data as string, pos as byte, byref length as byte, byref value as string, lengthPacket as byte) as boolean
+
+	value = ""
+	length = 0
+	snmp_get_string = false
+
+
+	if lengthPacket >= pos + 1 then
+		if snmp_is_string(data, pos) = true then
+			length = asc(mid(data, pos + 1, 1))
+			if lengthPacket >= pos + 1 + length then
+				snmp_get_string = true
+				if length > 0 then
+					value = mid(data, pos + 2, length)
+				end if
+			else
+				#if DEV_DEBUG_PRINT
+					dev_debugprint("SNMP String Value - packet length is not correct")
+				#endif
+			end if
+		else
+			#if DEV_DEBUG_PRINT
+				dev_debugprint("SNMP String Value - type is not correct")
+			#endif
+		end if
+	else
+		#if DEV_DEBUG_PRINT
+			dev_debugprint("SNMP String Value - packet length is not correct")
+		#endif
+	end if
+
+end function
+
+function snmp_is_command(byref data as string, pos as byte) as boolean
+
+	select case asc(mid(data, pos, 1))
+	case SNMP_GET_REQUEST_PDU:
+		snmp_is_command = true
+
+	case SNMP_GET_RESPONCE_PDU:
+		snmp_is_command = true
+
+	case SNMP_SET_REQUEST_PDU:
+		snmp_is_command = true
+
+	case else:
+		snmp_is_command = false
+		
+	end select
+	
+end function
+
+function snmp_get_command(byref data as string, pos as byte, byref value as byte, lengthPacket as byte) as boolean
+
+	value = 0
+	snmp_get_command = false
+
+	if lengthPacket >= pos + 1 then
+		if snmp_is_command(data, pos) = true then
+
+			value = asc(mid(data, pos, 1))
+			snmp_get_command = true
+			
+		else
+			#if DEV_DEBUG_PRINT
+				dev_debugprint("SNMP Command Value - type is not correct")
+			#endif
+		end if
+	else
+		#if DEV_DEBUG_PRINT
+			dev_debugprint("SNMP Command Value - packet length is not correct")
+		#endif
+	end if
+
+end function
+
+function snmp_get_command_sequence(byref data as string, pos as byte, lengthPacket as byte) as boolean
+	
+	dim lenID as byte
+	dim valueID as dword
+	dim lenError as byte
+	dim valueError as dword
+	dim lenErrIndex as byte
+	dim valueErrIndex as dword
+
+	' Check command sequence
+	snmp_get_command_sequence = false
+
+	if lengthPacket >= pos + 1 then
+		if snmp_is_command(data, pos) = true then
+
+			if asc(mid(data, pos, 1)) = SNMP_GET_REQUEST_PDU then
+				' Check integer ID
+				if snmp_get_integer(data, pos + 2, lenID, valueID, lengthPacket) = false then
+					#if DEV_DEBUG_PRINT
+						dev_debugprint("SNMP Command Sequence Value - ID value is not correct")
+					#endif
+				end if
+				
+				' Check integer Error
+				if snmp_get_integer(data, pos + 4 + lenID, lenError, valueError, lengthPacket) = false then
+					#if DEV_DEBUG_PRINT
+						dev_debugprint("SNMP Command Sequence Value - Error value is not correct")
+					#endif
+				end if
+				
+				' Check integer Error index
+				if snmp_get_integer(data, pos + 6 + lenID + lenError, lenErrIndex, valueErrIndex, lengthPacket) = false then
+					#if DEV_DEBUG_PRINT
+						dev_debugprint("SNMP Command Sequence Value - Error index value is not correct")
+					#endif
+				end if
+
+				' Check Sequence
+				if asc(mid(data, pos + 8 + lenID + lenError + lenErrIndex, 1)) <> SNMP_SEQUENCE then
+					#if DEV_DEBUG_PRINT
+						dev_debugprint("SNMP Command Sequence Value - Sequence value is not correct")
+					#endif
+				end if
+				
+				if asc(mid(data, pos + 10 + lenID + lenError + lenErrIndex, 1)) <> SNMP_SEQUENCE then
+					#if DEV_DEBUG_PRINT
+						dev_debugprint("SNMP Command Sequence Value - Sequence value is not correct")
+					#endif
+				end if
+				
+				' Get object ID
+				
+				
+			else
+				#if DEV_DEBUG_PRINT
+					dev_debugprint("SNMP Command Sequence Value - type is not correct")
+				#endif
+			end if
+		else
+			#if DEV_DEBUG_PRINT
+				dev_debugprint("SNMP Command Sequence Value - type is not correct")
+			#endif
+		end if
+	else
+		#if DEV_DEBUG_PRINT
+			dev_debugprint("SNMP Command Sequence Value - packet length is not correct")
+		#endif
+	end if
+	
+	
+end function

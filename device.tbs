@@ -1,10 +1,10 @@
 include "global.tbh"
 
-'--------------------------------------------------------------------
+
 declare sub change_current_interface(new_interface as pl_sock_interfaces)
 declare sub set_comm_channel_buffers(channel_num as byte, num_buffers as byte, ser_port_in_prog_mode as no_yes)
 
-'--------------------------------------------------------------------
+
 public dim error_mode as no_yes
 public dim pat_canint as no_yes
 public dim sock_connection_holdoff_tmr(MAX_NUM_SERIAL_PORTS) as byte
@@ -147,7 +147,7 @@ sub ethernet_link_state_change(new_state as pl_net_linkstate)
 	end if
 end sub
 
-'--------------------------------------------------------------------
+
 #if WLN_AVAILABLE
 sub callback_wln_ok()
 	
@@ -184,7 +184,7 @@ sub callback_wln_ok()
 end sub
 #endif
 
-'--------------------------------------------------------------------
+
 #if WLN_AVAILABLE
 sub callback_wln_failure(wln_state as en_wln_status_codes)
 
@@ -233,7 +233,7 @@ lbl1:
 end sub
 #endif
 
-'--------------------------------------------------------------------
+
 #if WLN_AVAILABLE
 sub callback_wln_mkey_progress_update(progress as byte)
 	#if SUPPORTS_DISPLAY
@@ -242,19 +242,19 @@ sub callback_wln_mkey_progress_update(progress as byte)
 end sub
 #endif
 
-'--------------------------------------------------------------------
+
 #if WLN_AVAILABLE
 sub callback_wln_pre_buffrq(required_buff_pages as byte)
 end sub
 #endif
 
-'--------------------------------------------------------------------
+
 #if WLN_AVAILABLE
 sub callback_wln_rescan_result(current_rssi as byte, scan_rssi as byte, different_ap as no_yes)
 end sub
 #endif
 
-'--------------------------------------------------------------------
+
 sub callback_gprs_ok()
 	#if DEV_DEBUG_PRINT
 		dev_debugprint("GPRS OK")
@@ -273,18 +273,18 @@ sub callback_gprs_ok()
 	#endif
 end sub
 
-'--------------------------------------------------------------------
+
 sub callback_gprs_failure()
 	#if DEV_DEBUG_PRINT
 		dev_debugprint("GPRS FAILED")
 	#endif
 end sub
 
-'--------------------------------------------------------------------
+
 sub callback_gprs_pre_buffrq(required_buff_pages as byte)
 end sub
 
-'--------------------------------------------------------------------
+
 sub callback_dhcp_ok(renew as no_yes, interface as pl_sock_interfaces, byref ip as string, byref gateway_ip as string, byref netmask as string, lease_time as dword)
 
 	if interface=PL_SOCK_INTERFACE_NET then
@@ -367,7 +367,6 @@ sub callback_dhcp_ok(renew as no_yes, interface as pl_sock_interfaces, byref ip 
 	#endif
 end sub
 
-'--------------------------------------------------------------------
 sub callback_dhcp_failure(interface as pl_sock_interfaces,failure_code as en_dhcp_status_codes)
 
 	sock.inconenabledmaster=NO
@@ -399,21 +398,17 @@ sub callback_dhcp_failure(interface as pl_sock_interfaces,failure_code as en_dhc
 	sock.inconenabledmaster=YES
 end sub
 
-'--------------------------------------------------------------------
 sub callback_dhcp_pre_clear_ip(interface as pl_sock_interfaces)
 	ip_configured(interface)=NO
 	close_interface_sockets(interface)
 end sub
 
-'--------------------------------------------------------------------
 sub callback_dhcp_pre_buffrq(required_buff_pages as byte)
 end sub
 
-'--------------------------------------------------------------------
 sub callback_dhcp_buff_released()
 end sub
 
-'--------------------------------------------------------------------
 sub callback_stg_error(byref stg_name_or_num as string,index as byte,status as en_stg_status_codes)
 	error_mode=YES
 	#if SUPPORTS_DISPLAY
@@ -421,15 +416,12 @@ sub callback_stg_error(byref stg_name_or_num as string,index as byte,status as e
 	#endif
 end sub
 
-'--------------------------------------------------------------------
 sub callback_stg_pre_get(byref stg_name_or_num as string,index as byte,byref stg_value as string)
 end sub
 
-'--------------------------------------------------------------------
 sub callback_stg_post_set(byref stg_name_or_num as string, index as byte,byref stg_value as string)
 end sub
 
-'--------------------------------------------------------------------
 sub close_interface_sockets(interface as pl_sock_interfaces)
 	dim f,sock_num_bup as byte
 	dim i as word
@@ -456,7 +448,6 @@ wait_close_interface_sockets:
 	sock.num=sock_num_bup
 end sub
 
-'--------------------------------------------------------------------
 sub change_current_interface(new_interface as pl_sock_interfaces)
 
 	if current_interface<>new_interface then
@@ -507,209 +498,273 @@ sub change_current_interface(new_interface as pl_sock_interfaces)
 	end if
 end sub
 
-'--------------------------------------------------------------------
-public sub enable_comm_channels(pages_to_distribute as byte)
-	dim f,x,num_ports_in_use as byte
-
-	num_ports_in_use=0
-	for f=0 to NUM_SERIAL_PORTS-1
-		if port_in_use(f)=YES then
-			num_ports_in_use=num_ports_in_use+1
-		end if
-	next f
-
-	x=pages_to_distribute/num_ports_in_use
-	for f=0 to NUM_SERIAL_PORTS-1
-		if port_in_use(f)=YES then
-			set_comm_channel_buffers(f,x,check_if_serial_channel_is_in_login_state(f))
-			if check_if_serial_channel_is_in_login_state(f)=NO then
-				set_ser_channel_for_normal_mode(f)
-			else
-				set_ser_channel_for_prog_mode(f)
-			end if
-		end if
-	next f	
-end sub
-
-'--------------------------------------------------------------------
-public sub enter_ser_prog_mode(channel_num as byte)
-	ser.num=channel_num
-	login_mode=CMD_MODE_SERIAL
-	add_serial_channel_to_login_data(channel_num)
-	#if PER_CHANNEL_STATUS_INDICATION=0
-		pat.channel=0
-	#else
-		pat.channel=channel_num+1
-	#endif
-	pat.play(PAT_GAP,PL_PAT_CANINT)
-	set_ser_channel_for_prog_mode(channel_num) 'this causes temporary ser port closing
-	#if SUPPORTS_DISPLAY
-		lcd_display_page(LCD_PAGE_SER_PROG_MODE,LCD_PRINT_MODE_AGGRESSIVE,LCD_PRINT_ELEMENT_ALL)
-	#endif
-end sub
-
-'--------------------------------------------------------------------
-public sub exit_ser_prog_mode(channel_num as byte)
-	ser.num=channel_num
-	
-	remove_serial_channel_from_login_data(channel_num)
-	if login_data="" then login_mode=CMD_MODE_NONE
-	#if PER_CHANNEL_STATUS_INDICATION=0
-		pat.channel=0
-	#else
-		pat.channel=channel_num+1
-	#endif
-	pat.play(PAT_GAP,PL_PAT_CANINT)
-	set_ser_channel_for_normal_mode(channel_num) 'this causes temporary ser port closing
-	#if SUPPORTS_DISPLAY
-		lcd_display_page(LCD_PAGE_NET,LCD_PRINT_MODE_AGGRESSIVE,LCD_PRINT_ELEMENT_ALL)
-	#endif
-	#if BEEP_AVAILABLE
-		beep.play(BEEP_SHORT,PL_BEEP_CANINT)
-	#endif
-end sub
-
-'--------------------------------------------------------------------
-public sub set_ser_channel_for_prog_mode(channel_num as byte)
-
-	dim x as byte
-	dim ser_enabled_prev as no_yes
-
-	ser.num=channel_num
-'	sock.num=sock_comm(channel_num)
-	
-	ser_enabled_prev=ser.enabled
-	ser.enabled=NO
-	ser.interface=PL_SER_SI_HALFDUPLEX 'will work for RS232 without flow control, as well as RS485
-	ser.flowcontrol=DISABLED
-	baudrate_set(BR_38400)
-	ser.parity=PL_SER_PR_NONE
-	ser.bits=PL_SER_BB_8
-	ser.interchardelay=0
-	ser.esctype=PL_SER_ET_DISABLED
-
-	x=sys.freebuffpages
-	set_comm_channel_buffers(channel_num,0,NO)
-	x=sys.freebuffpages-x 'this is how many buffers were allocated
-	set_comm_channel_buffers(channel_num,x,YES) 'now allocate the same num of buffers, but for prog mode
-'	sock.sinkdata=YES
-'	ser.redir(0)
-	
-	ser.enabled=ser_enabled_prev
-'	decide_on_ser_enabled(channel_num)
-end sub
-
-'--------------------------------------------------------------------
-public sub set_ser_channel_for_normal_mode(channel_num as byte)
+public function set_ser_channel_for_normal_mode(channel_num as byte) as boolean
 
 	dim x as byte
 
-	ser.num=channel_num
-		
+	ser.num = channel_num
 	ser.enabled = NO
 	
-	select case param_si(channel_num)
-	case 0:
-		ser.interface=PL_SER_SI_FULLDUPLEX
-		#if SUPPORTS_422_485_1 and DEVICE_PORT_SCHEME=PORT_SCHEME_4C
-			if channel_num=0 then
-				io.lineset(SER0_HDFD,HIGH)
-				io.lineset(SER0_RSMD,LOW)
-			end if
-		#endif
-		
-		#if SUPPORTS_422_485_4 and DEVICE_PORT_SCHEME=PORT_SCHEME_4P
+	#if SUPPORTS_422_485_4 and DEVICE_PORT_SCHEME = PORT_SCHEME_4P2		' TPS2 scheme
+		select case param_si(channel_num)
+		case 0:	' NONE
+			set_ser_channel_for_normal_mode = false
+
+		case 1:	' #01 RS232
 			select case channel_num
 			case 0:
+				ser.interface = PL_SER_SI_FULLDUPLEX
+				set_ser_channel_for_normal_mode = true
+				
+			case 1:
+				if param_si(channel_num - 1) = 0 or param_si(channel_num - 1) = 4 then	' Channel 1 is active only for tibbit #01 or #05 installed in Channel 0
+					ser.interface=PL_SER_SI_FULLDUPLEX
+					set_ser_channel_for_normal_mode = true
+				else
+					set_ser_channel_for_normal_mode = false
+				end if
+				
+			case 2:
+				ser.interface = PL_SER_SI_FULLDUPLEX
+				set_ser_channel_for_normal_mode = true
+				
+			case 3:
+				if param_si(channel_num - 1) = 0 or param_si(channel_num - 1) = 4 then	' Channel 3 is active only for tibbit #01 or #05 installed in Channel 2
+					ser.interface=PL_SER_SI_FULLDUPLEX
+					set_ser_channel_for_normal_mode = true
+				else
+					set_ser_channel_for_normal_mode = false
+				end if
+
+			case else:
+				set_ser_channel_for_normal_mode = false
+			
+			end select
+
+		case 2: ' #02 RS232
+			select case channel_num
+			case 0:
+				io.num = SER0_HDFD
+				io.state = HIGH
+				io.enabled = YES
+				io.num = SER0_RSMD
+				io.state = LOW
+				io.enabled = YES
 				io.lineset(SER0_HDFD,HIGH)
 				io.lineset(SER0_RSMD,LOW)
-			case 1:
-				io.lineset(SER1_HDFD,HIGH)
-				io.lineset(SER1_RSMD,LOW)
+				set_ser_channel_for_normal_mode = true
+			
 			case 2:
+				io.num = SER2_HDFD
+				io.state = HIGH
+				io.enabled = YES
+				io.num = SER2_RSMD
+				io.state = LOW
+				io.enabled = YES
 				io.lineset(SER2_HDFD,HIGH)
 				io.lineset(SER2_RSMD,LOW)
+				set_ser_channel_for_normal_mode = true
+				
 			case else:
-				io.lineset(SER3_HDFD,HIGH)
-				io.lineset(SER3_RSMD,LOW)
+				set_ser_channel_for_normal_mode = false
+				
 			end select
-		#endif
-	case 1:
-		ser.interface=PL_SER_SI_HALFDUPLEX
-		#if SUPPORTS_422_485_1 and DEVICE_PORT_SCHEME=PORT_SCHEME_4C
-			if channel_num=0 then
-				io.lineset(SER0_HDFD,LOW)
-				io.lineset(SER0_RSMD,HIGH)
-			end if
-		#endif
-		
-		#if SUPPORTS_422_485_4 and DEVICE_PORT_SCHEME=PORT_SCHEME_4P
+
+		case 3:	' #02 RS485
 			select case channel_num
 			case 0:
+				io.num = SER0_HDFD
+				io.state = HIGH
+				io.enabled = YES
+				io.num = SER0_RSMD
+				io.state = LOW
+				io.enabled = YES
 				io.lineset(SER0_HDFD,LOW)
 				io.lineset(SER0_RSMD,HIGH)
-			case 1:
-				io.lineset(SER1_HDFD,LOW)
-				io.lineset(SER1_RSMD,HIGH)
+				set_ser_channel_for_normal_mode = true
+				
 			case 2:
+				io.num = SER2_HDFD
+				io.state = HIGH
+				io.enabled = YES
+				io.num = SER2_RSMD
+				io.state = LOW
+				io.enabled = YES
 				io.lineset(SER2_HDFD,LOW)
 				io.lineset(SER2_RSMD,HIGH)
+				set_ser_channel_for_normal_mode = true
+				
 			case else:
-				io.lineset(SER3_HDFD,LOW)
-				io.lineset(SER3_RSMD,HIGH)
+				set_ser_channel_for_normal_mode = false
+				
 			end select
-		#endif
-	case else:
-		ser.interface=PL_SER_SI_FULLDUPLEX
-		#if SUPPORTS_422_485_1 and DEVICE_PORT_SCHEME=PORT_SCHEME_4C
-			if channel_num=0 then
-				io.lineset(SER0_HDFD,HIGH)
-				io.lineset(SER0_RSMD,HIGH)
-			end if
-		#endif
 
-		#if SUPPORTS_422_485_4 and DEVICE_PORT_SCHEME=PORT_SCHEME_4P
-			select case channel_num
+		case 4:	' #02 RS422
+				select case channel_num
 			case 0:
+				io.num = SER0_HDFD
+				io.state = HIGH
+				io.enabled = YES
+				io.num = SER0_RSMD
+				io.state = LOW
+				io.enabled = YES
 				io.lineset(SER0_HDFD,HIGH)
 				io.lineset(SER0_RSMD,HIGH)
-			case 1:
-				io.lineset(SER1_HDFD,HIGH)
-				io.lineset(SER1_RSMD,HIGH)
+				set_ser_channel_for_normal_mode = true
+				
 			case 2:
+				io.num = SER2_HDFD
+				io.state = HIGH
+				io.enabled = YES
+				io.num = SER2_RSMD
+				io.state = LOW
+				io.enabled = YES
 				io.lineset(SER2_HDFD,HIGH)
 				io.lineset(SER2_RSMD,HIGH)
+				set_ser_channel_for_normal_mode = true
+				
 			case else:
-				io.lineset(SER3_HDFD,HIGH)
-				io.lineset(SER3_RSMD,HIGH)
+				set_ser_channel_for_normal_mode = false
+				
 			end select
-		#endif
-	end select
 
-	ser.flowcontrol=val(stg_get("FC",channel_num))
-	baudrate_set(val(stg_get("BR",channel_num)))
-	ser.parity=val(stg_get("PR",channel_num))
-	ser.bits=val(stg_get("BB",channel_num))
-	ser.interchardelay=val(stg_get("MD",channel_num))
-	ser.esctype = PL_SER_ET_DISABLED
+		case 5:	' #05 RS485
+			select case channel_num
+			case 0:
+				ser.interface = PL_SER_SI_HALFDUPLEX
+				set_ser_channel_for_normal_mode = true
+				
+			case 1:
+				if param_si(channel_num - 1) = 0 or param_si(channel_num - 1) = 4 then	' Channel 1 is active only for tibbit #01 or #05 installed in Channel 0
+					ser.interface = PL_SER_SI_HALFDUPLEX
+					set_ser_channel_for_normal_mode = true
+				else
+					set_ser_channel_for_normal_mode = false
+				end if
+				
+			case 2:
+				ser.interface = PL_SER_SI_HALFDUPLEX
+				set_ser_channel_for_normal_mode = true
+				
+			case 3:
+				if param_si(channel_num - 1) = 0 or param_si(channel_num - 1) = 4 then	' Channel 3 is active only for tibbit #01 or #05 installed in Channel 2
+					ser.interface = PL_SER_SI_HALFDUPLEX
+					set_ser_channel_for_normal_mode = true
+				else
+					set_ser_channel_for_normal_mode = false
+				end if
+
+			case else:
+				set_ser_channel_for_normal_mode = false
+				
+			end select
+		
+		case else:
+			set_ser_channel_for_normal_mode = false
+			
+		end select
+
+	#else 
+		select case param_si(channel_num)
+		case 0:	' RS232
+			ser.interface=PL_SER_SI_FULLDUPLEX
+			#if SUPPORTS_422_485_1 and DEVICE_PORT_SCHEME=PORT_SCHEME_4C
+				if channel_num=0 then
+					io.lineset(SER0_HDFD,HIGH)
+					io.lineset(SER0_RSMD,LOW)
+				end if
+			#endif
+			
+			#if SUPPORTS_422_485_4 and DEVICE_PORT_SCHEME=PORT_SCHEME_4P
+				select case channel_num
+				case 0:
+					io.lineset(SER0_HDFD,HIGH)
+					io.lineset(SER0_RSMD,LOW)
+				case 1:
+					io.lineset(SER1_HDFD,HIGH)
+					io.lineset(SER1_RSMD,LOW)
+				case 2:
+					io.lineset(SER2_HDFD,HIGH)
+					io.lineset(SER2_RSMD,LOW)
+				case else:
+					io.lineset(SER3_HDFD,HIGH)
+					io.lineset(SER3_RSMD,LOW)
+				end select
+			#endif
+		case 1:	' RS485
+			ser.interface=PL_SER_SI_HALFDUPLEX
+			#if SUPPORTS_422_485_1 and DEVICE_PORT_SCHEME=PORT_SCHEME_4C
+				if channel_num=0 then
+					io.lineset(SER0_HDFD,LOW)
+					io.lineset(SER0_RSMD,HIGH)
+				end if
+			#endif
+			
+			#if SUPPORTS_422_485_4 and DEVICE_PORT_SCHEME=PORT_SCHEME_4P
+				select case channel_num
+				case 0:
+					io.lineset(SER0_HDFD,LOW)
+					io.lineset(SER0_RSMD,HIGH)
+				case 1:
+					io.lineset(SER1_HDFD,LOW)
+					io.lineset(SER1_RSMD,HIGH)
+				case 2:
+					io.lineset(SER2_HDFD,LOW)
+					io.lineset(SER2_RSMD,HIGH)
+				case else:
+					io.lineset(SER3_HDFD,LOW)
+					io.lineset(SER3_RSMD,HIGH)
+				end select
+			#endif
+		case else:	' RS422
+			ser.interface=PL_SER_SI_FULLDUPLEX
+			#if SUPPORTS_422_485_1 and DEVICE_PORT_SCHEME=PORT_SCHEME_4C
+				if channel_num=0 then
+					io.lineset(SER0_HDFD,HIGH)
+					io.lineset(SER0_RSMD,HIGH)
+				end if
+			#endif
+
+			#if SUPPORTS_422_485_4 and DEVICE_PORT_SCHEME=PORT_SCHEME_4P
+				select case channel_num
+				case 0:
+					io.lineset(SER0_HDFD,HIGH)
+					io.lineset(SER0_RSMD,HIGH)
+				case 1:
+					io.lineset(SER1_HDFD,HIGH)
+					io.lineset(SER1_RSMD,HIGH)
+				case 2:
+					io.lineset(SER2_HDFD,HIGH)
+					io.lineset(SER2_RSMD,HIGH)
+				case else:
+					io.lineset(SER3_HDFD,HIGH)
+					io.lineset(SER3_RSMD,HIGH)
+				end select
+			#endif
+		end select
+		
+		set_ser_channel_for_normal_mode = true
 	
-end sub
+	#endif
 
-'--------------------------------------------------------------------
+	if set_ser_channel_for_normal_mode = true then
+
+		ser.flowcontrol=val(stg_get("FC",channel_num))
+		baudrate_set(val(stg_get("BR",channel_num)))
+		ser.parity=val(stg_get("PR",channel_num))
+		ser.bits=val(stg_get("BB",channel_num))
+		ser.interchardelay=val(stg_get("MD",channel_num))
+		ser.esctype = PL_SER_ET_DISABLED
+
+	end if
+	
+end function
+
 public sub set_comm_channel_buffers(channel_num as byte, num_buffers as byte, ser_port_in_prog_mode as no_yes)
 
 	dim x,y as byte
 	dim use_inband as no_yes
 
-'	sock.num=sock_comm(channel_num)
-	ser.num=channel_num
-
-	'first deallocate all buffers
-'	sock.rxbuffrq(0)
-'	sock.txbuffrq(0)
-'	sock.tx2buffrq(0)
-'	sock.cmdbuffrq(0)
-'	sock.rplbuffrq(0)
 	ser.rxbuffrq(0)
 	ser.txbuffrq(0)
 	sys.buffalloc
@@ -719,13 +774,6 @@ public sub set_comm_channel_buffers(channel_num as byte, num_buffers as byte, se
 		exit sub
 	end if
 
-	'decide if we will be using inband
-'	if sock.protocol=PL_SOCK_PROTOCOL_TCP and sock.inbandcommands=YES then
-'		use_inband=YES
-'	else
-'		use_inband=NO
-'	end if
-
 	x = num_buffers / 2
 	y = num_buffers - x
 	ser.txbuffrq(x)
@@ -733,126 +781,6 @@ public sub set_comm_channel_buffers(channel_num as byte, num_buffers as byte, se
 	sys.buffalloc
 end sub
 
-'--------------------------------------------------------------------
-'public sub decide_on_ser_enabled(channel_num as byte)
-'	dim new_state as no_yes
-
-'	ser.num=channel_num
-''	sock.num=sock_comm(channel_num)
-
-'	if port_in_use(channel_num)=NO then
-'			new_state=NO 'port is not in use
-'	else
-'		if login_mode=CMD_MODE_SERIAL then
-'			new_state=YES 'port is always opened in the serial programming mode
-'		else
-'			if sock.statesimple=PL_SSTS_EST then
-'				new_state=YES 'port is always opened when connection is establised
-'			else
-'				if param_rm(channel_num)=RM_SERVER then
-'					new_state=NO 'server rounting mode --> port is closed
-'				else
-'					'server/client, client rounting modes --> need to see connection mode
-'					if param_cm(channel_num)=CM_DATA_COMMAND then
-'						new_state=YES 'we will be waiting for the data to come into the serial port
-'					else
-'						new_state=NO
-'					end if
-'				end if
-'			end if
-'		end if
-'	end if
-
-'	'change serial port state?
-'	if new_state=NO then
-'		'we are closing the port
-'		if port_in_use(channel_num)=YES and (ser.esctype=PL_SER_ET_TYPE1 or ser.esctype=PL_SER_ET_TYPE2) then
-'			'we must keep the port running but disable RXing
-'			if ser.enabled=NO then ser.enabled=YES
-'			if ser.sinkdata=NO then ser.sinkdata=YES
-'		else
-		
-'			'we can disable the port
-'			if ser.enabled=YES then ser.enabled=NO
-'		end if
-'	else
-'		if port_in_use(channel_num)=YES then
-'			if ser.enabled=NO then ser.enabled=YES
-'			if ser.sinkdata=YES then ser.sinkdata=NO
-'		end if
-'	end if	
-'end sub
-
-'--------------------------------------------------------------------
-'public sub set_sock_connmode(channel_num as byte)
-''sets sock.inconmode and sock.reconmode from param_rm, param_sf, sock.protocol
-	
-'	sock.num=sock_comm(channel_num)
-'	if param_rm(channel_num)=RM_CLIENT then
-'		sock.inconmode=PL_SOCK_INCONMODE_NONE
-'	else
-'		if param_sf(channel_num)=NO then
-'			sock.inconmode=PL_SOCK_INCONMODE_ANY_IP_ANY_PORT
-'			if sock.protocol=PL_SOCK_PROTOCOL_UDP then
-'				if param_rm(channel_num)=RM_SERVER then
-'					sock.reconmode=PL_SOCK_RECONMODE_3
-'				else
-'					sock.reconmode=PL_SOCK_RECONMODE_1
-'				end if
-'			else
-'				sock.reconmode=PL_SOCK_RECONMODE_2
-'			end if
-'		else
-'			sock.inconmode=PL_SOCK_INCONMODE_SPECIFIC_IP_ANY_PORT
-
-'			if sock.protocol=PL_SOCK_PROTOCOL_UDP then
-'				if param_rm(channel_num)=RM_SERVER then
-'					sock.reconmode=PL_SOCK_RECONMODE_2
-'				else
-'					sock.reconmode=PL_SOCK_RECONMODE_0
-'				end if
-'			else
-'				sock.reconmode=PL_SOCK_RECONMODE_2
-'			end if
-'		end if
-'	end if
-'end sub
-
-'--------------------------------------------------------------------
-'public sub decide_on_sock_connect(channel_num as byte)
-
-'	ser.num=channel_num
-'	sock.num=sock_comm(channel_num)
-
-'	if port_in_use(channel_num)=YES then
-'		if param_rm(channel_num)=RM_SERVER_CLIENT or param_rm(channel_num)=RM_CLIENT then
-'			if param_cm(channel_num)=CM_IMMEDIATELY or sock.txlen>0 then
-'				if interface_ready(current_interface)<>NO then
-'					select case current_interface
-'					case PL_SOCK_INTERFACE_NET:
-'						if ip_configured(PL_SOCK_INTERFACE_NET)=NO then
-'							exit sub
-'						end if
-					
-'				#if WLN_AVAILABLE	
-'					case PL_SOCK_INTERFACE_WLN:
-'						if ip_configured(PL_SOCK_INTERFACE_WLN)=NO then
-'							exit sub
-'						end if
-'				#endif	
-					
-'					case PL_SOCK_INTERFACE_PPP:
-'					end select
-					
-'					sock.targetinterface=current_interface
-'					sock.connect
-'				end if
-'			end if
-'		end if
-'	end if
-'end sub
-
-'--------------------------------------------------------------------
 public function login(new_login as cmd_modes, cmd_data as string(32), sock as byte) as ok_ng
 'looks at the current login attempt, checks it against current situation, makes decision to allow/reject
 
@@ -886,7 +814,6 @@ lb1:		'restart timeout timer
 	login=NG
 end function
 
-'--------------------------------------------------------------------
 public function compare_logins(new_login as cmd_modes, cmd_data as string(32), sock as byte) as login_comparison_codes
 'compares "proposed" new_login attempt against current, reports things
 'does not perform actual login
@@ -913,7 +840,7 @@ public function compare_logins(new_login as cmd_modes, cmd_data as string(32), s
 	end if
 end function
 
-'--------------------------------------------------------------------
+
 public sub add_serial_channel_to_login_data(channel_num as byte)
 
 	if instr(1,login_data,str(channel_num),1)=0 then
@@ -921,7 +848,7 @@ public sub add_serial_channel_to_login_data(channel_num as byte)
 	end if
 end sub
 
-'--------------------------------------------------------------------
+
 public sub remove_serial_channel_from_login_data(channel_num as byte)
 	dim x as byte
 
@@ -932,7 +859,7 @@ public sub remove_serial_channel_from_login_data(channel_num as byte)
 	if login_data="S" then login_data=""
 end sub
 
-'--------------------------------------------------------------------
+
 public function check_if_serial_channel_is_in_login_state(channel_num as byte) as no_yes
 	if login_mode=CMD_MODE_SERIAL and instr(1,login_data,str(channel_num),1)<>0 then
 		check_if_serial_channel_is_in_login_state=YES
@@ -941,14 +868,14 @@ public function check_if_serial_channel_is_in_login_state(channel_num as byte) a
 	end if
 end function
 
-'--------------------------------------------------------------------
+
 public sub logout()
 	login_tout=0
 	login_mode=CMD_MODE_NONE
 	login_data=""
 end sub
 
-'--------------------------------------------------------------------
+
 public sub reset_login_timeout
 	select case login_mode
 	case CMD_MODE_INBAND:
@@ -964,7 +891,7 @@ public sub reset_login_timeout
 	end select
 end sub
 
-'--------------------------------------------------------------------
+
 public function init_settings_of_one_channel(channel_num as byte) as ok_ng
 
 	dim f,num_members as byte
@@ -996,7 +923,7 @@ next_setting:
 	goto next_setting
 end function
 
-'--------------------------------------------------------------------
+
 #if SIGNAL_STRENGTH_INDICATION=1
 sub signal_strength_indication_init()
 	dim f as byte
@@ -1045,7 +972,7 @@ sub signal_strength_indication_init()
 end sub
 #endif	
 
-'--------------------------------------------------------------------
+
 #if SIGNAL_STRENGTH_INDICATION=1
 sub signal_strength_set(strength as byte)
 'Bits 0-5 of strength argument correspond to LEDs	
@@ -1103,7 +1030,7 @@ sub signal_strength_set(strength as byte)
 end sub
 #endif	
 
-'--------------------------------------------------------------------
+
 public function proc_device_op(s as string(1)) as string(1)
 	select case s
 	case "I":
@@ -1136,24 +1063,24 @@ reply_null:
 
 end function
 
-'--------------------------------------------------------------------
+
 public sub device_setting_set(sname as string(STG_MAX_SETTING_NAME_LEN), index as byte, s as string)
 	'********** ADDITIONAL CODE MAY BE NEEDED **********
 end sub
 
-'--------------------------------------------------------------------
+
 public function device_setting_check(byref setting_name as string,byref setting_val as string) as ok_ng
 	'********** ADDITIONAL CODE MAY BE NEEDED **********
 	device_setting_check = OK
 end function 
 
-'--------------------------------------------------------------------
+
 public function device_spec_arg_sg(byref setting_name as string, byref setting_val as string, byref stg_num as byte, rw as en_stg_rdwr) as en_stg_status_codes
 	'********** ADDITIONAL CODE MAY BE NEEDED **********
 	device_spec_arg_sg = EN_STG_STATUS_OK
 end function
 
-'--------------------------------------------------------------------
+
 function baudrate_set(br_mode as br_modes) as ok_ng
 'Set the UART according to the supplied baudrate "number"
 
@@ -1194,7 +1121,7 @@ select case br_mode
 	baudrate_set=OK
 end function
 
-'--------------------------------------------------------------------
+
 function baudrate_get() as br_modes
 	dim i as word
 	
@@ -1238,7 +1165,7 @@ function baudrate_get() as br_modes
 	
 end function
 
-'--------------------------------------------------------------------
+
 function validate_ip(byref ip as string) as string
 	dim x as byte
 	
@@ -1259,7 +1186,7 @@ function validate_ip(byref ip as string) as string
 	validate_ip=ddstr(validate_ip)
 end function
 
-'--------------------------------------------------------------------
+
 function get_x_flags_network(interface as pl_sock_interfaces) as string(10)
 	dim sock_num_bup as byte
 	dim f as byte
@@ -1348,7 +1275,6 @@ leave:
 end function
 #endif
 
-'------------------------------------------------------------------------------
 #if DEV_DEBUG_PRINT
 sub dev_debugprint(byref print_data as string)
 	sys.debugprint(DEV_STAMP+print_data+DEV_CR_LF)

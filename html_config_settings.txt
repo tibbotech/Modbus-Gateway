@@ -11,25 +11,26 @@ bit9	have 3 serial ports
 bit10	have 4 serial ports
 bit11	serial port 1 supports 232, 485, 422 so multi-channel configuration is only enabled for 232 (this bit works together with bit 1)
 bit12	serial port 1 doesn't support 232, 485, 422 so multi-channel configuration is always enabled (this bit works together with bit 1)
+bit13   TPS2
 
+bits32109876543210
 
-bits2109876543210
-
->>&b0000000000000	PW	Login Password					S,I,6	^
->>&b0000000000000	ON	Owner Name						S,I,8	^
->>&b0000000000000	DN	Device Name 					S,I,8	^
->>&b0000000000000	DH	DHCP							B,L,0-Disabled;1-Enabled;	^
->>&b0000000000000	IP	IP-address 						S,I,15	^
->>&b0000000000000	GI	Gateway IP-address 				S,I,15	^
->>&b0000000000000	NM	Subnet Mask						S,I,15	^
->>&b0000000000000	RJ0	TCP Port 1						S,I,5	^
->>&b0000000000000	RJ1	TCP Port 2						S,I,5	^
->>&b0000000000000	RJ2	TCP Port 3						S,I,5	^
->>&b0000000000000	RJ3	TCP Port 4						S,I,5	^
->>&b0000100000001	PC	Number of Serial Ports in Use	B,L,0-One port;1-Two ports;	^
->>&b0001000000001	PC	Number of Serial Ports in Use	B,L,0-One port;1-Two ports;2-Three ports;	^
->>&b0010000000001	PC	Number of Serial Ports in Use	B,L,0-One port;1-Two ports;2-Three ports;3-Four ports;	^
->>&b0100000000010	SI	Serial Interface 				B,L,0-Full-duplex (RS232);1-Half-duplex (RS485);2-Full-duplex (RS422);	^
->>&b0100000000010	PC	Serial Port Configuration-A		B,L,0-Option 0;1-Option 1;2-Option 2;3-Option 3;4-Option 4;5-Option 5;6-Option 6;7-Option 7;8-Option 8;9-Option 9;10-Option 10;11-Option 11;12-Option 12;13-Option 13;14-Option 14;	^
->>&b1000000000010	PC	Serial Port Configuration-B		B,L,0-Option 0;1-Option 1;2-Option 2;3-Option 3;4-Option 4;5-Option 5;6-Option 6;7-Option 7;8-Option 8;9-Option 9;10-Option 10;11-Option 11;12-Option 12;13-Option 13;14-Option 14;	^
->>&b0000000000100	PS	Power on Pin 9					B,L,0-Off;1-On;	^
+>>&b00000000000000	PW	Login Password					S,I,6	^
+>>&b00000000000000	ON	Owner Name						S,I,8	^
+>>&b00000000000000	DN	Device Name 					S,I,8	^+
+>>&b00000000000000	DH	DHCP							B,L,0-Disabled;1-Enabled;	^
+>>&b00000000000000	IP	IP-address 						S,I,15	^
+>>&b00000000000000	GI	Gateway IP-address 				S,I,15	^
+>>&b00000000000000	NM	Subnet Mask						S,I,15	^
+>>&b00000000000000	RJ0	TCP Port 1						S,I,5	^
+>>&b00000000000000	RJ1	TCP Port 2						S,I,5	^
+>>&b00000000000000	RJ2	TCP Port 3						S,I,5	^
+>>&b00000000000000	RJ3	TCP Port 4						S,I,5	^
+>>&b00000000000000	RN	Modbus TCP Exception			B,L,0-Disabled;1-Enabled;	^
+>>&b00000100000001	PC	Number of Serial Ports in Use	B,L,0-One port;1-Two ports;	^
+>>&b00001000000001	PC	Number of Serial Ports in Use	B,L,0-One port;1-Two ports;2-Three ports;	^
+>>&b00010000000001	PC	Number of Serial Ports in Use	B,L,0-One port;1-Two ports;2-Three ports;3-Four ports;	^
+>>&b00100000000010	SI	Serial Interface 				B,L,0-Full-duplex (RS232);1-Half-duplex (RS485);2-Full-duplex (RS422);	^
+>>&b00100000000010	PC	Serial Port Configuration-A		B,L,0-Option 0;1-Option 1;2-Option 2;3-Option 3;4-Option 4;5-Option 5;6-Option 6;7-Option 7;8-Option 8;9-Option 9;10-Option 10;11-Option 11;12-Option 12;13-Option 13;14-Option 14;	^
+>>&b01000000000010	PC	Serial Port Configuration-B		B,L,0-Option 0;1-Option 1;2-Option 2;3-Option 3;4-Option 4;5-Option 5;6-Option 6;7-Option 7;8-Option 8;9-Option 9;10-Option 10;11-Option 11;12-Option 12;13-Option 13;14-Option 14;	^
+>>&b00000000000100	PS	Power on Pin 9					B,L,0-Off;1-On;	^

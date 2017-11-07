@@ -46,33 +46,21 @@ end sub
 #if SIMULATE_ETHER_OFF_BY_BUTTON=0
 sub on_button_released()
 
-	if display_installed=NO then
-		'no display -- pressing the button gets us into the ser prog mode directly
+	#if SUPPORTS_DISPLAY
+		'display -- pressing the button rotates through pages
+		user_uses_button=YES
 		if login_mode<>CMD_MODE_SERIAL then
-				login(CMD_MODE_SERIAL,"S",0)
-				enter_ser_prog_mode(0)
+			#if SUPPORTS_DISPLAY
+				lcd_display_page(LCD_ADVANCE_PAGE,LCD_PRINT_MODE_AGGRESSIVE,LCD_PRINT_ELEMENT_ALL)
+			#endif
+		else
+			lcd_display_on()
 		end if
-	else
-		#if SUPPORTS_DISPLAY
-			'display -- pressing the button rotates through pages
-			user_uses_button=YES
-			if login_mode<>CMD_MODE_SERIAL then
-				#if SUPPORTS_DISPLAY
-					lcd_display_page(LCD_ADVANCE_PAGE,LCD_PRINT_MODE_AGGRESSIVE,LCD_PRINT_ELEMENT_ALL)
-				#endif
-			else
-				lcd_display_on()
-			end if
-		#endif
-	end if
+	#endif
 end sub
 #endif
 
 sub on_button_pressed()
-'	if display_installed=NO and login_mode<>CMD_MODE_SERIAL then
-'		login(CMD_MODE_SERIAL,"S",0)
-'		enter_ser_prog_mode(0)
-'	end if
 end sub
 
 '--------------------------------------------------------------------
@@ -462,6 +450,13 @@ public sub on_sock_data_arrival
 		wend
 	end if
 
+	' SNMP
+	if snmp_enable = true then
+		if sock.num = sock_snmp then
+			snmp_receive(sock.getdata(255))
+		end if
+	end if
+
 	' MODBUS
 	for f = 0 to modbus_socks_number - 1
 		if sock.num = modbus_socks(f) then
@@ -490,9 +485,11 @@ public sub on_ser_data_arrival
 	dim data as string
 
 	#if SUPPORTS_GPRS
-		if ser.num=GPRS_SER_PORT then
-			gprs_proc_ser_data()
-			exit sub
+		if param_ge <> GE_DISABLED then
+			if ser.num=GPRS_SER_PORT then
+				gprs_proc_ser_data()
+				exit sub
+			end if
 		end if
 	#endif
 
@@ -531,6 +528,20 @@ sub on_sock_event(newstate as pl_sock_state, newstatesimple as pl_sock_state_sim
 				modbus_tcp_established = true
 			end if	
 		next f
+		
+		for i = 0 to MODBUS_SLAVE_SOCKET_NUMBERS - 1
+			if ModBusTCPSocketsOperation(i).Socket = sock.num then
+				ModBusTCPSocketsOperation(i).Connected = MODBUS_SLAVE_TCP_CONNECTED
+				#if DEV_DEBUG_PRINT
+					dev_debugprint("ModBus. Connected" + str(ModBusTCPSocketsOperation(i).Socket))
+				#endif
+			end if
+		next f
+		
+		if sock.num = sock_telnet then
+			sock.txclear()
+			modbus_monitor = false
+		end if
 
 	case PL_SSTS_PC, PL_SSTS_AC:
 		for f = 0 to modbus_socks_number - 1
@@ -541,6 +552,10 @@ sub on_sock_event(newstate as pl_sock_state, newstatesimple as pl_sock_state_sim
 		next f
 
 	case PL_SSTS_CLOSED:
+		if sock.num = sock_telnet then
+			modbus_monitor = false
+		end if
+		
 		for f = 0 to modbus_socks_number - 1
 			if sock.num = modbus_socks(f) then
 				modbus_tcp_est_counter = modbus_tcp_est_counter - 1
@@ -552,11 +567,13 @@ sub on_sock_event(newstate as pl_sock_state, newstatesimple as pl_sock_state_sim
 
 		for i = 0 to MODBUS_SLAVE_SOCKET_NUMBERS - 1
 			if ModBusTCPSocketsOperation(i).Socket = sock.num then
-				if ModBusTCPSocketsOperation(i).Connected = true then
-					ModBusTCPSocketsOperation(i).Connected = false
-				end if
-			end if
+				ModBusTCPSocketsOperation(i).Connected = MODBUS_SLAVE_TCP_DISCONNECT
+				#if DEV_DEBUG_PRINT
+					dev_debugprint("ModBus. Disconnect" + str(ModBusTCPSocketsOperation(i).Socket))
+				#endif
+	end if
 		next f
+		
 	case else:
 		'force LED pattern change for comm channel 0 (unless we are in serprog mode)
 		if login_mode<>CMD_MODE_SERIAL then
@@ -591,9 +608,6 @@ end sub
 
 ''--------------------------------------------------------------------
 sub on_ser_esc()
-
-	login(CMD_MODE_SERIAL,"S",0)
-	enter_ser_prog_mode(ser.num)
 end sub
 
 '--------------------------------------------------------------------

@@ -182,13 +182,8 @@ declare function device_setting_check(byref setting_name as string,byref setting
 declare function device_spec_arg_sg(byref setting_name as string, byref setting_val as string, byref stg_num as byte, rw as en_stg_rdwr) as en_stg_status_codes
 declare function baudrate_set(br_mode as br_modes) as ok_ng
 declare function baudrate_get() as br_modes
-declare sub set_ser_channel_for_prog_mode(channel_num as byte)
-declare sub set_ser_channel_for_normal_mode(channel_num as byte)
-declare sub enter_ser_prog_mode(channel_num as byte)
-declare sub exit_ser_prog_mode(channel_num as byte)
+declare function set_ser_channel_for_normal_mode(channel_num as byte) as boolean
 declare sub set_sock_connmode(channel_num as byte)
-'declare sub decide_on_ser_enabled(channel_num as byte)
-declare sub decide_on_sock_connect(channel_num as byte)
 declare function get_x_flags_network(interface as pl_sock_interfaces) as string(10)
 declare function login(new_login as cmd_modes, cmd_data as string(32), sock as byte) as ok_ng
 declare sub logout()

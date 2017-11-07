@@ -34,8 +34,9 @@
 >>RJ	E	W	4	0	65535	A	502/0/0/0	TCP Ports
 >>RK	E	D	4	4	4	A	0.0.0.0/0.0.0.0/0.0.0.0/0.0.0.0	IP for Slave TCP MODBUS devices
 >>RL	E	W	4	0	65535	A	502/502/502/502	Ports for Slave TCP MODBUS devices
+>>RN	E	B	1	0	1	A	0	Modbus TCP exeption enable
 #define STG_DESCRIPTOR_FILE "settings_1p.xtxt"
-#define STG_MAX_NUM_SETTINGS 36
+#define STG_MAX_NUM_SETTINGS 37
 #define STG_RAM_ARRAY_SIZE 0
 #define STG_MAX_SETTING_NAME_LEN 2
 #define STG_MAX_SETTING_VALUE_LEN 26

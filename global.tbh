@@ -1,7 +1,7 @@
 'SUPPORTED PLATFORMS & RELATED CAPABILITIES--------------------------
 
 #define DHCP_DEBUG_PRINT 0
-#define DEV_DEBUG_PRINT 0
+#define DEV_DEBUG_PRINT 1
 
 #define SIMULATE_ETHER_OFF_BY_BUTTON 0 'set to 1 to use button for simulating unplugged Ethernet cable
 
@@ -9,6 +9,7 @@
 #define PORT_SCHEME_4P 0	'four independent serial ports
 #define PORT_SCHEME_4C 1	'four serial channels
 #define PORT_SCHEME_1P 2	'one serial port
+#define PORT_SCHEME_4P2 3	'four narrow independent serial ports in TPS2
 
 #if PLATFORM_ID=DS1202
 	#define SUPPORTS_422_485_4 0
@@ -207,6 +208,18 @@
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
 	#define WLN_WPA 1
 	#define SUPPORTS_DISPLAY 0
+#elif PLATFORM_ID=TPP2WG2
+	#define SUPPORTS_422_485_4 1
+	#define SUPPORTS_422_485_1 0
+	#define SUPPORTS_OVER_115200 1
+	#define PER_CHANNEL_STATUS_INDICATION 0
+	#define SIGNAL_STRENGTH_INDICATION 1
+	#define DEVICE_PORT_SCHEME PORT_SCHEME_4P2
+	#define POWER_ON_PIN9 0
+	#define SUPPORTS_GPRS 1
+	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
+	#define WLN_WPA 1
+	#define SUPPORTS_DISPLAY 0
 #else
 	  XXXX 'intentional garbage: currently selected platform is not supported!
 #endif
@@ -229,10 +242,18 @@
 		const SER3_RSMD=PL_IO_NUM_39
 #endif
 
+#if SUPPORTS_422_485_4 and DEVICE_PORT_SCHEME=PORT_SCHEME_4P2		' TPS2G2
+		'selection of serial port modes (232/422/485)
+		const SER0_HDFD=PL_IO_NUM_11_TX1	'HIGH for full-duplex, LOW for half-duplex
+		const SER0_RSMD=PL_IO_NUM_10_RX1	'HIGH for RS422/485, LOW for RS232
+		const SER2_HDFD=PL_IO_NUM_15_TX3
+		const SER2_RSMD=PL_IO_NUM_14_RX3
+#endif
+
 const MAX_NUM_SERIAL_PORTS=4 'do not change this, array declarations are made with this
 
 
-#if DEVICE_PORT_SCHEME=PORT_SCHEME_4P or DEVICE_PORT_SCHEME=PORT_SCHEME_4C
+#if DEVICE_PORT_SCHEME=PORT_SCHEME_4P or DEVICE_PORT_SCHEME=PORT_SCHEME_4C or DEVICE_PORT_SCHEME=PORT_SCHEME_4P2
 	#define DSMAN_MAX_NUM_LINES 121
 	const NUM_SERIAL_PORTS=4						'(must not exceed MAX_NUM_SERIAL_PORTS)  +++ ULYSSES +++
 	#define DSMAN_DESCRIPTOR_FILE "dsman_4p_4c.txt"
@@ -287,6 +308,11 @@ const MAX_NUM_SERIAL_PORTS=4 'do not change this, array declarations are made wi
 		#define GPRS_POWER PL_IO_NUM_39
 		#define GPRS_SER_PORT 3
 		#define GPRS_DEBUG_PRINT 1
+	#elif PLATFORM_ID=TPP2WG2
+		#define GPRS_RESET PL_IO_NUM_3
+		#define GPRS_POWER PL_IO_NUM_14_RX3
+		#define GPRS_SER_PORT 2
+		#define GPRS_DEBUG_PRINT 1
 	#endif
 #else
 	#define GPRS_SWITCH PL_IO_NULL
@@ -294,28 +320,20 @@ const MAX_NUM_SERIAL_PORTS=4 'do not change this, array declarations are made wi
 #endif
 
 
-#if DEVICE_PORT_SCHEME=PORT_SCHEME_4P
+#if DEVICE_PORT_SCHEME=PORT_SCHEME_4P or DEVICE_PORT_SCHEME=PORT_SCHEME_4P2
 	const BASE_OF_INT_LINES=PL_IO_NUM_16_INT0
 	
 	const SER0_CTS_INT=PL_INT_NUM_0		'must be from pl_int_num range (NOT pl_io_num)
 	const SER0_RTS=PL_IO_NUM_0			'must be from pl_io_num range
-	const SER0_DSR=PL_IO_NUM_20_INT4	'must be from pl_io_num range
-	const SER0_DTR=PL_IO_NUM_4			'must be from pl_io_num range
 		
 	const SER1_CTS_INT=PL_INT_NUM_1		'must be from pl_int_num range (NOT pl_io_num)
 	const SER1_RTS=PL_IO_NUM_1			'must be from pl_io_num range
-	const SER1_DSR=PL_IO_NUM_21_INT5	'must be from pl_io_num range
-	const SER1_DTR=PL_IO_NUM_5			'must be from pl_io_num range
 
 	const SER2_CTS_INT=PL_INT_NUM_2		'must be from pl_int_num range (NOT pl_io_num)
 	const SER2_RTS=PL_IO_NUM_2			'must be from pl_io_num range
-	const SER2_DSR=PL_IO_NUM_22_INT6	'must be from pl_io_num range
-	const SER2_DTR=PL_IO_NUM_6			'must be from pl_io_num range
 
 	const SER3_CTS_INT=PL_INT_NUM_3		'must be from pl_int_num range (NOT pl_io_num)
 	const SER3_RTS=PL_IO_NUM_3			'must be from pl_io_num range
-	const SER3_DSR=PL_IO_NUM_23_INT7	'must be from pl_io_num range
-	const SER3_DTR=PL_IO_NUM_7			'must be from pl_io_num range
 
 #elif DEVICE_PORT_SCHEME=PORT_SCHEME_4C
 	enum MAPPING
@@ -401,7 +419,7 @@ const MAX_NUM_SERIAL_PORTS=4 'do not change this, array declarations are made wi
 
 'INCLUDES------------------------------------------------------------
 
-#if DEVICE_PORT_SCHEME=PORT_SCHEME_4P or DEVICE_PORT_SCHEME=PORT_SCHEME_4C
+#if DEVICE_PORT_SCHEME=PORT_SCHEME_4P or DEVICE_PORT_SCHEME=PORT_SCHEME_4C or DEVICE_PORT_SCHEME=PORT_SCHEME_4P2
 	includepp "settings_4p_4c.xtxt"
 #else
 	includepp "settings_1p.xtxt"
@@ -420,6 +438,9 @@ include "error.tbh"
 include "html_common.tbh"
 include "dsman.tbh"
 include "lcd.tbh"
+
+' SNMP
+include "snmp.tbh"
 
 ' MODBUS
 include "modbus.tbh"
@@ -471,4 +492,3 @@ declare sub dev_debugprint(byref print_data as string)
 declare sub enable_comm_channels(pages_to_distribute as byte)
 declare sub set_comm_channel_buffers(channel_num as byte, num_buffers as byte, ser_port_in_prog_mode as no_yes) '<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-

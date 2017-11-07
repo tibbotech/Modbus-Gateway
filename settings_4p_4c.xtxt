@@ -7,7 +7,7 @@
 >>PW	E	S	1	0	6	A	^
 >>CT	E	B	4	0	99	A	5
 >>ND	E	B	4	0	1	A	0
->>SI	E	B	4	0	2	A	0
+>>SI	E	B	4	0	4	A	0/0/0/0
 >>FC	E	B	4	0	2	A	0
 >>DT	E	B	4	0	1	A	0
 >>DS	E	B	4	0	1	A	0
@@ -40,8 +40,10 @@
 >>RJ	E	W	4	0	65535	A	502/0/0/0	TCP Ports
 >>RK	E	D	4	4	4	A	0.0.0.0/0.0.0.0/0.0.0.0/0.0.0.0	IP for Slave TCP MODBUS devices
 >>RL	E	W	4	0	65535	A	502/502/502/502	Ports for Slave TCP MODBUS devices
+>>RN	E	B	1	0	1	A	0	Modbus TCP exeption enable
+>>SN	E	B	1	0	1	A	0	SNMP Enable
 #define STG_DESCRIPTOR_FILE "settings_4p_4c.xtxt"
-#define STG_MAX_NUM_SETTINGS 42
+#define STG_MAX_NUM_SETTINGS 44
 #define STG_RAM_ARRAY_SIZE 0
 #define STG_MAX_SETTING_NAME_LEN 2
 #define STG_MAX_SETTING_VALUE_LEN 32

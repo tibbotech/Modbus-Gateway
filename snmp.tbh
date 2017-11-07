@@ -1,0 +1,24 @@
+
+enum SNMP_BER_TYPES
+
+	SNMP_INTEGER = &h02,
+	SNMP_OCTET_STRING = &h04,
+	SNMP_NULL = &h05,
+	SNMP_OBJECT_ID = &h06,
+	SNMP_SEQUENCE = &h30,
+	SNMP_GET_REQUEST_PDU = &hA0,
+	SNMP_GET_RESPONCE_PDU = &hA2,
+	SNMP_SET_REQUEST_PDU = &hA3
+
+end enum
+
+declare snmp_enable as boolean
+declare sock_snmp as byte
+
+declare function snmp_initialize() as boolean
+declare sub snmp_receive(byref data as string)
+
+declare function snmp_get_integer(byref data as string, pos as byte, byref length as byte, byref value as dword, lengthPacket as byte) as boolean
+declare function snmp_get_string(byref data as string, pos as byte, byref length as byte, byref value as string, lengthPacket as byte) as boolean
+declare function snmp_get_command(byref data as string, pos as byte, byref value as byte, lengthPacket as byte) as boolean
+declare function snmp_get_command_sequence(byref data as string, pos as byte, lengthPacket as byte) as boolean
