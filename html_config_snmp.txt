@@ -1,0 +1,4 @@
+>>&b00000000000000	SN	SNMP Enable						B,L,0-Disabled;1-Enabled;	^
+>>&b00000000000000	SP	Community Name					S,I,20	^
+>>&b00000000000000	SC	Contact			 				S,I,20	^
+>>&b00000000000000	SL	Location						S,I,20	^

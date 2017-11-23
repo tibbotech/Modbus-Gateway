@@ -451,7 +451,7 @@ public sub on_sock_data_arrival
 	end if
 
 	' SNMP
-	if snmp_enable = true then
+	if snmp_set_enable = true then
 		if sock.num = sock_snmp then
 			snmp_receive(sock.getdata(255))
 		end if
@@ -517,6 +517,7 @@ sub on_sock_event(newstate as pl_sock_state, newstatesimple as pl_sock_state_sim
 		for f = 0 to modbus_socks_number - 1
 			if sock.num = modbus_socks(f) then
 				'modbus_tcp_connecting = true
+				sock.txclear()
 				pat.play(PAT_THREE_SHORT_GREEN, PL_PAT_CANINT)
 			end if	
 		next f
@@ -558,6 +559,8 @@ sub on_sock_event(newstate as pl_sock_state, newstatesimple as pl_sock_state_sim
 		
 		for f = 0 to modbus_socks_number - 1
 			if sock.num = modbus_socks(f) then
+				sock.txclear()
+				sock.rxclear()
 				modbus_tcp_est_counter = modbus_tcp_est_counter - 1
 				if modbus_tcp_est_counter = 0 then
 					modbus_tcp_established = false

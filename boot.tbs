@@ -135,6 +135,7 @@ public sub boot
 	login_data=""
 	login_tout=0
 	quick_init_flag=QI_NULL
+	gprs_connected = NO
 
 	'first assume we have no serial ports
 	for f=0 to NUM_SERIAL_PORTS-1
@@ -185,8 +186,8 @@ public sub boot
 			end if
 			
 		#if DEVICE_PORT_SCHEME = PORT_SCHEME_4P2
-			if x >= 2 and param_ge = GE_DISABLED then
-		#elif
+			if x >= 2 and param_ge = GE_DISABLED then		' For TPS2 - if GPRS enabled then 2 and 3 serial channels must be disabled!
+		#else
 			if x >= 2 then
 		#endif
 				'we have third port
@@ -681,7 +682,20 @@ public sub boot
 	#endif
 	
 	#if SUPPORTS_DISPLAY
-		lcd_display_page(LCD_PAGE_NET,LCD_PRINT_MODE_AGGRESSIVE,LCD_PRINT_ELEMENT_ALL)
+		#if PLATFORM_ID=TPP2WG2 or PLATFORM_ID=TPP2W
+			lcd_display_page(LCD_PAGE_LOGO_WORK, LCD_PRINT_MODE_AGGRESSIVE, LCD_PRINT_ELEMENT_ALL)
+			lcd_display_page(LCD_PAGE_NET, LCD_PRINT_MODE_AGGRESSIVE, LCD_PRINT_ELEMENT_ALL)
+			lcd_display_page(LCD_PAGE_WLN, LCD_PRINT_MODE_AGGRESSIVE, LCD_PRINT_ELEMENT_ALL)
+			#if SUPPORTS_GPRS
+				lcd_display_page(LCD_PAGE_GPRS, LCD_PRINT_MODE_AGGRESSIVE, LCD_PRINT_ELEMENT_ALL)
+			#endif
+			lcd_display_page(LCD_PAGE_CH1, LCD_PRINT_MODE_AGGRESSIVE, LCD_PRINT_ELEMENT_ALL)
+			lcd_display_page(LCD_PAGE_CH2, LCD_PRINT_MODE_AGGRESSIVE, LCD_PRINT_ELEMENT_ALL)
+			lcd_display_page(LCD_PAGE_CH3, LCD_PRINT_MODE_AGGRESSIVE, LCD_PRINT_ELEMENT_ALL)
+			lcd_display_page(LCD_PAGE_CH4, LCD_PRINT_MODE_AGGRESSIVE, LCD_PRINT_ELEMENT_ALL)
+		#else
+			lcd_display_page(LCD_PAGE_NET, LCD_PRINT_MODE_AGGRESSIVE, LCD_PRINT_ELEMENT_ALL)
+		#endif
 	#endif
 	
 	exit sub 'boot completed!-----

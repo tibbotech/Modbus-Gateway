@@ -338,6 +338,7 @@ sub modbus_timeout()
 				sock.protocol = PL_SOCK_PROTOCOL_TCP
 				sock.connectiontout = 600
 				sock.allowedinterfaces = "NET,WLN,PPP"
+				sock.targetinterface = current_interface
 				sock.targetip = ModBusSlaveDevices(i).TCPAddress
 				sock.targetport = ModBusSlaveDevices(i).TCPPort
 				ModBusTCPSocketsOperation(i).Connected = MODBUS_SLAVE_TCP_CONNECTING
@@ -550,12 +551,10 @@ sub modbus_send_request_to_tcp(byref data as string, sourceU as byte, destinatio
 					
 				end if
 
-					ModBusTCPSocketsOperation(i).TransactionID = ModBusTCPSocketsOperation(i).TransactionID + 1
-
 				if asc(mid(data_for_send, 1, 1)) <> 255 then ' if packet is BROADCAST - don't responce wait
 					
 					ModBusTCPSocketsOperation(i).TransactionID = transaction
-					ModBusTCPSocketsOperation(i).TransactionIDNew = ModBusTCPSocketsOperation(i).TransactionID + 1
+					ModBusTCPSocketsOperation(i).TransactionIDNew = ModBusTCPSocketsOperation(i).TransactionIDNew + 1
 					ModBusTCPSocketsOperation(i).ClientID = asc(left(data_for_send, 1))
 					ModBusTCPSocketsOperation(i).Func = asc(mid(data_for_send, 2, 1))
 					ModBusTCPSocketsOperation(i).OperationInProgress = true
@@ -569,7 +568,11 @@ sub modbus_send_request_to_tcp(byref data as string, sourceU as byte, destinatio
 					#endif
 				end if
 				
-				modbus_send_tcp(data_for_send, destination, ModBusTCPSocketsOperation(i).TransactionIDNew, shiftID, MODBUS_TCP_REQUEST)
+				if modbus_send_tcp(data_for_send, destination, ModBusTCPSocketsOperation(i).TransactionIDNew, shiftID, MODBUS_TCP_REQUEST) = false then
+					' Socket is close! Clear 
+					ModBusTCPSocketsOperation(i).OperationInProgress = false
+				end if
+				
 			end if
 			exit for
 		end if
@@ -687,6 +690,8 @@ sub modbus_send_serial_ascii(byref packet as string, channelSerial as byte, shif
 		ser.setdata(modbus_str)
 		ser.send
 		
+		snmp_counter_out_serial(channelSerial) = snmp_counter_out_serial(channelSerial) + len(modbus_str)
+		
 		' Check MONITOR mode
 		if modbus_monitor = true then
 			modbus_monitor_send(modbus_str, channelSerial or MODBUS_SERIAL_SOCKET_TYPE, MODBUS_MONITOR_DIRECTION_OUT, pType)
@@ -728,6 +733,8 @@ sub modbus_send_serial_rtu(byref packet as string, channelSerial as byte, shiftI
 		ser.enabled = YES
 		ser.setdata(modbus_str)
 		ser.send
+
+		snmp_counter_out_serial(channelSerial) = snmp_counter_out_serial(channelSerial) + len(modbus_str)
 
 		' Check MONITOR mode
 		if modbus_monitor = true then
@@ -784,7 +791,7 @@ function modbus_packet_ascii_to_bin(byref data_ascii as string) as string
 
 end function
 
-sub modbus_send_tcp(byref data as string, destination as byte, transaction as word, shiftID as char, pType as MODBUS_MONITOR_PACKET_TYPE)
+function modbus_send_tcp(byref data as string, destination as byte, transaction as word, shiftID as char, pType as MODBUS_MONITOR_PACKET_TYPE) as boolean
 
 	dim data_for_send as string
 	dim client_id as byte
@@ -811,15 +818,26 @@ sub modbus_send_tcp(byref data as string, destination as byte, transaction as wo
 		modbus_debug_dump(data_for_send)
 	#endif
 	sock.num = destination
-	sock.setdata(data_for_send)
-	sock.send()
+	if sock.statesimple = PL_SSTS_EST then
+		sock.setdata(data_for_send)
+		sock.send()
 
-	' Check MONITOR mode
-	if modbus_monitor = true then
-		modbus_monitor_send(data_for_send, destination or MODBUS_TCP_SOCKET_TYPE, MODBUS_MONITOR_DIRECTION_OUT, pType)
+		snmp_counter_out_ethernet = snmp_counter_out_ethernet + len(data_for_send)
+
+		' Check MONITOR mode
+		if modbus_monitor = true then
+			modbus_monitor_send(data_for_send, destination or MODBUS_TCP_SOCKET_TYPE, MODBUS_MONITOR_DIRECTION_OUT, pType)
+		end if
+		
+		modbus_send_tcp = true
+	else
+		#if DEV_DEBUG_PRINT
+			dev_debugprint("ModBus TCP socket status " + str(sock.statesimple))
+		#endif
+		modbus_send_tcp = false
 	end if
 
-end sub
+end function
 
 sub modbus_store_packet(byref data as string, sourceU as byte, destinationU as byte, shiftID as char)
 
@@ -895,6 +913,8 @@ sub modbus_tcp_receive(byref data as string, channelTCP as byte, portTCP as word
 		dev_debugprint("ModBus TCP packet received. Channel : " + str(channelTCP) + ", Port : " + str(portTCP))
 		modbus_debug_dump(data)
 	#endif
+
+	snmp_counter_in_ethernet = snmp_counter_in_ethernet + len(data)
 
 	if len(data) > 0 then
 		if asc(mid(data, 3, 1)) = 0 and asc(mid(data, 4, 1)) = 0 then	' test MODBUS Protocol ID
@@ -995,6 +1015,8 @@ sub modbus_serial_receive(byref data as string, channelSerial as byte)
 		modbus_debug_dump(data)
 	#endif
 
+	snmp_counter_in_serial(channelSerial) = snmp_counter_in_serial(channelSerial) + len(data)
+
 	select case ModBusSerialChannelsOperation(channelSerial).SerialType
 	case MODBUS_SERIAL_MASTER_RTU:
 		' Check MONITOR mode
@@ -1025,6 +1047,9 @@ sub modbus_serial_receive(byref data as string, channelSerial as byte)
 			end if
 		else
 			' CRC is error
+			
+			snmp_counter_error_serial(channelSerial) = snmp_counter_error_serial(channelSerial) + 1
+
 			#if DEV_DEBUG_PRINT
 				dev_debugprint("MODBUS MASTER RTU Packet CRC is Error")
 			#endif
@@ -1070,6 +1095,9 @@ sub modbus_serial_receive(byref data as string, channelSerial as byte)
 					end if
 				else
 					' LRC is error
+			
+					snmp_counter_error_serial(channelSerial) = snmp_counter_error_serial(channelSerial) + 1
+
 					#if DEV_DEBUG_PRINT
 						dev_debugprint("MODBUS MASTER ASCII Packet LRC is Error")
 					#endif
@@ -1098,6 +1126,9 @@ sub modbus_serial_receive(byref data as string, channelSerial as byte)
 			end if
 		else
 			' CRC is error
+			
+			snmp_counter_error_serial(channelSerial) = snmp_counter_error_serial(channelSerial) + 1
+
 			#if DEV_DEBUG_PRINT
 				dev_debugprint("MODBUS SLAVE RTU Packet CRC is Error")
 			#endif
@@ -1134,6 +1165,9 @@ sub modbus_serial_receive(byref data as string, channelSerial as byte)
 					end if
 				else
 					' LRC is error
+			
+					snmp_counter_error_serial(channelSerial) = snmp_counter_error_serial(channelSerial) + 1
+
 					#if DEV_DEBUG_PRINT
 						dev_debugprint("MODBUS SLAVE ASCII Packet LRC is Error")
 					#endif

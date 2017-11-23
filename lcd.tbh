@@ -1,7 +1,7 @@
 enum enum_lcd_pages
 	LCD_PAGE_NET
 	LCD_PAGE_WLN
-	'LCD_PAGE_GPRS	'disable until we have something with GPRS and display
+	LCD_PAGE_GPRS	'disable until we have something with GPRS and display
 	LCD_PAGE_CH1
 	LCD_PAGE_CH2
 	LCD_PAGE_CH3
@@ -10,6 +10,7 @@ enum enum_lcd_pages
 	LCD_PAGE_SER_PROG_MODE
 	LCD_PAGE_ERROR
 	LCD_PAGE_LOGO
+	LCD_PAGE_LOGO_WORK
 	LCD_PAGE_INIT_START
 	LCD_PAGE_INIT_DONE
 
@@ -30,6 +31,9 @@ end enum
 
 declare lcd_on_ctr as word
 declare user_uses_button as no_yes
+
+#define LCD_FORECOLOR 65535
+#define LCD_BACKCOLOR 0
 
 declare sub lcd_init()
 declare sub lcd_display_page(page as enum_lcd_pages, mode as enum_lcd_print_modes, element as enum_lcd_print_elements)

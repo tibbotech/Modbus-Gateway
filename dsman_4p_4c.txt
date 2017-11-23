@@ -54,6 +54,9 @@ bits5432109876543210
 
 >>&b0000000000000000	I=$SNMP;D=SNMP;T=GROUP
 >>&b0000000000000000	I=SN;D=SNMP Enable;T=INT;C=STATIC;O=0- Disabled/0/1- Enabled/1;F=R
+>>&b0000000000000000	I=SP;D=Community Name;T=STRING;C=EDIT;MAXLEN=20;F=R*
+>>&b0000000000000000	I=SC;D=Contact;T=STRING;C=EDIT;MAXLEN=20;F=R*
+>>&b0000000000000000	I=SL;D=Location;T=STRING;C=EDIT;MAXLEN=20;F=R*
 
 >>&b0000000000000000	I=$CHANNEL1;D=Ch1;T=GROUP
 >>&b0000000000100000	I=SI;D=Serial interface;T=INT;C=STATIC;O=0- Full-duplex (RS232)/0/1- Half-duplex (RS485)/1/2- Full-duplex (RS422)/2
@@ -71,37 +74,37 @@ bits5432109876543210
 >>&b0000000010100000	I=SI@2;D=Serial interface;T=INT;C=STATIC;O=0- Full-duplex (RS232)/0/1- Half-duplex (RS485)/1/2- Full-duplex (RS422)/2
 >>&b1000000000000000	I=SI@2;D=Serial interface;T=INT;C=STATIC;O=0- None/0/1- #01 Full-duplex (RS232)/1/5- #05 Half-duplex (RS485)/5
 >>&b0000000011000000	I=SI@2;D=Serial interface;T=INT;C=STATIC;O=0- Full-duplex/0/1- Half-duplex/1
->>&b0000000010000000	I=RI@2;D=MODBUS Serial Type;T=INT;C=STATIC;S=SI@2!=0?"e":"i";O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
->>&b0000000010000000	I=CT@2;D=Connection timeout (1/2 sec);T=INT;C=EDIT/SPIN/0/1/1/10;S=SI@2!=0?"e":"i";O=0- Disabled/0;V=CT@2>255?"Maximum timeout is 255 1/2 sec":""
->>&b0000000010000000	I=FC@2;D=Flow control;T=INT;C=STATIC;S=SI@2!=0?"e":"i";O=0- Disabled OR remote /0/1- Local RTS-CTS/1/2- Local XON-XOFF/2
->>&b0000000010000000	I=BR@2;D=Baudrate;T=INT;C=STATIC;S=SI@2!=0?"e":"i";O=8-150bps/8/9-300bps/9/10-600bps/10/0-1200bps/0/1-2400bps/1/2-4800bps/2/3-9600bps/3/4-19200bps/4/11-28800bps/11/5-38400bps/5/6-57600bps/6/7-115200bps/7/12-230400bps/12/13-460800bps/13
->>&b0000000010000000	I=PR@2;D=Parity;T=INT;C=STATIC;S=SI@2!=0?"e":"i";O=0- None/0/1- Even/1/2- Odd/2/3- Mark/3/4- Space/4
->>&b0000000010000000	I=BB@2;D=Data bits;T=INT;C=STATIC;S=SI@2!=0?"e":"i";O=0- 7 bits/0/1- 8 bits/1
->>&b0000000010000000	I=MD@2;D=Max intercharacter delay;T=INT;C=EDIT/SPIN/0/1/1/10;S=SI@2!=0?"e":"i";V=MD@2>255?"Maximum intercharacter delay is 255":""
+>>&b0000000010000000	I=RI@2;D=MODBUS Serial Type;T=INT;C=STATIC;O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
+>>&b0000000010000000	I=CT@2;D=Connection timeout (1/2 sec);T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=CT@2>255?"Maximum timeout is 255 1/2 sec":""
+>>&b0000000010000000	I=FC@2;D=Flow control;T=INT;C=STATIC;O=0- Disabled OR remote /0/1- Local RTS-CTS/1/2- Local XON-XOFF/2
+>>&b0000000010000000	I=BR@2;D=Baudrate;T=INT;C=STATIC;O=8-150bps/8/9-300bps/9/10-600bps/10/0-1200bps/0/1-2400bps/1/2-4800bps/2/3-9600bps/3/4-19200bps/4/11-28800bps/11/5-38400bps/5/6-57600bps/6/7-115200bps/7/12-230400bps/12/13-460800bps/13
+>>&b0000000010000000	I=PR@2;D=Parity;T=INT;C=STATIC;O=0- None/0/1- Even/1/2- Odd/2/3- Mark/3/4- Space/4
+>>&b0000000010000000	I=BB@2;D=Data bits;T=INT;C=STATIC;O=0- 7 bits/0/1- 8 bits/1
+>>&b0000000010000000	I=MD@2;D=Max intercharacter delay;T=INT;C=EDIT/SPIN/0/1/1/10;V=MD@2>255?"Maximum intercharacter delay is 255":""
 
 >>&b0000000110000000	I=$CHANNEL3;D=Ch3;T=GROUP
 >>&b0000000110100000	I=SI@3;D=Serial interface;T=INT;C=STATIC;O=0- Full-duplex (RS232)/0/1- Half-duplex (RS485)/1/2- Full-duplex (RS422)/2
 >>&b1000000000000000	I=SI@3;D=Serial interface;T=INT;C=STATIC;O=0- None/0/1- #01 Full-duplex (RS232)/1/2- #02 Full-duplex (RS232)/2/3- #02 Half-duplex (RS485)/3/4- #02 Full-duplex (RS422)/4/5- #05 Half-duplex (RS485)/5
 >>&b0000000111000000	I=SI@3;D=Serial interface;T=INT;C=STATIC;O=0- Full-duplex/0/1- Half-duplex/1
->>&b0000000110000000	I=RI@3;D=MODBUS Serial Type;T=INT;C=STATIC;S=SI@3!=0?"e":"i";O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
->>&b0000000110000000	I=CT@3;D=Connection timeout (1/2 sec);T=INT;C=EDIT/SPIN/0/1/1/10;S=SI@3!=0?"e":"i";O=0- Disabled/0;V=CT@3>255?"Maximum timeout is 255 1/2 sec":""
->>&b0000000110000000	I=FC@3;D=Flow control;T=INT;C=STATIC;S=SI@3!=0?"e":"i";O=0- Disabled OR remote /0/1- Local RTS-CTS/1/2- Local XON-XOFF/2
->>&b0000000110000000	I=BR@3;D=Baudrate;T=INT;C=STATIC;S=SI@3!=0?"e":"i";O=8-150bps/8/9-300bps/9/10-600bps/10/0-1200bps/0/1-2400bps/1/2-4800bps/2/3-9600bps/3/4-19200bps/4/11-28800bps/11/5-38400bps/5/6-57600bps/6/7-115200bps/7/12-230400bps/12/13-460800bps/13
->>&b0000000110000000	I=PR@3;D=Parity;T=INT;C=STATIC;S=SI@3!=0?"e":"i";O=0- None/0/1- Even/1/2- Odd/2/3- Mark/3/4- Space/4
->>&b0000000110000000	I=BB@3;D=Data bits;T=INT;C=STATIC;S=SI@3!=0?"e":"i";O=0- 7 bits/0/1- 8 bits/1
->>&b0000000110000000	I=MD@3;D=Max intercharacter delay;T=INT;C=EDIT/SPIN/0/1/1/10;S=SI@3!=0?"e":"i";V=MD@3>255?"Maximum intercharacter delay is 255":""
+>>&b0000000110000000	I=RI@3;D=MODBUS Serial Type;T=INT;C=STATIC;O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
+>>&b0000000110000000	I=CT@3;D=Connection timeout (1/2 sec);T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=CT@3>255?"Maximum timeout is 255 1/2 sec":""
+>>&b0000000110000000	I=FC@3;D=Flow control;T=INT;C=STATIC;O=0- Disabled OR remote /0/1- Local RTS-CTS/1/2- Local XON-XOFF/2
+>>&b0000000110000000	I=BR@3;D=Baudrate;T=INT;C=STATIC;O=8-150bps/8/9-300bps/9/10-600bps/10/0-1200bps/0/1-2400bps/1/2-4800bps/2/3-9600bps/3/4-19200bps/4/11-28800bps/11/5-38400bps/5/6-57600bps/6/7-115200bps/7/12-230400bps/12/13-460800bps/13
+>>&b0000000110000000	I=PR@3;D=Parity;T=INT;C=STATIC;O=0- None/0/1- Even/1/2- Odd/2/3- Mark/3/4- Space/4
+>>&b0000000110000000	I=BB@3;D=Data bits;T=INT;C=STATIC;O=0- 7 bits/0/1- 8 bits/1
+>>&b0000000110000000	I=MD@3;D=Max intercharacter delay;T=INT;C=EDIT/SPIN/0/1/1/10;V=MD@3>255?"Maximum intercharacter delay is 255":""
 
 >>&b0000001110000000	I=$CHANNEL4;D=Ch4;T=GROUP
 >>&b0000001110100000	I=SI@4;D=Serial interface;T=INT;C=STATIC;O=0- Full-duplex (RS232)/0/1- Half-duplex (RS485)/1/2- Full-duplex (RS422)/2
 >>&b1000000000000000	I=SI@4;D=Serial interface;T=INT;C=STATIC;O=0- None/0/1- #01 Full-duplex (RS232)/1/5- #05 Half-duplex (RS485)/5
 >>&b0000001111000000	I=SI@4;D=Serial interface;T=INT;C=STATIC;O=0- Full-duplex/0/1- Half-duplex/1
->>&b0000001110000000	I=RI@4;D=MODBUS Serial Type;T=INT;C=STATIC;S=SI@4!=0?"e":"i";O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
->>&b0000001110000000	I=CT@4;D=Connection timeout (1/2 sec);T=INT;C=EDIT/SPIN/0/1/1/10;S=SI@4!=0?"e":"i";O=0- Disabled/0;V=CT@4>255?"Maximum timeout is 255 1/2 sec":""
->>&b0000001110000000	I=FC@4;D=Flow control;T=INT;C=STATIC;S=SI@4!=0?"e":"i";O=0- Disabled OR remote /0/1- Local RTS-CTS/1/2- Local XON-XOFF/2
->>&b0000001110000000	I=BR@4;D=Baudrate;T=INT;C=STATIC;S=SI@4!=0?"e":"i";O=8-150bps/8/9-300bps/9/10-600bps/10/0-1200bps/0/1-2400bps/1/2-4800bps/2/3-9600bps/3/4-19200bps/4/11-28800bps/11/5-38400bps/5/6-57600bps/6/7-115200bps/7/12-230400bps/12/13-460800bps/13
->>&b0000001110000000	I=PR@4;D=Parity;T=INT;C=STATIC;S=SI@4!=0?"e":"i";O=0- None/0/1- Even/1/2- Odd/2/3- Mark/3/4- Space/4
->>&b0000001110000000	I=BB@4;D=Data bits;T=INT;C=STATIC;S=SI@4!=0?"e":"i";O=0- 7 bits/0/1- 8 bits/1
->>&b0000001110000000	I=MD@4;D=Max intercharacter delay;T=INT;C=EDIT/SPIN/0/1/1/10;S=SI@4!=0?"e":"i";V=MD@4>255?"Maximum intercharacter delay is 255":""
+>>&b0000001110000000	I=RI@4;D=MODBUS Serial Type;T=INT;C=STATIC;O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
+>>&b0000001110000000	I=CT@4;D=Connection timeout (1/2 sec);T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=CT@4>255?"Maximum timeout is 255 1/2 sec":""
+>>&b0000001110000000	I=FC@4;D=Flow control;T=INT;C=STATIC;O=0- Disabled OR remote /0/1- Local RTS-CTS/1/2- Local XON-XOFF/2
+>>&b0000001110000000	I=BR@4;D=Baudrate;T=INT;C=STATIC;O=8-150bps/8/9-300bps/9/10-600bps/10/0-1200bps/0/1-2400bps/1/2-4800bps/2/3-9600bps/3/4-19200bps/4/11-28800bps/11/5-38400bps/5/6-57600bps/6/7-115200bps/7/12-230400bps/12/13-460800bps/13
+>>&b0000001110000000	I=PR@4;D=Parity;T=INT;C=STATIC;O=0- None/0/1- Even/1/2- Odd/2/3- Mark/3/4- Space/4
+>>&b0000001110000000	I=BB@4;D=Data bits;T=INT;C=STATIC;O=0- 7 bits/0/1- 8 bits/1
+>>&b0000001110000000	I=MD@4;D=Max intercharacter delay;T=INT;C=EDIT/SPIN/0/1/1/10;V=MD@4>255?"Maximum intercharacter delay is 255":""
 
 >>&b0000000000000000	I=$ROUTEID;D=Routing ID;T=GROUP
 >>&b0000000000000000	I=RA@1;D=1- ID from;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@1>255?"Maximum modbus ID is 255":""

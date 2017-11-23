@@ -1,7 +1,7 @@
 'SUPPORTED PLATFORMS & RELATED CAPABILITIES--------------------------
 
 #define DHCP_DEBUG_PRINT 0
-#define DEV_DEBUG_PRINT 1
+#define DEV_DEBUG_PRINT 0
 
 #define SIMULATE_ETHER_OFF_BY_BUTTON 0 'set to 1 to use button for simulating unplugged Ethernet cable
 
@@ -21,6 +21,8 @@
 	#define POWER_ON_PIN9 0
 	#define SUPPORTS_GPRS 0
 	#define SUPPORTS_DISPLAY 0
+	#define SNMP_INTERFACE_COUNT_VALUE 7
+	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Device DS1202"
 
 #elif PLATFORM_ID=DS1206
 	#define SUPPORTS_422_485_4 0
@@ -33,6 +35,8 @@
 	#define SUPPORTS_GPRS 0
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
 	#define SUPPORTS_DISPLAY 0
+	#define SNMP_INTERFACE_COUNT_VALUE 7
+	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Device DS1206"
 
 #elif PLATFORM_ID=EM1000 or PLATFORM_ID=EM1001 or PLATFORM_ID=EM2000 'also used for DS100x devices
 	#define SUPPORTS_422_485_4 1
@@ -45,6 +49,8 @@
 	#define SUPPORTS_GPRS 0
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
 	#define SUPPORTS_DISPLAY 0
+	#define SNMP_INTERFACE_COUNT_VALUE 7
+	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Device EM1001 EM2000"
 
 #elif PLATFORM_ID=EM1000W or PLATFORM_ID=EM1001W or PLATFORM_ID=EM2000W
 	#define SUPPORTS_422_485_4 1
@@ -58,6 +64,8 @@
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
 	#define WLN_WPA 1
 	#define SUPPORTS_DISPLAY 0
+	#define SNMP_INTERFACE_COUNT_VALUE 7
+	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Device EM1000W EM2000W"
 
 #elif PLATFORM_ID=EM1202
 	#define SUPPORTS_422_485_4 0
@@ -70,6 +78,8 @@
 	#define SUPPORTS_GPRS 0
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
 	#define SUPPORTS_DISPLAY 0
+	#define SNMP_INTERFACE_COUNT_VALUE 7
+	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Device EM1202"
 
 #elif PLATFORM_ID=EM1202W
 	#define SUPPORTS_422_485_4 0
@@ -83,6 +93,8 @@
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
 	#define WLN_WPA 1
 	#define SUPPORTS_DISPLAY 0
+	#define SNMP_INTERFACE_COUNT_VALUE 7
+	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Device EM1202W"
 
 #elif PLATFORM_ID=EM1206
 	#define SUPPORTS_422_485_4 0
@@ -95,6 +107,8 @@
 	#define SUPPORTS_GPRS 0
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
 	#define SUPPORTS_DISPLAY 0
+	#define SNMP_INTERFACE_COUNT_VALUE 7
+	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Device EM1206"
 
 #elif PLATFORM_ID=EM1206W
 	#define SUPPORTS_422_485_4 0
@@ -108,6 +122,8 @@
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
 	#define WLN_WPA 1
 	#define SUPPORTS_DISPLAY 0
+	#define SNMP_INTERFACE_COUNT_VALUE 7
+	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Device EM1206W"
 
 #elif PLATFORM_ID=EM500
 	#define SUPPORTS_422_485_4 0
@@ -120,6 +136,8 @@
 	#define SUPPORTS_GPRS 0
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 0
 	#define SUPPORTS_DISPLAY 0
+	#define SNMP_INTERFACE_COUNT_VALUE 4
+	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Device EM500"
 
 #elif PLATFORM_ID=EM500W
 	#define SUPPORTS_422_485_4 0
@@ -133,6 +151,8 @@
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 0
 	#define WLN_WPA 0
 	#define SUPPORTS_DISPLAY 0
+	#define SNMP_INTERFACE_COUNT_VALUE 4
+	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Device EM500W"
 
 #elif PLATFORM_ID=NB1010
 	#define SUPPORTS_422_485_4 1
@@ -145,6 +165,8 @@
 	#define SUPPORTS_GPRS 1
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
 	#define SUPPORTS_DISPLAY 0
+	#define SNMP_INTERFACE_COUNT_VALUE 7
+	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Device NB1010"
 
 #elif PLATFORM_ID=NB1010W
 	#define SUPPORTS_422_485_4 1
@@ -158,6 +180,8 @@
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
 	#define WLN_WPA 1
 	#define SUPPORTS_DISPLAY 0
+	#define SNMP_INTERFACE_COUNT_VALUE 7
+	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Device NB1010W"
 
 #elif PLATFORM_ID=DS1102W
 	#define SUPPORTS_422_485_4 0
@@ -171,6 +195,8 @@
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
 	#define WLN_WPA 1
 	#define SUPPORTS_DISPLAY 1
+	#define SNMP_INTERFACE_COUNT_VALUE 7
+	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Device DS1102W"
 
 #elif PLATFORM_ID=DS1101W
 	#define SUPPORTS_422_485_4 0
@@ -184,6 +210,8 @@
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
 	#define WLN_WPA 1
 	#define SUPPORTS_DISPLAY 1
+	#define SNMP_INTERFACE_COUNT_VALUE 7
+	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Device DS1101W"
 
 #elif PLATFORM_ID=DS1100
 	#define SUPPORTS_422_485_4 0
@@ -196,6 +224,9 @@
 	#define SUPPORTS_GPRS 0
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 0
 	#define SUPPORTS_DISPLAY 0
+	#define SNMP_INTERFACE_COUNT_VALUE 4
+	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Device DS1100"
+
 #elif PLATFORM_ID=TPP3W or PLATFORM_ID=TPP3WG2
 	#define SUPPORTS_422_485_4 1
 	#define SUPPORTS_422_485_1 0
@@ -208,6 +239,9 @@
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
 	#define WLN_WPA 1
 	#define SUPPORTS_DISPLAY 0
+	#define SNMP_INTERFACE_COUNT_VALUE 7
+	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Device TPP3W"
+	
 #elif PLATFORM_ID=TPP2WG2
 	#define SUPPORTS_422_485_4 1
 	#define SUPPORTS_422_485_1 0
@@ -219,7 +253,10 @@
 	#define SUPPORTS_GPRS 1
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
 	#define WLN_WPA 1
-	#define SUPPORTS_DISPLAY 0
+	#define SUPPORTS_DISPLAY 1
+	#define SNMP_INTERFACE_COUNT_VALUE 7
+	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Device TPP2W"
+
 #else
 	  XXXX 'intentional garbage: currently selected platform is not supported!
 #endif
@@ -254,7 +291,7 @@ const MAX_NUM_SERIAL_PORTS=4 'do not change this, array declarations are made wi
 
 
 #if DEVICE_PORT_SCHEME=PORT_SCHEME_4P or DEVICE_PORT_SCHEME=PORT_SCHEME_4C or DEVICE_PORT_SCHEME=PORT_SCHEME_4P2
-	#define DSMAN_MAX_NUM_LINES 121
+	#define DSMAN_MAX_NUM_LINES 200
 	const NUM_SERIAL_PORTS=4						'(must not exceed MAX_NUM_SERIAL_PORTS)  +++ ULYSSES +++
 	#define DSMAN_DESCRIPTOR_FILE "dsman_4p_4c.txt"
 	
@@ -271,6 +308,7 @@ const MAX_NUM_SERIAL_PORTS=4 'do not change this, array declarations are made wi
 #endif
 
 #define HTML_SETTINGS_DEF "html_config_settings.txt"
+#define HTML_SNMP_DEF "html_config_snmp.txt"
 #define	HTML_GPRS_DEF "html_config_gprs.txt"
 #define	HTML_PORT_DEF "html_config_ports.txt"
 #define	HTML_ROUTE_ID_DEF "html_config_route_id.txt"
@@ -462,6 +500,7 @@ declare sock_http(NUM_HTTP_SOCKETS) as byte
 declare sock_telnet as byte
 
 declare current_interface as pl_sock_interfaces
+declare gprs_connected as no_yes
 declare interface_ready(MAX_NUM_INTERFACES) as no_yes
 declare html_reboot_flag as no_yes
 declare sub close_interface_sockets(interface as pl_sock_interfaces)

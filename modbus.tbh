@@ -108,7 +108,7 @@ declare sub modbus_send_responce_to_tcp(byref data as string, sourceU as byte, d
 declare sub modbus_send_serial_ascii(byref packet as string, channelSerial as byte, shiftID as char, pType as MODBUS_MONITOR_PACKET_TYPE)
 declare sub modbus_send_serial_rtu(byref packet as string, channelSerial as byte, shiftID as char, pType as MODBUS_MONITOR_PACKET_TYPE)
 declare function modbus_packet_ascii_to_bin(byref data_ascii as string) as string
-declare sub modbus_send_tcp(byref data as string, destination as byte, transaction as word, shiftID as char, pType as MODBUS_MONITOR_PACKET_TYPE)
+declare function modbus_send_tcp(byref data as string, destination as byte, transaction as word, shiftID as char, pType as MODBUS_MONITOR_PACKET_TYPE) as boolean
 declare sub modbus_store_packet(byref data as string, sourceU as byte, destinationU as byte, shiftID as char)
 
 declare sub modbus_tcp_receive(byref data as string, channelTCP as byte, portTCP as word)

@@ -6,15 +6,54 @@ enum SNMP_BER_TYPES
 	SNMP_NULL = &h05,
 	SNMP_OBJECT_ID = &h06,
 	SNMP_SEQUENCE = &h30,
+	SNMP_COUNTER = &h41,
+	SNMP_TIMETICKS = &h43,
 	SNMP_GET_REQUEST_PDU = &hA0,
+	SNMP_GET_NEXT_REQUEST_PDU = &hA1,
 	SNMP_GET_RESPONCE_PDU = &hA2,
 	SNMP_SET_REQUEST_PDU = &hA3
 
 end enum
 
-declare snmp_enable as boolean
+' Supported SNMP objects
+#define SNMP_OBJECT_MIB2_ROOT chr(&h2b) + chr(&h06) + chr(&h01) + chr(&h02) + chr(&h01)
+#define SNMP_OBJECT_SYSTEM_ROOT chr(&h2b) + chr(&h06) + chr(&h01) + chr(&h02) + chr(&h01) + chr(&h01)
+#define SNMP_OBJECT_SYSDESC chr(&h2b) + chr(&h06) + chr(&h01) + chr(&h02) + chr(&h01) + chr(&h01) + chr(&h01) + chr(&h00)
+#define SNMP_OBJECT_SYSOBJECTID chr(&h2b) + chr(&h06) + chr(&h01) + chr(&h02) + chr(&h01) + chr(&h01) + chr(&h02) + chr(&h00)
+#define SNMP_OBJECT_SYSUPTIME chr(&h2b) + chr(&h06) + chr(&h01) + chr(&h02) + chr(&h01) + chr(&h01) + chr(&h03) + chr(&h00)
+#define SNMP_OBJECT_SYSCONTACT chr(&h2b) + chr(&h06) + chr(&h01) + chr(&h02) + chr(&h01) + chr(&h01) + chr(&h04) + chr(&h00)
+#define SNMP_OBJECT_SYSNAME chr(&h2b) + chr(&h06) + chr(&h01) + chr(&h02) + chr(&h01) + chr(&h01) + chr(&h05) + chr(&h00)
+#define SNMP_OBJECT_SYSLOCATION chr(&h2b) + chr(&h06) + chr(&h01) + chr(&h02) + chr(&h01) + chr(&h01) + chr(&h06) + chr(&h00)
+#define SNMP_OBJECT_SYSSERVICES chr(&h2b) + chr(&h06) + chr(&h01) + chr(&h02) + chr(&h01) + chr(&h01) + chr(&h07) + chr(&h00)
+#define SNMP_OBJECT_INTERFACE_COUNT chr(&h2b) + chr(&h06) + chr(&h01) + chr(&h02) + chr(&h01) + chr(&h02) + chr(&h01) + chr(&h00)	'.1.3.6.1.2.1.2.1.0
+#define SNMP_OBJECT_INTERFACE_ROOT chr(&h2b) + chr(&h06) + chr(&h01) + chr(&h02) + chr(&h01) + chr(&h02)	'.1.3.6.1.2.1.2
+#define SNMP_OBJECT_INTERFACE_TABLE chr(&h2b) + chr(&h06) + chr(&h01) + chr(&h02) + chr(&h01) + chr(&h02) + chr(&h02)
+#define SNMP_OBJECT_INTERFACE_TABLE_ROOT chr(&h2b) + chr(&h06) + chr(&h01) + chr(&h02) + chr(&h01) + chr(&h02) + chr(&h02) + chr(&h01)	'.1.3.6.1.2.1.2.2.1
+#define SNMP_OBJECT_AT chr(&h2b) + chr(&h06) + chr(&h01) + chr(&h02) + chr(&h01) + chr(&h03)
+#define SNMP_SET_OBJECTID chr(&h2b) + chr(&h06) + chr(&h01) + chr(&h04) + chr(&h01) + chr(&h81) + chr(&ha2) + chr(&h02)
+
+' Settings 
+declare snmp_set_enable as boolean
+declare snmp_set_public as string(20)
+declare snmp_set_contact as string(20)
+declare snmp_set_location as string(20)
+
 declare sock_snmp as byte
 
+' Counters
+declare snmp_counter_in_ethernet as dword
+declare snmp_counter_in_wln as dword
+declare snmp_counter_in_gprs as dword
+declare snmp_counter_in_serial(4) as dword
+
+declare snmp_counter_out_ethernet as dword
+declare snmp_counter_out_wln as dword
+declare snmp_counter_out_gprs as dword
+declare snmp_counter_out_serial(4) as dword
+
+declare snmp_counter_error_serial(4) as dword
+
+' Functions & Subs
 declare function snmp_initialize() as boolean
 declare sub snmp_receive(byref data as string)
 

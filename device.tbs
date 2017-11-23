@@ -4,7 +4,7 @@ include "global.tbh"
 declare sub change_current_interface(new_interface as pl_sock_interfaces)
 declare sub set_comm_channel_buffers(channel_num as byte, num_buffers as byte, ser_port_in_prog_mode as no_yes)
 
-
+public dim gprs_connected as no_yes
 public dim error_mode as no_yes
 public dim pat_canint as no_yes
 public dim sock_connection_holdoff_tmr(MAX_NUM_SERIAL_PORTS) as byte
@@ -186,6 +186,7 @@ end sub
 
 
 #if WLN_AVAILABLE
+
 sub callback_wln_failure(wln_state as en_wln_status_codes)
 
 	wln_recent_status=wln_state
@@ -256,18 +257,28 @@ end sub
 
 
 sub callback_gprs_ok()
+
+	gprs_connected = YES
+	
 	#if DEV_DEBUG_PRINT
 		dev_debugprint("GPRS OK")
 	#endif
-	interface_ready(PL_SOCK_INTERFACE_PPP)=YES
+	
+	interface_ready(PL_SOCK_INTERFACE_PPP) = YES
 
+	#if SUPPORTS_DISPLAY
+		#if PLATFORM_ID = TPP2WG2 or PLATFORM_ID = TPP2W
+			lcd_display_page(LCD_PAGE_GPRS, LCD_PRINT_MODE_GENTLE, LCD_PRINT_ELEMENT_ALL)
+		#endif
+	#endif
+	
 	'Should GPRS become our current interface?
 	#if WLN_AVAILABLE
-		if interface_ready(PL_SOCK_INTERFACE_NET)=NO and interface_ready(PL_SOCK_INTERFACE_WLN)=NO then
+		if interface_ready(PL_SOCK_INTERFACE_NET) = NO and interface_ready(PL_SOCK_INTERFACE_WLN) = NO then
 			change_current_interface(PL_SOCK_INTERFACE_PPP)
 		end if
 	#else
-		if interface_ready(PL_SOCK_INTERFACE_NET)=NO then
+		if interface_ready(PL_SOCK_INTERFACE_NET) = NO then
 			change_current_interface(PL_SOCK_INTERFACE_PPP)
 		end if
 	#endif
@@ -275,6 +286,13 @@ end sub
 
 
 sub callback_gprs_failure()
+
+	gprs_connected = NO
+
+	#if SUPPORTS_DISPLAY and (PLATFORM_ID = TPP2WG2 or PLATFORM_ID = TPP2W)
+		lcd_display_page(LCD_PAGE_GPRS, LCD_PRINT_MODE_GENTLE, LCD_PRINT_ELEMENT_ALL)
+	#endif
+	
 	#if DEV_DEBUG_PRINT
 		dev_debugprint("GPRS FAILED")
 	#endif
@@ -484,14 +502,25 @@ sub change_current_interface(new_interface as pl_sock_interfaces)
 		#if SUPPORTS_DISPLAY
 			select case new_interface
 			case PL_SOCK_INTERFACE_NET:
-				lcd_display_page(LCD_PAGE_NET,LCD_PRINT_MODE_STANDARD,LCD_PRINT_ELEMENT_ALL)
-				lcd_display_page(LCD_PAGE_WLN,LCD_PRINT_MODE_GENTLE,LCD_PRINT_ELEMENT_ALL)
+				lcd_display_page(LCD_PAGE_NET, LCD_PRINT_MODE_STANDARD, LCD_PRINT_ELEMENT_ALL)
+				lcd_display_page(LCD_PAGE_WLN, LCD_PRINT_MODE_GENTLE, LCD_PRINT_ELEMENT_ALL)
+				#if PLATFORM_ID=TPP2WG2 or PLATFORM_ID=TPP2W
+					lcd_display_page(LCD_PAGE_GPRS, LCD_PRINT_MODE_GENTLE, LCD_PRINT_ELEMENT_ALL)
+				#endif
 			
 			case PL_SOCK_INTERFACE_WLN:
-				lcd_display_page(LCD_PAGE_WLN,LCD_PRINT_MODE_STANDARD,LCD_PRINT_ELEMENT_ALL)
-				lcd_display_page(LCD_PAGE_NET,LCD_PRINT_MODE_GENTLE,LCD_PRINT_ELEMENT_ALL)
+				lcd_display_page(LCD_PAGE_WLN, LCD_PRINT_MODE_STANDARD, LCD_PRINT_ELEMENT_ALL)
+				lcd_display_page(LCD_PAGE_NET, LCD_PRINT_MODE_GENTLE, LCD_PRINT_ELEMENT_ALL)
+				#if PLATFORM_ID=TPP2WG2 or PLATFORM_ID=TPP2W
+					lcd_display_page(LCD_PAGE_GPRS, LCD_PRINT_MODE_GENTLE, LCD_PRINT_ELEMENT_ALL)
+				#endif
 			
 			case PL_SOCK_INTERFACE_PPP:	'lcd_display_page(LCD_PAGE_GPRS,LCD_PRINT_MODE_STANDARD,LCD_PRINT_ELEMENT_ALL)
+				#if PLATFORM_ID=TPP2WG2 or PLATFORM_ID=TPP2W
+					lcd_display_page(LCD_PAGE_WLN, LCD_PRINT_MODE_STANDARD, LCD_PRINT_ELEMENT_ALL)
+					lcd_display_page(LCD_PAGE_NET, LCD_PRINT_MODE_GENTLE, LCD_PRINT_ELEMENT_ALL)
+					lcd_display_page(LCD_PAGE_GPRS, LCD_PRINT_MODE_GENTLE, LCD_PRINT_ELEMENT_ALL)
+				#endif
 			
 			end select
 		#endif
@@ -517,7 +546,7 @@ public function set_ser_channel_for_normal_mode(channel_num as byte) as boolean
 				set_ser_channel_for_normal_mode = true
 				
 			case 1:
-				if param_si(channel_num - 1) = 0 or param_si(channel_num - 1) = 4 then	' Channel 1 is active only for tibbit #01 or #05 installed in Channel 0
+				if param_si(channel_num - 1) = 1 or param_si(channel_num - 1) = 5 then	' Channel 1 is active only for tibbit #01 or #05 installed in Channel 0
 					ser.interface=PL_SER_SI_FULLDUPLEX
 					set_ser_channel_for_normal_mode = true
 				else
@@ -529,7 +558,7 @@ public function set_ser_channel_for_normal_mode(channel_num as byte) as boolean
 				set_ser_channel_for_normal_mode = true
 				
 			case 3:
-				if param_si(channel_num - 1) = 0 or param_si(channel_num - 1) = 4 then	' Channel 3 is active only for tibbit #01 or #05 installed in Channel 2
+				if param_si(channel_num - 1) = 1 or param_si(channel_num - 1) = 5 then	' Channel 3 is active only for tibbit #01 or #05 installed in Channel 2
 					ser.interface=PL_SER_SI_FULLDUPLEX
 					set_ser_channel_for_normal_mode = true
 				else
@@ -635,7 +664,7 @@ public function set_ser_channel_for_normal_mode(channel_num as byte) as boolean
 				set_ser_channel_for_normal_mode = true
 				
 			case 1:
-				if param_si(channel_num - 1) = 0 or param_si(channel_num - 1) = 4 then	' Channel 1 is active only for tibbit #01 or #05 installed in Channel 0
+				if param_si(channel_num - 1) = 1 or param_si(channel_num - 1) = 5 then	' Channel 1 is active only for tibbit #01 or #05 installed in Channel 0
 					ser.interface = PL_SER_SI_HALFDUPLEX
 					set_ser_channel_for_normal_mode = true
 				else
@@ -647,7 +676,7 @@ public function set_ser_channel_for_normal_mode(channel_num as byte) as boolean
 				set_ser_channel_for_normal_mode = true
 				
 			case 3:
-				if param_si(channel_num - 1) = 0 or param_si(channel_num - 1) = 4 then	' Channel 3 is active only for tibbit #01 or #05 installed in Channel 2
+				if param_si(channel_num - 1) = 1 or param_si(channel_num - 1) = 5 then	' Channel 3 is active only for tibbit #01 or #05 installed in Channel 2
 					ser.interface = PL_SER_SI_HALFDUPLEX
 					set_ser_channel_for_normal_mode = true
 				else

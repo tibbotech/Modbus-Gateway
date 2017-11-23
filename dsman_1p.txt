@@ -21,6 +21,12 @@
 >>&b00001000	I=WG;D=Gateway IP-address;T=STRING;C=IPCTRL;S=WE!=0?"e":"i";F=R*
 >>&b00001000	I=WN;D=Subnet mask;T=STRING;C=IPCTRL;S=WE!=0?"e":"i";F=R*
 
+>>&b00000000	I=$SNMP;D=SNMP;T=GROUP
+>>&b00000000	I=SN;D=SNMP Enable;T=INT;C=STATIC;O=0- Disabled/0/1- Enabled/1;F=R
+>>&b00000000	I=SP;D=Community Name;T=STRING;C=EDIT;MAXLEN=20;F=R*
+>>&b00000000	I=SC;D=Contact;T=STRING;C=EDIT;MAXLEN=20;F=R*
+>>&b00000000	I=SL;D=Location;T=STRING;C=EDIT;MAXLEN=20;F=R*
+
 >>&b00000000	I=$CHANNEL1;D=Channel1;T=GROUP
 >>&b00000000	I=RI;D=MODBUS Serial Type;T=INT;C=STATIC;O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
 >>&b00000000	I=CT;D=Connection timeout (1/2 sec);T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=CT>255?"Maximum timeout is 255 1/2 sec":""
