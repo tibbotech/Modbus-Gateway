@@ -399,7 +399,7 @@ sub lcd_display_channel(channel as byte)
 
 		lcd_print_top_text(s, corn_x, corn_y + 30, 80, 8)
 
-		if (interface = 1) or (interface = 2) then
+		if (interface = 1) or (interface = 2) or (interface = 4) then
 			if ser.flowcontrol = DISABLED then
 				s = "NONE F/C`"
 			else if ser.flowcontrol = PL_SER_FC_RTSCTS then

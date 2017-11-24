@@ -626,3 +626,7 @@ sub on_wln_task_complete(completed_task as pl_wln_tasks)
 	wln_proc_task_complete(completed_task)
 end sub
 #endif
+
+sub on_ser_data_sent()
+	' TODO: place "on_ser_data_sent" event handler code here...
+end sub
