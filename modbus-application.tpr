@@ -1,6 +1,6 @@
 [project]
 version=1
-platform=TPP3W(G2)
+platform=TPP2W(G2)
 src_lib_ver=2_00
 name=modbus_application
 output=mb_application.tpc

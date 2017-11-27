@@ -88,8 +88,9 @@ public sub boot
 	#endif
 
 	#if DEVICE_PORT_SCHEME = PORT_SCHEME_4P2
-		dsman_config = dsman_config + 32768													' Set TPS2 scheme
-		html_print_setting_flags_ports_page = html_print_setting_flags_ports_page + 1024	' Set TPS2 scheme
+		dsman_config = dsman_config + 32768														' Set TPS2 scheme
+		html_print_setting_flags_ports_page = html_print_setting_flags_ports_page + 1024		' Set TPS2 scheme
+		html_print_setting_flags_settings_page = html_print_setting_flags_settings_page + 8192	' Set TPS2 scheme
 	#endif
 	
 	#if SUPPORTS_OVER_115200

@@ -11,20 +11,22 @@ bit9	have 3 serial ports
 bit10	have 4 serial ports
 bit11	serial port 1 supports 232, 485, 422 so multi-channel configuration is only enabled for 232 (this bit works together with bit 1)
 bit12	serial port 1 doesn't support 232, 485, 422 so multi-channel configuration is always enabled (this bit works together with bit 1)
+bit13	TPS2
 
+bits32109876543210
 
-bits2109876543210
+>>&b00000000000000	RF	TCP Port									S,I,5	^
+>>&b00000000000000	RG	ID Shift									S,I,-3	^
+>>&b00000100000001	RH	Destination									B,L,0-Serial 1;1-Serial 2;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
+>>&b00001000000001	RH	Destination									B,L,0-Serial 1;1-Serial 2;2-Serial 3;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
+>>&b00010000000001	RH	Destination									B,L,0-Serial 1;1-Serial 2;2-Serial 3;3-Serial 4;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
 
->>&b0000000000000	RF	TCP Port									S,I,5	^
->>&b0000000000000	RG	ID Shift									S,I,-3	^
->>&b0000100000001	RH	Destination									B,L,0-Serial 1;1-Serial 2;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
->>&b0001000000001	RH	Destination									B,L,0-Serial 1;1-Serial 2;2-Serial 3;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
->>&b0010000000001	RH	Destination									B,L,0-Serial 1;1-Serial 2;2-Serial 3;3-Serial 4;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
+>>&b00100100000010	RH	Destination									B,L,0-Serial 1;1-Serial 2;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
+>>&b00101000000010	RH	Destination									B,L,0-Serial 1;1-Serial 2;2-Serial 3;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
+>>&b00110000000010	RH	Destination									B,L,0-Serial 1;1-Serial 2;2-Serial 3;3-Serial 4;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
 
->>&b0100100000010	RH	Destination									B,L,0-Serial 1;1-Serial 2;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
->>&b0101000000010	RH	Destination									B,L,0-Serial 1;1-Serial 2;2-Serial 3;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
->>&b0110000000010	RH	Destination									B,L,0-Serial 1;1-Serial 2;2-Serial 3;3-Serial 4;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
+>>&b01000100000010	RH	Destination									B,L,0-Serial 1;1-Serial 2;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
+>>&b01001000000010	RH	Destination									B,L,0-Serial 1;1-Serial 2;2-Serial 3;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
+>>&b01010000000010	RH	Destination									B,L,0-Serial 1;1-Serial 2;2-Serial 3;3-Serial 4;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
 
->>&b1000100000010	RH	Destination									B,L,0-Serial 1;1-Serial 2;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
->>&b1001000000010	RH	Destination									B,L,0-Serial 1;1-Serial 2;2-Serial 3;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
->>&b1010000000010	RH	Destination									B,L,0-Serial 1;1-Serial 2;2-Serial 3;3-Serial 4;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^
+>>&b10000000000000	RH	Destination									B,L,0-Serial 1;1-Serial 2;2-Serial 3;3-Serial 4;4-TCP Slave device 1;5-TCP Slave device 2;6-TCP Slave device 3;7-TCP Slave device 4;	^

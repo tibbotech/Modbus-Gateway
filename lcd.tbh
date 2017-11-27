@@ -1,7 +1,9 @@
 enum enum_lcd_pages
 	LCD_PAGE_NET
 	LCD_PAGE_WLN
-	LCD_PAGE_GPRS	'disable until we have something with GPRS and display
+#if PLATFORM_ID=TPP2WG2 or PLATFORM_ID=TPP2W
+	LCD_PAGE_GPRS ' - only for TPS2 and TPS2(G2) Platforms
+#endif
 	LCD_PAGE_CH1
 	LCD_PAGE_CH2
 	LCD_PAGE_CH3

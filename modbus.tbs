@@ -334,18 +334,20 @@ sub modbus_timeout()
 	for i = 0 to MODBUS_SLAVE_SOCKET_NUMBERS - 1
 		if ModBusTCPSocketsOperation(i).Socket <> 255 then
 			if ModBusTCPSocketsOperation(i).Connected = MODBUS_SLAVE_TCP_DISCONNECT then
-				sock.num = ModBusTCPSocketsOperation(i).Socket
-				sock.protocol = PL_SOCK_PROTOCOL_TCP
-				sock.connectiontout = 600
-				sock.allowedinterfaces = "NET,WLN,PPP"
-				sock.targetinterface = current_interface
-				sock.targetip = ModBusSlaveDevices(i).TCPAddress
-				sock.targetport = ModBusSlaveDevices(i).TCPPort
-				ModBusTCPSocketsOperation(i).Connected = MODBUS_SLAVE_TCP_CONNECTING
-				sock.connect()
-				#if DEV_DEBUG_PRINT
-					dev_debugprint("ModBus. Connecting" + str(ModBusTCPSocketsOperation(i).Socket))
-				#endif
+				if gprs_connected = YES then
+					sock.num = ModBusTCPSocketsOperation(i).Socket
+					sock.protocol = PL_SOCK_PROTOCOL_TCP
+					sock.connectiontout = 600
+					sock.allowedinterfaces = "NET,WLN,PPP"
+					sock.targetinterface = current_interface
+					sock.targetip = ModBusSlaveDevices(i).TCPAddress
+					sock.targetport = ModBusSlaveDevices(i).TCPPort
+					ModBusTCPSocketsOperation(i).Connected = MODBUS_SLAVE_TCP_CONNECTING
+					sock.connect()
+					#if DEV_DEBUG_PRINT
+						dev_debugprint("ModBus. Connecting" + str(ModBusTCPSocketsOperation(i).Socket))
+					#endif
+				end if
 			end if
 		end if
 	next i
