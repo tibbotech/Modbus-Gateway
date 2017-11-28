@@ -731,3 +731,9 @@ type=binary
 format=
 locked=no
 location=project
+[file83]
+path=dsman_4p2.txt
+type=text
+format=
+locked=no
+location=project

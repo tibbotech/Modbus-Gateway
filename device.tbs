@@ -602,6 +602,7 @@ public function set_ser_channel_for_normal_mode(channel_num as byte) as boolean
 		case 3:	' #02 RS485
 			select case channel_num
 			case 0:
+				ser.interface = PL_SER_SI_HALFDUPLEX
 				io.num = SER0_HDFD
 				io.state = HIGH
 				io.enabled = YES
@@ -613,6 +614,7 @@ public function set_ser_channel_for_normal_mode(channel_num as byte) as boolean
 				set_ser_channel_for_normal_mode = true
 				
 			case 2:
+				ser.interface = PL_SER_SI_HALFDUPLEX
 				io.num = SER2_HDFD
 				io.state = HIGH
 				io.enabled = YES
