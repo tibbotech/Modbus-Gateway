@@ -1,0 +1,151 @@
+bit0	multi-port configuration
+bit1	multi-channel configuration, particulars depend on bits 13 and 14 
+bit2	Power on pin 9 available
+bit3	Wi-Fi available
+bit4	GPRS available
+bit5	serial port modes are 232, 485, and 422 (used for ports 2, 3, 4)
+bit6	serial port modes are full-duplex and half-duplex (used for ports 2, 3, 4)
+bit7	have serial port (channel) #2
+bit8	have serial port (channel) #3
+bit9	have serial port (channel) #4
+bit10	have 2 serial ports
+bit11	have 3 serial ports
+bit12	have 4 serial ports
+bit13	serial port 1 supports 232, 485, 422 so multi-channel configuration is only enabled for 232 (this bit works together with bit 1)
+bit14	serial port 1 doesn't support 232, 485, 422 so multi-channel configuration is always enabled (this bit works together with bit 1)
+bit15	TPS2
+
+bits5432109876543210
+
+>>&b0000000000000000	I=$GENERAL;D=General;T=GROUP
+>>&b0000000000000000	I=ON;D=Owner name;T=STRING;C=EDIT;MAXLEN=8;F=R*
+>>&b0000000000000000	I=DN;D=Device name;T=STRING;C=EDIT;MAXLEN=8;F=R*
+>>&b0000000000000000	I=DH;D=DHCP;T=INT;C=STATIC;O=0- Disabled/0/1- Enabled/1;F=R
+>>&b0000000000000000	I=IP;D=IP-address;T=STRING;C=IPCTRL;S=DH==1?"a":"e";F=R*
+>>&b0000000000000000	I=GI;D=Gateway IP-address;T=STRING;C=IPCTRL;S=DH==1?"a":"e";F=R*
+>>&b0000000000000000	I=NM;D=Subnet mask;T=STRING;C=IPCTRL;S=DH==1?"a":"e";F=R*
+>>&b0000000000000000	I=RJ@1;D=TCP Port 1;T=INT;C=EDIT
+>>&b0000000000000000	I=RJ@2;D=TCP Port 2;T=INT;C=EDIT
+>>&b0000000000000000	I=RJ@3;D=TCP Port 3;T=INT;C=EDIT
+>>&b0000000000000000	I=RJ@4;D=TCP Port 4;T=INT;C=EDIT
+>>&b0000000000000000	I=RN;D=Modbus TCP exeption;T=INT;C=STATIC;O=0- Disable/0/1- Enable/1
+
+>>&b0000000000001000	I=$WI-FI;D=Wi-Fi;T=GROUP
+>>&b0000000000001000	I=WE;D=Wi-Fi Mode;T=INT;C=STATIC;O=0- Disabled/0/1- Enabled (on demand)/1/2- Enabled (permanently)/2
+>>&b0000000000001000	I=WA;D=Access Point Name;T=STRING;C=EDIT;MAXLEN=32;S=WE!=0?"e":"i";F=R*
+>>&b0000000000001000	I=WS;D=Security;T=INT;C=STATIC;S=WE!=0?"e":"i";O=0- Disabled/0/1- WEP64/1/2- WEP128/2/3- WPA-PSK/3/4-WPA2-PSK/4          
+>>&b0000000000001000	I=WP;E=1;D=Password;T=STRING;C=EDIT;MAXLEN=32;S=WE!=0&&WS!=0?"e":"i";F=R*
+>>&b0000000000001000	I=WD;D=DHCP;T=INT;C=STATIC;S=WE!=0?"e":"i";F=R;O=0- Disabled/0/1- Enabled/1;
+>>&b0000000000001000	I=WI;D=IP-address;T=STRING;C=IPCTRL;S=WE!=0?"e":"i";F=R*
+>>&b0000000000001000	I=WG;D=Gateway IP-address;T=STRING;C=IPCTRL;S=WE!=0?"e":"i";F=R*
+>>&b0000000000001000	I=WN;D=Subnet mask;T=STRING;C=IPCTRL;S=WE!=0?"e":"i";F=R*
+
+>>&b0000000000010000	I=$GPRS;D=GPRS;T=GROUP
+>>&b0000000000010000	I=GE;D=GPRS Mode;T=INT;C=STATIC;O=0- Disabled/0/1- Enabled (on demand)/1/2- Enabled (permanently)/2
+>>&b0000000000010000	I=GA;D=ATDT Command Parameter;T=STRING;C=EDIT;MAXLEN=16;S=GE!=0?"e":"i";F=R*
+>>&b0000000000010000	I=GP;D=GPRS access point name;T=STRING;C=EDIT;MAXLEN=16;S=GE!=0?"e":"i";F=R*
+
+>>&b0000000000000000	I=$SNMP;D=SNMP;T=GROUP
+>>&b0000000000000000	I=SN;D=SNMP Enable;T=INT;C=STATIC;O=0- Disabled/0/1- Enabled/1;F=R
+>>&b0000000000000000	I=SP;D=Community Name;T=STRING;C=EDIT;MAXLEN=20;F=R*
+>>&b0000000000000000	I=SC;D=Contact;T=STRING;C=EDIT;MAXLEN=20;F=R*
+>>&b0000000000000000	I=SL;D=Location;T=STRING;C=EDIT;MAXLEN=20;F=R*
+
+>>&b0000000000000000	I=$CHANNEL1;D=Ch1;T=GROUP
+>>&b1000000000000000	I=SI;D=Serial interface;T=INT;C=STATIC;O=0- None/0/1- #01 Full-duplex (RS232)/1/2- #02 Full-duplex (RS232)/2/3- #02 Half-duplex (RS485)/3/4- #02 Full-duplex (RS422)/4/5- #05 Half-duplex (RS485)/5
+>>&b0000000000000000	I=RI;D=MODBUS Serial Type;T=INT;C=STATIC;O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
+>>&b0000000000000000	I=CT;D=Connection timeout (1/2 sec);T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=CT>255?"Maximum timeout is 255 1/2 sec":""
+>>&b0000000000000000	I=FC;D=Flow control;T=INT;C=STATIC;O=0- Disabled OR remote /0/1- Local RTS-CTS/1/2- Local XON-XOFF/2
+>>&b0000000000000000	I=BR;D=Baudrate;T=INT;C=STATIC;O=8-150bps/8/9-300bps/9/10-600bps/10/0-1200bps/0/1-2400bps/1/2-4800bps/2/3-9600bps/3/4-19200bps/4/11-28800bps/11/5-38400bps/5/6-57600bps/6/7-115200bps/7/12-230400bps/12/13-460800bps/13
+>>&b0000000000000000	I=PR;D=Parity;T=INT;C=STATIC;O=0- None/0/1- Even/1/2- Odd/2/3- Mark/3/4- Space/4
+>>&b0000000000000000	I=BB;D=Data bits;T=INT;C=STATIC;O=0- 7 bits/0/1- 8 bits/1
+>>&b0000000000000000	I=MD;D=Max intercharacter delay;T=INT;C=EDIT/SPIN/0/1/1/10;V=MD>255?"Maximum intercharacter delay is 255":""
+
+>>&b0000000010000000	I=$CHANNEL2;D=Ch2;T=GROUP
+>>&b1000000000000000	I=SI@2;D=Serial interface;T=INT;C=STATIC;O=0- None/0/1- #01 Full-duplex (RS232)/1/5- #05 Half-duplex (RS485)/5
+>>&b0000000010000000	I=RI@2;D=MODBUS Serial Type;T=INT;C=STATIC;O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
+>>&b0000000010000000	I=CT@2;D=Connection timeout (1/2 sec);T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=CT@2>255?"Maximum timeout is 255 1/2 sec":""
+>>&b0000000010000000	I=FC@2;D=Flow control;T=INT;C=STATIC;O=0- Disabled OR remote /0/1- Local RTS-CTS/1/2- Local XON-XOFF/2
+>>&b0000000010000000	I=BR@2;D=Baudrate;T=INT;C=STATIC;O=8-150bps/8/9-300bps/9/10-600bps/10/0-1200bps/0/1-2400bps/1/2-4800bps/2/3-9600bps/3/4-19200bps/4/11-28800bps/11/5-38400bps/5/6-57600bps/6/7-115200bps/7/12-230400bps/12/13-460800bps/13
+>>&b0000000010000000	I=PR@2;D=Parity;T=INT;C=STATIC;O=0- None/0/1- Even/1/2- Odd/2/3- Mark/3/4- Space/4
+>>&b0000000010000000	I=BB@2;D=Data bits;T=INT;C=STATIC;O=0- 7 bits/0/1- 8 bits/1
+>>&b0000000010000000	I=MD@2;D=Max intercharacter delay;T=INT;C=EDIT/SPIN/0/1/1/10;V=MD@2>255?"Maximum intercharacter delay is 255":""
+
+>>&b0000000110000000	I=$CHANNEL3;D=Ch3;T=GROUP
+>>&b1000000000000000	I=SI@3;D=Serial interface;T=INT;C=STATIC;O=0- None/0/1- #01 Full-duplex (RS232)/1/2- #02 Full-duplex (RS232)/2/3- #02 Half-duplex (RS485)/3/4- #02 Full-duplex (RS422)/4/5- #05 Half-duplex (RS485)/5
+>>&b0000000110000000	I=RI@3;D=MODBUS Serial Type;T=INT;C=STATIC;O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
+>>&b0000000110000000	I=CT@3;D=Connection timeout (1/2 sec);T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=CT@3>255?"Maximum timeout is 255 1/2 sec":""
+>>&b0000000110000000	I=FC@3;D=Flow control;T=INT;C=STATIC;O=0- Disabled OR remote /0/1- Local RTS-CTS/1/2- Local XON-XOFF/2
+>>&b0000000110000000	I=BR@3;D=Baudrate;T=INT;C=STATIC;O=8-150bps/8/9-300bps/9/10-600bps/10/0-1200bps/0/1-2400bps/1/2-4800bps/2/3-9600bps/3/4-19200bps/4/11-28800bps/11/5-38400bps/5/6-57600bps/6/7-115200bps/7/12-230400bps/12/13-460800bps/13
+>>&b0000000110000000	I=PR@3;D=Parity;T=INT;C=STATIC;O=0- None/0/1- Even/1/2- Odd/2/3- Mark/3/4- Space/4
+>>&b0000000110000000	I=BB@3;D=Data bits;T=INT;C=STATIC;O=0- 7 bits/0/1- 8 bits/1
+>>&b0000000110000000	I=MD@3;D=Max intercharacter delay;T=INT;C=EDIT/SPIN/0/1/1/10;V=MD@3>255?"Maximum intercharacter delay is 255":""
+
+>>&b0000001110000000	I=$CHANNEL4;D=Ch4;T=GROUP
+>>&b1000000000000000	I=SI@4;D=Serial interface;T=INT;C=STATIC;O=0- None/0/1- #01 Full-duplex (RS232)/1/5- #05 Half-duplex (RS485)/5
+>>&b0000001110000000	I=RI@4;D=MODBUS Serial Type;T=INT;C=STATIC;O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
+>>&b0000001110000000	I=CT@4;D=Connection timeout (1/2 sec);T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=CT@4>255?"Maximum timeout is 255 1/2 sec":""
+>>&b0000001110000000	I=FC@4;D=Flow control;T=INT;C=STATIC;O=0- Disabled OR remote /0/1- Local RTS-CTS/1/2- Local XON-XOFF/2
+>>&b0000001110000000	I=BR@4;D=Baudrate;T=INT;C=STATIC;O=8-150bps/8/9-300bps/9/10-600bps/10/0-1200bps/0/1-2400bps/1/2-4800bps/2/3-9600bps/3/4-19200bps/4/11-28800bps/11/5-38400bps/5/6-57600bps/6/7-115200bps/7/12-230400bps/12/13-460800bps/13
+>>&b0000001110000000	I=PR@4;D=Parity;T=INT;C=STATIC;O=0- None/0/1- Even/1/2- Odd/2/3- Mark/3/4- Space/4
+>>&b0000001110000000	I=BB@4;D=Data bits;T=INT;C=STATIC;O=0- 7 bits/0/1- 8 bits/1
+>>&b0000001110000000	I=MD@4;D=Max intercharacter delay;T=INT;C=EDIT/SPIN/0/1/1/10;V=MD@4>255?"Maximum intercharacter delay is 255":""
+
+>>&b0000000000000000	I=$ROUTEID;D=Routing ID;T=GROUP
+>>&b0000000000000000	I=RA@1;D=1- ID from;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@1>255?"Maximum modbus ID is 255":""
+>>&b0000000000000000	I=RB@1;E=1;D=ID to;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RB@1>255?"Maximum modbus ID is 255":""
+>>&b0000000000000000	I=RD@1;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
+>>&b1000000000000000	I=RE@1;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
+>>&b0000000000000000	I=RA@2;D=2- ID from;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@2>255?"Maximum modbus ID is 255":""
+>>&b0000000000000000	I=RB@2;E=1;D=ID to;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RB@2>255?"Maximum modbus ID is 255":""
+>>&b0000000000000000	I=RD@2;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
+>>&b1000000000000000	I=RE@2;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
+>>&b0000000000000000	I=RA@3;D=3- ID from;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@3>255?"Maximum modbus ID is 255":""
+>>&b0000000000000000	I=RB@3;E=1;D=ID to;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RB@3>255?"Maximum modbus ID is 255":""
+>>&b0000000000000000	I=RD@3;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
+>>&b1000000000000000	I=RE@3;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
+>>&b0000000000000000	I=RA@4;D=4- ID from;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@4>255?"Maximum modbus ID is 255":""
+>>&b0000000000000000	I=RB@4;E=1;D=ID to;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RB@4>255?"Maximum modbus ID is 255":""
+>>&b0000000000000000	I=RD@4;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
+>>&b1000000000000000	I=RE@4;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
+>>&b0000000000000000	I=RA@5;D=5- ID from;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@5>255?"Maximum modbus ID is 255":""
+>>&b0000000000000000	I=RB@5;E=1;D=ID to;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RB@5>255?"Maximum modbus ID is 255":""
+>>&b0000000000000000	I=RD@5;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
+>>&b1000000000000000	I=RE@5;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
+>>&b0000000000000000	I=RA@6;D=6- ID from;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@6>255?"Maximum modbus ID is 255":""
+>>&b0000000000000000	I=RB@6;E=1;D=ID to;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RB@6>255?"Maximum modbus ID is 255":""
+>>&b0000000000000000	I=RD@6;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
+>>&b1000000000000000	I=RE@6;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
+>>&b0000000000000000	I=RA@7;D=7- ID from;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@7>255?"Maximum modbus ID is 255":""
+>>&b0000000000000000	I=RB@7;E=1;D=ID to;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RB@7>255?"Maximum modbus ID is 255":""
+>>&b0000000000000000	I=RD@7;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
+>>&b1000000000000000	I=RE@7;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
+>>&b0000000000000000	I=RA@8;D=8- ID from;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@8>255?"Maximum modbus ID is 255":""
+>>&b0000000000000000	I=RB@8;E=1;D=ID to;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RB@8>255?"Maximum modbus ID is 255":""
+>>&b0000000000000000	I=RD@8;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
+>>&b1000000000000000	I=RE@8;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
+
+>>&b0000000000000000	I=$ROUTEPORT;D=Routing PORT;T=GROUP
+>>&b0000000000000000	I=RF@1;D=1- TCP Port;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@1>65535?"Maximum TCP port is 65535":""
+>>&b0000000000000000	I=RG@1;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
+>>&b1000000000000000	I=RH@1;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
+>>&b0000000000000000	I=RF@2;D=2- TCP Port;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@1>65535?"Maximum TCP port is 65535":""
+>>&b0000000000000000	I=RG@2;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
+>>&b1000000000000000	I=RH@2;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
+>>&b0000000000000000	I=RF@3;D=3- TCP Port;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@1>65535?"Maximum TCP port is 65535":""
+>>&b0000000000000000	I=RG@3;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
+>>&b1000000000000000	I=RH@3;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
+>>&b0000000000000000	I=RF@4;D=4- TCP Port;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@1>65535?"Maximum TCP port is 65535":""
+>>&b0000000000000000	I=RG@4;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
+>>&b1000000000000000	I=RH@4;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
+
+>>&b0000000000000000	I=$TCPSLAVE;D=TCP Slave Devices;T=GROUP
+>>&b0000000000000000	I=RK@1;D=1- TCP IP-address;T=STRING;C=IPCTRL;S=DH==1?"a":"e";F=R*
+>>&b0000000000000000	I=RL@1;E=1;D=TCP Port;T=INT;C=EDIT
+>>&b0000000000000000	I=RK@2;D=2- TCP IP-address;T=STRING;C=IPCTRL;S=DH==1?"a":"e";F=R*
+>>&b0000000000000000	I=RL@2;E=1;D=TCP Port;T=INT;C=EDIT
+>>&b0000000000000000	I=RK@3;D=3- TCP IP-address;T=STRING;C=IPCTRL;S=DH==1?"a":"e";F=R*
+>>&b0000000000000000	I=RL@3;E=1;D=TCP Port;T=INT;C=EDIT
+>>&b0000000000000000	I=RK@4;D=4- TCP IP-address;T=STRING;C=IPCTRL;S=DH==1?"a":"e";F=R*
+>>&b0000000000000000	I=RL@4;E=1;D=TCP Port;T=INT;C=EDIT
+ 
