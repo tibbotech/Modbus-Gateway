@@ -291,11 +291,11 @@ const MAX_NUM_SERIAL_PORTS=4 'do not change this, array declarations are made wi
 
 
 #if DEVICE_PORT_SCHEME=PORT_SCHEME_4P or DEVICE_PORT_SCHEME=PORT_SCHEME_4C
-	#define DSMAN_MAX_NUM_LINES 200
+	#define DSMAN_MAX_NUM_LINES 122
 	const NUM_SERIAL_PORTS=4						'(must not exceed MAX_NUM_SERIAL_PORTS)  +++ ULYSSES +++
 	#define DSMAN_DESCRIPTOR_FILE "dsman_4p_4c.txt"
 #elif DEVICE_PORT_SCHEME=PORT_SCHEME_4P2
-	#define DSMAN_MAX_NUM_LINES 200
+	#define DSMAN_MAX_NUM_LINES 121
 	const NUM_SERIAL_PORTS=4
 	#define DSMAN_DESCRIPTOR_FILE "dsman_4p2.txt"
 #else

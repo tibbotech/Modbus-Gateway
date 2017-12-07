@@ -293,7 +293,7 @@ sub modbus_buffer_operate(channelU as byte)
 				shiftID = modbus_out_buffer((i + 2) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK) 		' Get shiftID
 				k = modbus_out_buffer((i + 3) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK) 			' get length
 				pointerData = (i + 4) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK
-				modbus_out_buffer((i + 1) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK) = MODBUS_BUFFER_EMPTY_FLAG										' Marking packet is delete
+				modbus_out_buffer((i + 1) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK) = MODBUS_BUFFER_EMPTY_FLAG	' Marking packet is delete
 				for l = 0 to k - 1
 					data = data + chr(modbus_out_buffer((pointerData + l) and MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK))
 				next l
@@ -691,6 +691,7 @@ sub modbus_send_serial_ascii(byref packet as string, channelSerial as byte, shif
 		ser.send
 		
 		snmp_counter_out_serial(channelSerial) = snmp_counter_out_serial(channelSerial) + len(modbus_str)
+		snmp_packets_out_serial(channelSerial) = snmp_packets_out_serial(channelSerial) + 1
 		
 		' Check MONITOR mode
 		if modbus_monitor = true then
@@ -718,7 +719,6 @@ sub modbus_send_serial_rtu(byref packet as string, channelSerial as byte, shiftI
 	
 	if port_in_use(channelSerial) = YES then
 		'Change ID
-		'Change ID
 		if shiftID <> 0 then
 			client_id = asc(mid(packet, 1, 1))
 			client_id = client_id + shiftID
@@ -735,6 +735,7 @@ sub modbus_send_serial_rtu(byref packet as string, channelSerial as byte, shiftI
 		ser.send
 
 		snmp_counter_out_serial(channelSerial) = snmp_counter_out_serial(channelSerial) + len(modbus_str)
+		snmp_packets_out_serial(channelSerial) = snmp_packets_out_serial(channelSerial) + 1
 
 		' Check MONITOR mode
 		if modbus_monitor = true then
@@ -817,12 +818,14 @@ function modbus_send_tcp(byref data as string, destination as byte, transaction 
 		dev_debugprint("ModBus TCP packet send. Socket: " + str(destination))
 		modbus_debug_dump(data_for_send)
 	#endif
+	
 	sock.num = destination
 	if sock.statesimple = PL_SSTS_EST then
 		sock.setdata(data_for_send)
 		sock.send()
 
 		snmp_counter_out_ethernet = snmp_counter_out_ethernet + len(data_for_send)
+		snmp_packets_out_ethernet = snmp_packets_out_ethernet + 1
 
 		' Check MONITOR mode
 		if modbus_monitor = true then
@@ -915,6 +918,7 @@ sub modbus_tcp_receive(byref data as string, channelTCP as byte, portTCP as word
 	#endif
 
 	snmp_counter_in_ethernet = snmp_counter_in_ethernet + len(data)
+	snmp_packets_in_ethernet = snmp_packets_in_ethernet + 1
 
 	if len(data) > 0 then
 		if asc(mid(data, 3, 1)) = 0 and asc(mid(data, 4, 1)) = 0 then	' test MODBUS Protocol ID
@@ -954,7 +958,7 @@ sub modbus_tcp_receive(byref data as string, channelTCP as byte, portTCP as word
 								end if
 							next j
 
-							if (ind = false) and (modbus_tcp_exeption = true )then
+							if (ind = false) and (modbus_tcp_exeption = true) then
 								' generate Modbus TCP exeption Route Error - 0A
 								data_for_exeption = mid(data, 7, 1) + chr(asc(mid(data, 8, 1)) or MODBUS_TCP_EXEPTION_FLAG) + chr(MODBUS_TCP_EXEPTION_ROUTE_ERROR)
 								modbus_send_tcp(data_for_exeption, channelTCP and not MODBUS_SOCKET_TYPE_FLAG, 256 * asc(mid(data, 1, 1)) + asc(mid(data, 2, 1)), 0, MODBUS_TCP_EXCEPTION)
@@ -1016,6 +1020,7 @@ sub modbus_serial_receive(byref data as string, channelSerial as byte)
 	#endif
 
 	snmp_counter_in_serial(channelSerial) = snmp_counter_in_serial(channelSerial) + len(data)
+	snmp_packets_in_serial(channelSerial) = snmp_packets_in_serial(channelSerial) + 1
 
 	select case ModBusSerialChannelsOperation(channelSerial).SerialType
 	case MODBUS_SERIAL_MASTER_RTU:
@@ -1029,7 +1034,7 @@ sub modbus_serial_receive(byref data as string, channelSerial as byte)
 		crc = CRC16(data, len(data)-2)
 		
 		if asc(mid(data, len(data)-1, 1)) = (crc shr 8) and asc(mid(data, len(data), 1)) = (crc and 255) then
-			' CRC is OK
+			' CRC OK
 			' Get serial channel(s) for routing request
 			clientid = asc(mid(data, 1, 1))
 			serials = 0
@@ -1046,7 +1051,7 @@ sub modbus_serial_receive(byref data as string, channelSerial as byte)
 				modbus_broadcast_operate(data, channelSerial or MODBUS_SERIAL_SOCKET_TYPE)
 			end if
 		else
-			' CRC is error
+			' CRC error
 			
 			snmp_counter_error_serial(channelSerial) = snmp_counter_error_serial(channelSerial) + 1
 
@@ -1094,7 +1099,7 @@ sub modbus_serial_receive(byref data as string, channelSerial as byte)
 						modbus_broadcast_operate(data, channelSerial or MODBUS_SERIAL_SOCKET_TYPE)
 					end if
 				else
-					' LRC is error
+					' LRC error
 			
 					snmp_counter_error_serial(channelSerial) = snmp_counter_error_serial(channelSerial) + 1
 
@@ -1117,7 +1122,7 @@ sub modbus_serial_receive(byref data as string, channelSerial as byte)
 		crc = CRC16(data, len(data)-2)
 		
 		if asc(mid(data, len(data)-1, 1)) = (crc shr 8) and asc(mid(data, len(data), 1)) = (crc and 255) then
-			' CRC is OK
+			' CRC OK
 			if ModBusSerialChannelsOperation(channelSerial).OperationInProgress = true then
 				modbus_send_responce(left(data, len(data) - 2), channelSerial or MODBUS_SERIAL_SOCKET_TYPE, ModBusSerialChannelsOperation(channelSerial).SourceU, 0 - ModBusSerialChannelsOperation(channelSerial).ShiftID)
 				
@@ -1125,7 +1130,7 @@ sub modbus_serial_receive(byref data as string, channelSerial as byte)
 				modbus_buffer_operate(channelSerial or MODBUS_SERIAL_SOCKET_TYPE)
 			end if
 		else
-			' CRC is error
+			' CRC error
 			
 			snmp_counter_error_serial(channelSerial) = snmp_counter_error_serial(channelSerial) + 1
 
@@ -1156,7 +1161,7 @@ sub modbus_serial_receive(byref data as string, channelSerial as byte)
 				next i
 				
 				if lrc = 0 then
-					' LRC is OK
+					' LRC OK
 					if ModBusSerialChannelsOperation(channelSerial).OperationInProgress = true then
 						modbus_send_responce(left(data_bin, len(data_bin) - 1), channelSerial or MODBUS_SERIAL_SOCKET_TYPE, ModBusSerialChannelsOperation(channelSerial).SourceU, 0 - ModBusSerialChannelsOperation(channelSerial).ShiftID)
 						
@@ -1164,7 +1169,7 @@ sub modbus_serial_receive(byref data as string, channelSerial as byte)
 						modbus_buffer_operate(channelSerial or MODBUS_SERIAL_SOCKET_TYPE)
 					end if
 				else
-					' LRC is error
+					' LRC error
 			
 					snmp_counter_error_serial(channelSerial) = snmp_counter_error_serial(channelSerial) + 1
 

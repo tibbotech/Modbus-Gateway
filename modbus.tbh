@@ -1,4 +1,4 @@
-#define MODBUS_SERIAL_OUT_BUFFER_LENGTH 2048
+#define MODBUS_SERIAL_OUT_BUFFER_LENGTH 2048		' Must be a power of two
 #define MODBUS_SERIAL_OUT_BUFFER_LENGTH_MASK MODBUS_SERIAL_OUT_BUFFER_LENGTH - 1 
 #define MODBUS_SOCKET_MAX_NUMBERS 8
 #define MODBUS_SLAVE_SOCKET_NUMBERS 4				' numbers sockets for conneting to modbus slave TCP units

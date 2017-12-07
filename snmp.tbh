@@ -51,6 +51,16 @@ declare snmp_counter_out_wln as dword
 declare snmp_counter_out_gprs as dword
 declare snmp_counter_out_serial(4) as dword
 
+declare snmp_packets_in_ethernet as dword
+declare snmp_packets_in_wln as dword
+declare snmp_packets_in_gprs as dword
+declare snmp_packets_in_serial(4) as dword
+
+declare snmp_packets_out_ethernet as dword
+declare snmp_packets_out_wln as dword
+declare snmp_packets_out_gprs as dword
+declare snmp_packets_out_serial(4) as dword
+
 declare snmp_counter_error_serial(4) as dword
 
 ' Functions & Subs
