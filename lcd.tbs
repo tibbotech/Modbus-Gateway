@@ -179,11 +179,11 @@ end sub
 sub lcd_show_wln_mkey_progress(progress as byte)
 	if display_installed=NO then exit sub
 
-	lcd.textalignment=PL_LCD_TEXT_ALIGNMENT_TOP_CENTER
-
 	#if PLATFORM_ID=TPP2WG2 or PLATFORM_ID=TPP2W
+		lcd.textalignment=PL_LCD_TEXT_ALIGNMENT_TOP_CENTER
 		lcd.printaligned(str(progress)+"%", 0, 145, lcd.width, 10)
 	#else
+		lcd.textalignment=PL_LCD_TEXT_ALIGNMENT_BOTTOM_CENTER
 		lcd.printaligned(str(progress)+"%", 0, 0, lcd.width, lcd.height)
 	#endif
 end sub
@@ -665,13 +665,14 @@ sub lcd_display_page(page as enum_lcd_pages, mode as enum_lcd_print_modes, eleme
 		
 		if port_in_use(ch)=NO then
 			if element=LCD_PRINT_ELEMENT_ALL then
-				lcd_print_icon("ser_channel.bmp")
 				lcd_print_top_text("CHANNEL #"+str(ch+1))
 				lcd_print_bottom_text("NOT IN USE")
 			end if
 		else	
 			if element=LCD_PRINT_ELEMENT_ALL then
 			
+				lcd_print_icon("ser_channel.bmp")
+
 				s="CHANNEL #"+str(ch+1)
 			
 				interface=param_si(ch)
