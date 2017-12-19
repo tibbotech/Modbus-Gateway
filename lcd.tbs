@@ -538,7 +538,7 @@ sub lcd_display_page(page as enum_lcd_pages, mode as enum_lcd_print_modes, eleme
 		lcd_display_tibbo("Booting...")	
 
 	case LCD_PAGE_LOGO_WORK:
-		lcd_display_tibbo("Modbus Device Server")	
+		lcd_display_tibbo("Modbus Gateway")	
 	
 	case LCD_PAGE_INIT_START:
 		lcd_display_tibbo("INIT IN PROGRESS`Do not power off the device!")

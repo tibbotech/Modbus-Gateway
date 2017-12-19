@@ -1061,7 +1061,7 @@ function snmp_operate_objectID(byref data as string, pos as byte, lengthPacket a
 		
 		case SNMP_OBJECT_SYSNAME:		' .1.3.6.1.2.1.1.5.0 Name
 			snmp_operate_objectID = true
-			snmp_send_responce(SNMP_OCTET_STRING, "Tibbo Modbus Device Server", SNMP_OBJECT_SYSNAME)
+			snmp_send_responce(SNMP_OCTET_STRING, "Tibbo Modbus Gateway", SNMP_OBJECT_SYSNAME)
 
 		case SNMP_OBJECT_SYSLOCATION:	' .1.3.6.1.2.1.1.6.0 Location
 			snmp_operate_objectID = true

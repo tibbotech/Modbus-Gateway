@@ -477,7 +477,7 @@ sub modbus_send_request_to_serial(byref data as string, sourceU as byte, destina
 					
 				end if
 
-				if asc(mid(data_for_send, 1, 1)) <> 255 then		' if packet is BROADCAST - no responce waiting
+				if asc(mid(data_for_send, 1, 1)) <> 0 then		' if packet is BROADCAST - no responce waiting
 
 					ModBusSerialChannelsOperation(destination).TransactionID = transaction
 					ModBusSerialChannelsOperation(destination).ClientID = asc(left(data_for_send, 1))
@@ -551,7 +551,7 @@ sub modbus_send_request_to_tcp(byref data as string, sourceU as byte, destinatio
 					
 				end if
 
-				if asc(mid(data_for_send, 1, 1)) <> 255 then ' if packet is BROADCAST - don't responce wait
+				if asc(mid(data_for_send, 1, 1)) <> 0 then ' if packet is BROADCAST - don't responce wait
 					
 					ModBusTCPSocketsOperation(i).TransactionID = transaction
 					ModBusTCPSocketsOperation(i).TransactionIDNew = ModBusTCPSocketsOperation(i).TransactionIDNew + 1
@@ -927,7 +927,7 @@ sub modbus_tcp_receive(byref data as string, channelTCP as byte, portTCP as word
 			clientid = asc(mid(data, 7, 1))
 			serials = 0
 			sockets = 0
-			if clientid <> 255 then
+			if clientid <> 0 then
 				for i = 0 to modbus_socks_number - 1
 					if modbus_socks(i) = channelTCP then
 						' MASTER channel
@@ -1039,7 +1039,7 @@ sub modbus_serial_receive(byref data as string, channelSerial as byte)
 			clientid = asc(mid(data, 1, 1))
 			serials = 0
 			sockets = 0
-			if clientid <> 255 then
+			if clientid <> 0 then
 				for i = 0 to MODBUS_RULES_ID_NUMBERS - 1
 					if ModBusRouteId(i).IdFrom <> 0 and ModBusRouteId(i).IdTo <> 0 then
 						if clientid >= ModBusRouteId(i).IdFrom and clientid <= ModBusRouteId(i).IdTo  then
@@ -1087,7 +1087,7 @@ sub modbus_serial_receive(byref data as string, channelSerial as byte)
 					clientid = asc(mid(data_bin, 1, 1))
 					serials = 0
 					sockets = 0
-					if clientid <> 255 then
+					if clientid <> 0 then
 						for i = 0 to MODBUS_RULES_ID_NUMBERS - 1
 							if ModBusRouteId(i).IdFrom <> 0 and ModBusRouteId(i).IdTo <> 0 then
 								if clientid >= ModBusRouteId(i).IdFrom and clientid <= ModBusRouteId(i).IdTo  then
