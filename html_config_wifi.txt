@@ -13,6 +13,6 @@ bits76543210
 >>&b00000000	WS	Security						B,L,0-Disabled;1-WEP64;2-WEP128;3-WPA-PSK;4-WPA2-PSK;	^
 >>&b00000000	WP	Password						S,I,26	^
 >>&b00000000	WD	DHCP							B,L,0-Disabled;1-Enabled;	^
->>&b00000000	WI	IP-address 						S,I,15	^
->>&b00000000	WG	Gateway IP-address 				S,I,15	^
+>>&b00000000	WI	IP Address 						S,I,15	^
+>>&b00000000	WG	Gateway IP Address 				S,I,15	^
 >>&b00000000	WN	Subnet Mask						S,I,15	^

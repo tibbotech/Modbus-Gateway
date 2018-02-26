@@ -102,7 +102,7 @@ bits5432109876543210
 >>&b0000001110000000	I=BB@4;D=Data bits;T=INT;C=STATIC;O=0- 7 bits/0/1- 8 bits/1
 >>&b0000001110000000	I=MD@4;D=Max intercharacter delay;T=INT;C=EDIT/SPIN/0/1/1/10;V=MD@4>255?"Maximum intercharacter delay is 255":""
 
->>&b0000000000000000	I=$ROUTEID;D=Routing ID;T=GROUP
+>>&b0000000000000000	I=$ROUTEID;D=ID-based Routing;T=GROUP
 >>&b0000000000000000	I=RA@1;D=1- ID from;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@1>255?"Maximum modbus ID is 255":""
 >>&b0000000000000000	I=RB@1;E=1;D=ID to;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RB@1>255?"Maximum modbus ID is 255":""
 >>&b0000000000000000	I=RD@1;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
@@ -152,7 +152,7 @@ bits5432109876543210
 >>&b0000100000000000	I=RE@8;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
 >>&b0001000000000000	I=RE@8;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
 
->>&b0000000000000000	I=$ROUTEPORT;D=Routing PORT;T=GROUP
+>>&b0000000000000000	I=$ROUTEPORT;D=Port-based Routing;T=GROUP
 >>&b0000000000000000	I=RF@1;D=1- TCP Port;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@1>65535?"Maximum TCP port is 65535":""
 >>&b0000000000000000	I=RG@1;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
 >>&b0000010000000000	I=RH@1;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
@@ -174,13 +174,13 @@ bits5432109876543210
 >>&b0000100000000000	I=RH@4;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
 >>&b0001000000000000	I=RH@4;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
 
->>&b0000000000000000	I=$TCPSLAVE;D=TCP Slave Devices;T=GROUP
->>&b0000000000000000	I=RK@1;D=1- TCP IP-address;T=STRING;C=IPCTRL;S=DH==1?"a":"e";F=R*
+>>&b0000000000000000	I=$TCPSLAVE;D=TCP Slaves;T=GROUP
+>>&b0000000000000000	I=RK@1;D=1- IP-address;T=STRING;C=IPCTRL;S=DH==1?"a":"e";F=R*
 >>&b0000000000000000	I=RL@1;E=1;D=TCP Port;T=INT;C=EDIT
->>&b0000000000000000	I=RK@2;D=2- TCP IP-address;T=STRING;C=IPCTRL;S=DH==1?"a":"e";F=R*
+>>&b0000000000000000	I=RK@2;D=2- IP-address;T=STRING;C=IPCTRL;S=DH==1?"a":"e";F=R*
 >>&b0000000000000000	I=RL@2;E=1;D=TCP Port;T=INT;C=EDIT
->>&b0000000000000000	I=RK@3;D=3- TCP IP-address;T=STRING;C=IPCTRL;S=DH==1?"a":"e";F=R*
+>>&b0000000000000000	I=RK@3;D=3- IP-address;T=STRING;C=IPCTRL;S=DH==1?"a":"e";F=R*
 >>&b0000000000000000	I=RL@3;E=1;D=TCP Port;T=INT;C=EDIT
->>&b0000000000000000	I=RK@4;D=4- TCP IP-address;T=STRING;C=IPCTRL;S=DH==1?"a":"e";F=R*
+>>&b0000000000000000	I=RK@4;D=4- IP-address;T=STRING;C=IPCTRL;S=DH==1?"a":"e";F=R*
 >>&b0000000000000000	I=RL@4;E=1;D=TCP Port;T=INT;C=EDIT
  
