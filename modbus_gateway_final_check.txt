@@ -1,0 +1,11 @@
+DS1101 -- there shouldn't be a "serial interface" setting in Serial tabs
+
+Do we actually support TPS3? I don't see the arrangement where ALL serial tibbits can be #02
+
+In the web interface, the order of serial options for TPS is different from the DS Man
+
+How come in DS Man we have different option sets for ports 1/3 and 2/4, but in the web interface it is all the same?
+
+Why do we have max intercharacter delay?
+
+We do not need TCP port in port-based routing settings

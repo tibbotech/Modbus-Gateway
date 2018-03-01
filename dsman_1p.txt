@@ -28,10 +28,10 @@
 >>&b00000000	I=SL;D=Location;T=STRING;C=EDIT;MAXLEN=20;F=R*
 
 >>&b00000000	I=$CHANNEL1;D=Channel1;T=GROUP
->>&b00000000	I=RI;D=MODBUS Serial Type;T=INT;C=STATIC;O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
->>&b00000000	I=CT;D=Connection timeout (1/2 sec);T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=CT>255?"Maximum timeout is 255 1/2 sec":""
+>>&b00000000	I=RI;D=Modbus Serial Type;T=INT;C=STATIC;O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
+>>&b00000000	I=CT;D=Reply timeout (1/2 sec. int.);T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=CT>255?"Maximum timeout is 255 1/2 sec":""
 >>&b00000000	I=SI;D=Serial interface;T=INT;C=STATIC;O=0- Full-duplex/0/1- Half-duplex/1
->>&b00000000	I=FC;D=RTS/CTS flow control;T=INT;C=STATIC;O=0- Disabled OR remote /0/1- Local RTS-CTS/1
+>>&b00000000	I=FC;D=RTS/CTS flow control;T=INT;C=STATIC;O=0- Disabled /0/1- RTS-CTS/1
 >>&b00000000	I=DT;D=DTR mode;T=INT;C=STATIC;O=0- Idle or remote /0/1- Indicate connection status/1
 >>&b00000000	I=DS;E=1;D=Power-up DTR state;T=INT;C=STATIC;O=0- LOW /0/1- HIGH/1;S=DT==0?"e":"i"
 >>&b00000000	I=BR;D=Baudrate;T=INT;C=STATIC;O=8-150bps/8/9-300bps/9/10-600bps/10/0-1200bps/0/1-2400bps/1/2-4800bps/2/3-9600bps/3/4-19200bps/4/11-28800bps/11/5-38400bps/5/6-57600bps/6/7-115200bps/7

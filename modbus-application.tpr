@@ -1,11 +1,11 @@
 [project]
 version=1
-platform=DS1101W
+platform=TPP2W(G2)
 src_lib_ver=2_00
 name=modbus_app-1_00
 output=modbus_app-1_00.tpc
 debug=off
-defines=/dLCD_TYPE=SOLOMON_SSD1305 /dOBJECT_LCD=LCD_ENABLED /dOBJECT_FD=FD_ENABLED /dOBJECT_WLN=WLN_ENABLED /dOBJECT_KP=KP_ENABLED
+defines= /dLCD_TYPE=SOLOMON_SSD1305 /dOBJECT_LCD=LCD_ENABLED /dOBJECT_FD=FD_ENABLED /dOBJECT_KP=KP_ENABLED /dOBJECT_WLN=WLN_ENABLED
 transport=udp_winpcap
 [address1]
 platform=DS1100
@@ -18,7 +18,7 @@ address=0.36.119.82.118.67
 [address3]
 platform=DS1102W
 transport=udp_winpcap
-address=0.36.119.82.110.205
+address=0.36.119.82.113.145
 [address4]
 platform=DS1202
 transport=udp_winpcap
@@ -90,7 +90,7 @@ address=0.1.2.3.8.201
 [address21]
 platform=TPP3W(G2)
 transport=udp_winpcap
-address=0.36.119.82.191.240
+address=0.36.119.85.251.40
 [address22]
 platform=SIMULATOR
 transport=udp_winpcap
@@ -98,7 +98,7 @@ address=0.17.107.27.190.187
 [address23]
 platform=TPP2W(G2)
 transport=udp_winpcap
-address=0.36.119.82.191.246
+address=0.36.119.85.251.40
 [address24]
 platform=EM2000W
 transport=udp_winpcap
