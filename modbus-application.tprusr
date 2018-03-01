@@ -205,7 +205,7 @@ opened=no
 [file43]
 line=0
 cursor=0
-opened=yes
+opened=active
 [file44]
 line=0
 cursor=0
@@ -298,7 +298,7 @@ opened=no
 [file75]
 line=78
 cursor=1987
-opened=active
+opened=yes
 breakpoints=
 [file76]
 line=0
