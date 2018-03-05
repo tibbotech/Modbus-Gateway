@@ -52,8 +52,8 @@ opened=no
 breakpoints=
 [file11]
 line=50
-cursor=1031
-opened=no
+cursor=1488
+opened=active
 breakpoints=
 [file12]
 line=71
@@ -168,7 +168,7 @@ breakpoints=
 [file34]
 line=0
 cursor=1084
-opened=active
+opened=yes
 breakpoints=
 [file35]
 line=0
