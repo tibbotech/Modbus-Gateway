@@ -11,7 +11,7 @@ bit9	have 3 serial ports
 bit10	have 4 serial ports
 bit11	serial port 1 supports 232, 485, 422 so multi-channel configuration is only enabled for 232 (this bit works together with bit 1)
 bit12	serial port 1 doesn't support 232, 485, 422 so multi-channel configuration is always enabled (this bit works together with bit 1)
-bit13   TPS2
+bit13	TPS2 TPS3
 
 bits32109876543210
 

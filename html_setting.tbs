@@ -286,9 +286,9 @@ public sub html_rules_port_selected
 	sock_setsend("<select name = 'ch' onchange=PortSelected(this.value) STYLE='width: 100%'>")
 	for i = 0 to MODBUS_RULES_PORT_NUMBERS - 1
 		if i = html_channel_index then
-			sock_setsend("<option value = '"+str(i)+"' selected='selected'>Rule "+str(i+1)+"</option>")
+			sock_setsend("<option value = '"+str(i)+"' selected='selected'>TCP Port "+str(i+1)+"</option>")
 		else
-			sock_setsend("<option value = '"+str(i)+"' >Rule "+str(i+1)+"</option>")
+			sock_setsend("<option value = '"+str(i)+"' >TCP Port "+str(i+1)+"</option>")
 		end if
 	next i	
 	sock_setsend("</select>")
