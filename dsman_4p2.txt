@@ -52,92 +52,88 @@ bits5432109876543210
 >>&b0000000000000000	I=SL;D=Location;T=STRING;C=EDIT;MAXLEN=20;S=SN!=0?"e":"i";F=R*
 
 >>&b0000000000000000	I=$CHANNEL1;D=Serial 1;T=GROUP
->>&b1000000000000000	I=SI;D=Serial interface;T=INT;C=STATIC;O=0- None/0/1- Tibbit #01, RS232 (full-duplex)/1/2- Tibbit #02, RS232 (full-duplex)/2/3- Tibbit #02, RS485 (half-duplex)/3/4- Tibbit #02, RS422 (full-duplex)/4/5- Tibbit #05, RS485 (half-duplex)/5
->>&b0000000000000000	I=RI;D=Modbus Serial Type;T=INT;C=STATIC;S=SI!=0?"e":"i";O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
->>&b0000000000000000	I=CT;D=Reply timeout (1/2 sec. int.);T=INT;S=SI!=0?"e":"i";C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=CT>255?"Maximum timeout is 255 1/2 sec":""
->>&b0000000000000000	I=FC;D=Flow control;T=INT;C=STATIC;S=SI==1||SI==2||SI==4?"e":"i";O=0- Disabled /0/1- RTS-CTS/1
->>&b0000000000000000	I=BR;D=Baudrate;T=INT;C=STATIC;S=SI!=0?"e":"i";O=8-150bps/8/9-300bps/9/10-600bps/10/0-1200bps/0/1-2400bps/1/2-4800bps/2/3-9600bps/3/4-19200bps/4/11-28800bps/11/5-38400bps/5/6-57600bps/6/7-115200bps/7/12-230400bps/12/13-460800bps/13
->>&b0000000000000000	I=PR;D=Parity;T=INT;C=STATIC;S=SI!=0?"e":"i";O=0- None/0/1- Even/1/2- Odd/2/3- Mark/3/4- Space/4
->>&b0000000000000000	I=BB;D=Data bits;T=INT;C=STATIC;S=SI!=0?"e":"i";O=0- 7 bits/0/1- 8 bits/1
->>&b0000000000000000	I=MD;D=Max intercharacter delay;T=INT;S=SI!=0?"e":"i";C=EDIT/SPIN/0/1/1/10;V=MD>255?"Maximum intercharacter delay is 255":""
+>>&b0000000000000000	I=SI@1;D=Serial interface;T=INT;C=STATIC;O=0- None/0/1- Tibbit #01, RS232 (full-duplex)/1/2- Tibbit #02, RS232 (full-duplex)/2/3- Tibbit #02, RS485 (half-duplex)/3/4- Tibbit #02, RS422 (full-duplex)/4/5- Tibbit #05, RS485 (half-duplex)/5
+>>&b0000000000000000	I=RI@1;D=Modbus Serial Type;T=INT;C=STATIC;S=SI@1!=0?"e":"i";O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
+>>&b0000000000000000	I=CT@1;D=Reply timeout (1/2 sec. int.);T=INT;S=SI@1!=0?"e":"i";C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=CT@1>255?"Maximum timeout is 255 1/2 sec":""
+>>&b0000000000000000	I=FC@1;D=Flow control;T=INT;C=STATIC;S=SI@1==1||SI@1==2||SI@1==4?"e":"i";O=0- Disabled /0/1- RTS-CTS/1
+>>&b0000000000000000	I=BR@1;D=Baudrate;T=INT;C=STATIC;S=SI@1!=0?"e":"i";O=8-150bps/8/9-300bps/9/10-600bps/10/0-1200bps/0/1-2400bps/1/2-4800bps/2/3-9600bps/3/4-19200bps/4/11-28800bps/11/5-38400bps/5/6-57600bps/6/7-115200bps/7/12-230400bps/12/13-460800bps/13
+>>&b0000000000000000	I=PR@1;D=Parity;T=INT;C=STATIC;S=SI@1!=0?"e":"i";O=0- None/0/1- Even/1/2- Odd/2/3- Mark/3/4- Space/4
+>>&b0000000000000000	I=BB@1;D=Data bits;T=INT;C=STATIC;S=SI@1!=0?"e":"i";O=0- 7 bits/0/1- 8 bits/1
+>>&b0000000000000000	I=MD@1;D=Max intercharacter delay;T=INT;S=SI@1!=0?"e":"i";C=EDIT/SPIN/0/1/1/10;V=MD@1>255?"Maximum intercharacter delay is 255":""
 
->>&b0000000010000000	I=$CHANNEL2;D=Serial 2;T=GROUP
->>&b1000000000000000	I=SI@2;D=Serial interface;T=INT;C=STATIC;O=0- None/0/1- Tibbit #01, RS232 (full-duplex)/1/5- Tibbit #05, RS485 (half-duplex)/5
->>&b0000000010000000	I=RI@2;D=Modbus Serial Type;T=INT;C=STATIC;S=SI@2!=0?"e":"i";O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
->>&b0000000010000000	I=CT@2;D=Reply timeout (1/2 sec. int.);T=INT;S=SI@2!=0?"e":"i";C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=CT@2>255?"Maximum timeout is 255 1/2 sec":""
->>&b0000000010000000	I=FC@2;D=Flow control;T=INT;C=STATIC;S=SI@2==1||SI@2==2||SI@2==4?"e":"i";O=0- Disabled /0/1- RTS-CTS/1
->>&b0000000010000000	I=BR@2;D=Baudrate;T=INT;C=STATIC;S=SI@2!=0?"e":"i";O=8-150bps/8/9-300bps/9/10-600bps/10/0-1200bps/0/1-2400bps/1/2-4800bps/2/3-9600bps/3/4-19200bps/4/11-28800bps/11/5-38400bps/5/6-57600bps/6/7-115200bps/7/12-230400bps/12/13-460800bps/13
->>&b0000000010000000	I=PR@2;D=Parity;T=INT;C=STATIC;S=SI@2!=0?"e":"i";O=0- None/0/1- Even/1/2- Odd/2/3- Mark/3/4- Space/4
->>&b0000000010000000	I=BB@2;D=Data bits;T=INT;C=STATIC;S=SI@2!=0?"e":"i";O=0- 7 bits/0/1- 8 bits/1
->>&b0000000010000000	I=MD@2;D=Max intercharacter delay;T=INT;S=SI@2!=0?"e":"i";C=EDIT/SPIN/0/1/1/10;V=MD@2>255?"Maximum intercharacter delay is 255":""
+>>&b0000000000000000	I=$CHANNEL2;D=Serial 2;T=GROUP
+>>&b0000000000000000	I=SI@2;D=Serial interface;T=INT;S=SI@1!=2&&SI@1!=3&&SI@1!=4?"e":"i";C=STATIC;O=0- None/0/1- Tibbit #01, RS232 (full-duplex)/1/5- Tibbit #05, RS485 (half-duplex)/5
+>>&b0000000000000000	I=RI@2;D=Modbus Serial Type;T=INT;C=STATIC;S=SI@2!=0?"e":"i";O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
+>>&b0000000000000000	I=CT@2;D=Reply timeout (1/2 sec. int.);T=INT;S=SI@2!=0?"e":"i";C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=CT@2>255?"Maximum timeout is 255 1/2 sec":""
+>>&b0000000000000000	I=FC@2;D=Flow control;T=INT;C=STATIC;S=SI@2==1||SI@2==2||SI@2==4?"e":"i";O=0- Disabled /0/1- RTS-CTS/1
+>>&b0000000000000000	I=BR@2;D=Baudrate;T=INT;C=STATIC;S=SI@2!=0?"e":"i";O=8-150bps/8/9-300bps/9/10-600bps/10/0-1200bps/0/1-2400bps/1/2-4800bps/2/3-9600bps/3/4-19200bps/4/11-28800bps/11/5-38400bps/5/6-57600bps/6/7-115200bps/7/12-230400bps/12/13-460800bps/13
+>>&b0000000000000000	I=PR@2;D=Parity;T=INT;C=STATIC;S=SI@2!=0?"e":"i";O=0- None/0/1- Even/1/2- Odd/2/3- Mark/3/4- Space/4
+>>&b0000000000000000	I=BB@2;D=Data bits;T=INT;C=STATIC;S=SI@2!=0?"e":"i";O=0- 7 bits/0/1- 8 bits/1
+>>&b0000000000000000	I=MD@2;D=Max intercharacter delay;T=INT;S=SI@2!=0?"e":"i";C=EDIT/SPIN/0/1/1/10;V=MD@2>255?"Maximum intercharacter delay is 255":""
 
->>&b0000000110000000	I=$CHANNEL3;D=Serial 3;T=GROUP
->>&b1000000000000000	I=SI@3;D=Serial interface;T=INT;C=STATIC;O=0- None/0/1- Tibbit #01, RS232 (full-duplex)/1/2- Tibbit #02, RS232 (full-duplex)/2/3- Tibbit #02, RS485 (half-duplex)/3/4- Tibbit #02, RS422 (full-duplex)/4/5- Tibbit #05, RS485 (half-duplex)/5
->>&b0000000110000000	I=RI@3;D=Modbus Serial Type;T=INT;C=STATIC;S=SI@3!=0?"e":"i";O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
->>&b0000000110000000	I=CT@3;D=Reply timeout (1/2 sec. int.);T=INT;S=SI@3!=0?"e":"i";C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=CT@3>255?"Maximum timeout is 255 1/2 sec":""
->>&b0000000110000000	I=FC@3;D=Flow control;T=INT;C=STATIC;S=SI@3==1||SI@3==2||SI@3==4?"e":"i";O=0- Disabled /0/1- RTS-CTS/1
->>&b0000000110000000	I=BR@3;D=Baudrate;T=INT;C=STATIC;S=SI@3!=0?"e":"i";O=8-150bps/8/9-300bps/9/10-600bps/10/0-1200bps/0/1-2400bps/1/2-4800bps/2/3-9600bps/3/4-19200bps/4/11-28800bps/11/5-38400bps/5/6-57600bps/6/7-115200bps/7/12-230400bps/12/13-460800bps/13
->>&b0000000110000000	I=PR@3;D=Parity;T=INT;C=STATIC;S=SI@3!=0?"e":"i";O=0- None/0/1- Even/1/2- Odd/2/3- Mark/3/4- Space/4
->>&b0000000110000000	I=BB@3;D=Data bits;T=INT;C=STATIC;S=SI@3!=0?"e":"i";O=0- 7 bits/0/1- 8 bits/1
->>&b0000000110000000	I=MD@3;D=Max intercharacter delay;T=INT;S=SI@3!=0?"e":"i";C=EDIT/SPIN/0/1/1/10;V=MD@3>255?"Maximum intercharacter delay is 255":""
+>>&b0000000000000000	I=$CHANNEL3;D=Serial 3;T=GROUP
+>>&b0000000000000000	I=SI@3;D=Serial interface;T=INT;C=STATIC;O=0- None/0/1- Tibbit #01, RS232 (full-duplex)/1/2- Tibbit #02, RS232 (full-duplex)/2/3- Tibbit #02, RS485 (half-duplex)/3/4- Tibbit #02, RS422 (full-duplex)/4/5- Tibbit #05, RS485 (half-duplex)/5
+>>&b0000000000000000	I=RI@3;D=Modbus Serial Type;T=INT;C=STATIC;S=SI@3!=0?"e":"i";O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
+>>&b0000000000000000	I=CT@3;D=Reply timeout (1/2 sec. int.);T=INT;S=SI@3!=0?"e":"i";C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=CT@3>255?"Maximum timeout is 255 1/2 sec":""
+>>&b0000000000000000	I=FC@3;D=Flow control;T=INT;C=STATIC;S=SI@3==1||SI@3==2||SI@3==4?"e":"i";O=0- Disabled /0/1- RTS-CTS/1
+>>&b0000000000000000	I=BR@3;D=Baudrate;T=INT;C=STATIC;S=SI@3!=0?"e":"i";O=8-150bps/8/9-300bps/9/10-600bps/10/0-1200bps/0/1-2400bps/1/2-4800bps/2/3-9600bps/3/4-19200bps/4/11-28800bps/11/5-38400bps/5/6-57600bps/6/7-115200bps/7/12-230400bps/12/13-460800bps/13
+>>&b0000000000000000	I=PR@3;D=Parity;T=INT;C=STATIC;S=SI@3!=0?"e":"i";O=0- None/0/1- Even/1/2- Odd/2/3- Mark/3/4- Space/4
+>>&b0000000000000000	I=BB@3;D=Data bits;T=INT;C=STATIC;S=SI@3!=0?"e":"i";O=0- 7 bits/0/1- 8 bits/1
+>>&b0000000000000000	I=MD@3;D=Max intercharacter delay;T=INT;S=SI@3!=0?"e":"i";C=EDIT/SPIN/0/1/1/10;V=MD@3>255?"Maximum intercharacter delay is 255":""
 
->>&b0000001110000000	I=$CHANNEL4;D=Serial 4;T=GROUP
->>&b1000000000000000	I=SI@4;D=Serial interface;T=INT;C=STATIC;O=0- None/0/1- Tibbit #01, RS232 (full-duplex)/1/5- Tibbit #05, RS485 (half-duplex)/5
->>&b0000001110000000	I=RI@4;D=Modbus Serial Type;T=INT;C=STATIC;S=SI@4!=0?"e":"i";O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
->>&b0000001110000000	I=CT@4;D=Reply timeout (1/2 sec. int.);T=INT;S=SI@4!=0?"e":"i";C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=CT@4>255?"Maximum timeout is 255 1/2 sec":""
->>&b0000001110000000	I=FC@4;D=Flow control;T=INT;C=STATIC;S=SI@4==1||SI@4==2||SI@4==4?"e":"i";O=0- Disabled /0/1- RTS-CTS/1
->>&b0000001110000000	I=BR@4;D=Baudrate;T=INT;C=STATIC;S=SI@4!=0?"e":"i";O=8-150bps/8/9-300bps/9/10-600bps/10/0-1200bps/0/1-2400bps/1/2-4800bps/2/3-9600bps/3/4-19200bps/4/11-28800bps/11/5-38400bps/5/6-57600bps/6/7-115200bps/7/12-230400bps/12/13-460800bps/13
->>&b0000001110000000	I=PR@4;D=Parity;T=INT;C=STATIC;S=SI@4!=0?"e":"i";O=0- None/0/1- Even/1/2- Odd/2/3- Mark/3/4- Space/4
->>&b0000001110000000	I=BB@4;D=Data bits;T=INT;C=STATIC;S=SI@4!=0?"e":"i";O=0- 7 bits/0/1- 8 bits/1
->>&b0000001110000000	I=MD@4;D=Max intercharacter delay;T=INT;S=SI@4!=0?"e":"i";C=EDIT/SPIN/0/1/1/10;V=MD@4>255?"Maximum intercharacter delay is 255":""
+>>&b0000000000000000	I=$CHANNEL4;D=Serial 4;T=GROUP
+>>&b0000000000000000	I=SI@4;D=Serial interface;T=INT;C=STATIC;S=SI@3!=2&&SI@3!=3&&SI@3!=4?"e":"i";O=0- None/0/1- Tibbit #01, RS232 (full-duplex)/1/5- Tibbit #05, RS485 (half-duplex)/5
+>>&b0000000000000000	I=RI@4;D=Modbus Serial Type;T=INT;C=STATIC;S=SI@4!=0?"e":"i";O=0- Master RTU/0/1- Master ASCII/1/2- Slave RTU/2/3- Slave ASCII/3
+>>&b0000000000000000	I=CT@4;D=Reply timeout (1/2 sec. int.);T=INT;S=SI@4!=0?"e":"i";C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=CT@4>255?"Maximum timeout is 255 1/2 sec":""
+>>&b0000000000000000	I=FC@4;D=Flow control;T=INT;C=STATIC;S=SI@4==1||SI@4==2||SI@4==4?"e":"i";O=0- Disabled /0/1- RTS-CTS/1
+>>&b0000000000000000	I=BR@4;D=Baudrate;T=INT;C=STATIC;S=SI@4!=0?"e":"i";O=8-150bps/8/9-300bps/9/10-600bps/10/0-1200bps/0/1-2400bps/1/2-4800bps/2/3-9600bps/3/4-19200bps/4/11-28800bps/11/5-38400bps/5/6-57600bps/6/7-115200bps/7/12-230400bps/12/13-460800bps/13
+>>&b0000000000000000	I=PR@4;D=Parity;T=INT;C=STATIC;S=SI@4!=0?"e":"i";O=0- None/0/1- Even/1/2- Odd/2/3- Mark/3/4- Space/4
+>>&b0000000000000000	I=BB@4;D=Data bits;T=INT;C=STATIC;S=SI@4!=0?"e":"i";O=0- 7 bits/0/1- 8 bits/1
+>>&b0000000000000000	I=MD@4;D=Max intercharacter delay;T=INT;S=SI@4!=0?"e":"i";C=EDIT/SPIN/0/1/1/10;V=MD@4>255?"Maximum intercharacter delay is 255":""
 
 >>&b0000000000000000	I=$ROUTEID;D=ID-based Routing;T=GROUP
 >>&b0000000000000000	I=RA@1;D=1- ID from;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@1>255?"Maximum modbus ID is 255":""
 >>&b0000000000000000	I=RB@1;E=1;D=ID to;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RB@1>255?"Maximum modbus ID is 255":""
 >>&b0000000000000000	I=RD@1;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
->>&b1000000000000000	I=RE@1;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
+>>&b0000000000000000	I=RE@1;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
 >>&b0000000000000000	I=RA@2;D=2- ID from;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@2>255?"Maximum modbus ID is 255":""
 >>&b0000000000000000	I=RB@2;E=1;D=ID to;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RB@2>255?"Maximum modbus ID is 255":""
 >>&b0000000000000000	I=RD@2;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
->>&b1000000000000000	I=RE@2;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
+>>&b0000000000000000	I=RE@2;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
 >>&b0000000000000000	I=RA@3;D=3- ID from;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@3>255?"Maximum modbus ID is 255":""
 >>&b0000000000000000	I=RB@3;E=1;D=ID to;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RB@3>255?"Maximum modbus ID is 255":""
 >>&b0000000000000000	I=RD@3;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
->>&b1000000000000000	I=RE@3;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
+>>&b0000000000000000	I=RE@3;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
 >>&b0000000000000000	I=RA@4;D=4- ID from;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@4>255?"Maximum modbus ID is 255":""
 >>&b0000000000000000	I=RB@4;E=1;D=ID to;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RB@4>255?"Maximum modbus ID is 255":""
 >>&b0000000000000000	I=RD@4;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
->>&b1000000000000000	I=RE@4;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
+>>&b0000000000000000	I=RE@4;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
 >>&b0000000000000000	I=RA@5;D=5- ID from;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@5>255?"Maximum modbus ID is 255":""
 >>&b0000000000000000	I=RB@5;E=1;D=ID to;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RB@5>255?"Maximum modbus ID is 255":""
 >>&b0000000000000000	I=RD@5;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
->>&b1000000000000000	I=RE@5;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
+>>&b0000000000000000	I=RE@5;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
 >>&b0000000000000000	I=RA@6;D=6- ID from;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@6>255?"Maximum modbus ID is 255":""
 >>&b0000000000000000	I=RB@6;E=1;D=ID to;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RB@6>255?"Maximum modbus ID is 255":""
 >>&b0000000000000000	I=RD@6;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
->>&b1000000000000000	I=RE@6;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
+>>&b0000000000000000	I=RE@6;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
 >>&b0000000000000000	I=RA@7;D=7- ID from;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@7>255?"Maximum modbus ID is 255":""
 >>&b0000000000000000	I=RB@7;E=1;D=ID to;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RB@7>255?"Maximum modbus ID is 255":""
 >>&b0000000000000000	I=RD@7;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
->>&b1000000000000000	I=RE@7;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
+>>&b0000000000000000	I=RE@7;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
 >>&b0000000000000000	I=RA@8;D=8- ID from;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@8>255?"Maximum modbus ID is 255":""
 >>&b0000000000000000	I=RB@8;E=1;D=ID to;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RB@8>255?"Maximum modbus ID is 255":""
 >>&b0000000000000000	I=RD@8;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
->>&b1000000000000000	I=RE@8;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
+>>&b0000000000000000	I=RE@8;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
 
 >>&b0000000000000000	I=$ROUTEPORT;D=Port-based Routing;T=GROUP
->>&b0000000000000000	I=RF@1;D=1- TCP Port;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@1>65535?"Maximum TCP port is 65535":""
->>&b0000000000000000	I=RG@1;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
->>&b1000000000000000	I=RH@1;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
->>&b0000000000000000	I=RF@2;D=2- TCP Port;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@1>65535?"Maximum TCP port is 65535":""
->>&b0000000000000000	I=RG@2;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
->>&b1000000000000000	I=RH@2;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
->>&b0000000000000000	I=RF@3;D=3- TCP Port;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@1>65535?"Maximum TCP port is 65535":""
->>&b0000000000000000	I=RG@3;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
->>&b1000000000000000	I=RH@3;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
->>&b0000000000000000	I=RF@4;D=4- TCP Port;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@1>65535?"Maximum TCP port is 65535":""
->>&b0000000000000000	I=RG@4;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
->>&b1000000000000000	I=RH@4;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/1- Serial 2/1/2- Serial 3/2/3- Serial 4/3/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
+>>&b0000000000000000	I=RG@1;E=1;D=1- ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
+>>&b0000000000000000	I=RH@1;E=1;D=Destination;T=INT;C=STATIC;O=0- None/0/1- Serial 1/1/2- Serial 2/2/3- Serial 3/3/4- Serial 4/4/5- TCP slave device 1/5/6- TCP slave device 2/6/7- TCP slave device 3/7/8- TCP slave device 4/8
+>>&b0000000000000000	I=RG@2;E=1;D=2- ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
+>>&b0000000000000000	I=RH@2;E=1;D=Destination;T=INT;C=STATIC;O=0- None/0/1- Serial 1/1/2- Serial 2/2/3- Serial 3/3/4- Serial 4/4/5- TCP slave device 1/5/6- TCP slave device 2/6/7- TCP slave device 3/7/8- TCP slave device 4/8
+>>&b0000000000000000	I=RG@3;E=1;D=3- ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
+>>&b0000000000000000	I=RH@3;E=1;D=Destination;T=INT;C=STATIC;O=0- None/0/1- Serial 1/1/2- Serial 2/2/3- Serial 3/3/4- Serial 4/4/5- TCP slave device 1/5/6- TCP slave device 2/6/7- TCP slave device 3/7/8- TCP slave device 4/8
+>>&b0000000000000000	I=RG@4;E=1;D=4- ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
+>>&b0000000000000000	I=RH@4;E=1;D=Destination;T=INT;C=STATIC;O=0- None/0/1- Serial 1/1/2- Serial 2/2/3- Serial 3/3/4- Serial 4/4/5- TCP slave device 1/5/6- TCP slave device 2/6/7- TCP slave device 3/7/8- TCP slave device 4/8
 
 >>&b0000000000000000	I=$TCPSLAVE;D=TCP Slaves;T=GROUP
 >>&b0000000000000000	I=RK@1;D=1- IP-address;T=STRING;C=IPCTRL;S=DH==1?"a":"e";F=R*

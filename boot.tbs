@@ -17,6 +17,11 @@ public sub boot
 		lcd_display_page(LCD_PAGE_LOGO,LCD_PRINT_MODE_AGGRESSIVE,LCD_PRINT_ELEMENT_ALL)
 	#endif
 
+	' TEST
+'	pat.play(PAT_TWO_SHORT_RED, PL_PAT_CANINT)
+'test0:	goto test0
+
+
 	for f=0 to MAX_NUM_INTERFACES-1
 		interface_ready(f)=NO
 	next f
@@ -25,6 +30,10 @@ public sub boot
 		goto boot_failed
 	end if
 
+	#if PLATFORM_ID <> TPP3W or PLATFORM_ID <> TPP3WG2 or PLATFORM_ID <> TPP2W or PLATFORM_ID <> TPP2WG2
+		stg_set("PC", 0, 4)
+	#endif
+	
 	'form configuration words for descriptor files
 	dsman_config=0
 	html_print_setting_flags_settings_page=0
@@ -48,7 +57,7 @@ public sub boot
 		html_print_setting_flags_settings_page=html_print_setting_flags_settings_page+4
 	#endif
 
-	#if DEVICE_PORT_SCHEME <> PORT_SCHEME_4P2
+	#if DEVICE_PORT_SCHEME <> PORT_SCHEME_4P2 and PLATFORM_ID <> TPP3W and PLATFORM_ID <> TPP3WG2
 		select case NUM_SERIAL_PORTS
 		case 1:
 			'---
@@ -87,6 +96,10 @@ public sub boot
 		#endif
 	#endif
 
+	#if PLATFORM_ID = TPP3W or PLATFORM_ID = TPP3WG2
+		dsman_config = dsman_config + 32768														' Set TPS2 scheme
+	#endif 
+	
 	#if DEVICE_PORT_SCHEME = PORT_SCHEME_4P2
 		dsman_config = dsman_config + 32768														' Set TPS2 scheme
 		html_print_setting_flags_ports_page = html_print_setting_flags_ports_page + 1024		' Set TPS2 scheme
@@ -111,7 +124,7 @@ public sub boot
 		dsman_config=dsman_config+512
 	end if
 
-	#if DEVICE_PORT_SCHEME <> PORT_SCHEME_4P2
+	#if DEVICE_PORT_SCHEME <> PORT_SCHEME_4P2 and PLATFORM_ID <> TPP3W and PLATFORM_ID <> TPP3WG2
 		select case NUM_SERIAL_PORTS
 		case 1:
 			'---
@@ -635,8 +648,8 @@ public sub boot
 
 				can_show_data_transmission(f) = YES
 
-				ser.txbuffrq(1)
-				ser.rxbuffrq(1)
+				ser.txbuffrq(2)
+				ser.rxbuffrq(2)
 				sys.buffalloc
 				ser.enabled = YES
 			else

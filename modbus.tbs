@@ -100,25 +100,25 @@ function modbus_initialize() as boolean
 	modbus_out_buffer_head = 0
 	modbus_out_buffer_length = 0
 	
-	modbus_tcp_exeption = val(stg_get("RN",0))
+	modbus_tcp_exeption = val(stg_get("RN", 0))
 	modbus_monitor = false
 
 	for i = 0 to NUM_SERIAL_PORTS - 1
 
-		ModBusSerialChannelsOperation(i).SerialType = val(stg_get("RI",i))
+		ModBusSerialChannelsOperation(i).SerialType = val(stg_get("RI", i))
 		ModBusSerialChannelsOperation(i).TransactionID = 0
 		ModBusSerialChannelsOperation(i).OperationInProgress = false
 		ModBusSerialChannelsOperation(i).SourceU = 255
 		ModBusSerialChannelsOperation(i).ShiftID = 0
 		ModBusSerialChannelsOperation(i).TimeOut = 0
-		modbus_serial_timeout(i) = val(stg_get("CT",i))
+		modbus_serial_timeout(i) = val(stg_get("CT", i))
 		
 	next
 
 	for i = 0 to MODBUS_SLAVE_SOCKET_NUMBERS - 1
 		
-		ModBusSlaveDevices(i).TCPAddress = stg_get("RK",i)
-		ModBusSlaveDevices(i).TCPPort = stg_get("RL",i)
+		ModBusSlaveDevices(i).TCPAddress = stg_get("RK", i)
+		ModBusSlaveDevices(i).TCPPort = stg_get("RL", i)
 		'modbus_tcp_timeout(i) = MODBUS_TCP_TIMEOUT
 
 		if ModBusSlaveDevices(i).TCPAddress <> "0.0.0.0" then
@@ -150,22 +150,31 @@ function modbus_initialize() as boolean
 
 	for i = 0 to MODBUS_RULES_PORT_NUMBERS - 1
 		
-		ModBusRoutePort(i).TCPPort = val(stg_get("RF",i))
-		ModBusRoutePort(i).IdShift = val(stg_get("RG",i))
-		ModBusRoutePort(i).ChannelU = val(stg_get("RH",i))
-		if ModBusRoutePort(i).ChannelU > 3 and ModBusRoutePort(i).ChannelU < 8 then
-			ModBusRoutePort(i).ChannelU = modbus_slave_socks(ModBusRoutePort(i).ChannelU - 4) or MODBUS_TCP_SOCKET_TYPE
-		else 
-			ModBusRoutePort(i).ChannelU = ModBusRoutePort(i).ChannelU or MODBUS_SERIAL_SOCKET_TYPE
+		ModBusRoutePort(i).TCPPort = val(stg_get("RJ", i))
+		if ModBusRoutePort(i).TCPPort <> 0 then
+			ModBusRoutePort(i).IdShift = val(stg_get("RG", i))
+			ModBusRoutePort(i).ChannelU = val(stg_get("RH", i))
+			if ModBusRoutePort(i).ChannelU > 4 and ModBusRoutePort(i).ChannelU < 9 then
+				ModBusRoutePort(i).ChannelU = modbus_slave_socks(ModBusRoutePort(i).ChannelU - 5) or MODBUS_TCP_SOCKET_TYPE
+			else 
+				if ModBusRoutePort(i).ChannelU <> 0 then
+					ModBusRoutePort(i).ChannelU = (ModBusRoutePort(i).ChannelU - 1) or MODBUS_SERIAL_SOCKET_TYPE
+				else
+					ModBusRoutePort(i).TCPPort = 0
+				end if
+			end if
+		else
+			ModBusRoutePort(i).IdShift = 0
+			ModBusRoutePort(i).ChannelU = 0
 		end if
 	next i
 	
 	for i = 0 to MODBUS_RULES_ID_NUMBERS - 1
 
-		ModBusRouteId(i).IdFrom = val(stg_get("RA",i))
-		ModBusRouteId(i).IdTo = val(stg_get("RB",i))
-		ModBusRouteId(i).IdShift = val(stg_get("RD",i))
-		ModBusRouteId(i).ChannelU = val(stg_get("RE",i))
+		ModBusRouteId(i).IdFrom = val(stg_get("RA", i))
+		ModBusRouteId(i).IdTo = val(stg_get("RB", i))
+		ModBusRouteId(i).IdShift = val(stg_get("RD", i))
+		ModBusRouteId(i).ChannelU = val(stg_get("RE", i))
 		if ModBusRouteId(i).ChannelU > 3 and ModBusRouteId(i).ChannelU < 8 then
 			ModBusRouteId(i).ChannelU = modbus_slave_socks(ModBusRouteId(i).ChannelU - 4) or MODBUS_TCP_SOCKET_TYPE
 		else 
@@ -175,10 +184,10 @@ function modbus_initialize() as boolean
 	next i
 
 	' Get list of TCP Ports
-	ports = stg_get("RJ",0)
+	ports = stg_get("RJ", 0)
 	for i = 1 to 3
-		if val(stg_get("RJ",i)) <> 0 then
-			ports = ports + "," + stg_get("RJ",i)
+		if val(stg_get("RJ", i)) <> 0 then
+			ports = ports + "," + stg_get("RJ", i)
 		end if
 	next i
 	

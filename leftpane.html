@@ -60,7 +60,8 @@ li {display:inline;}
 
 <body>
 
-<h3>TIBBO</h3>
+<h3>TIBBO<br>
+Modbus Gateway</h3>
 <? if login_mode=CMD_MODE_HTTP then ?>
 	<a href = 'settings.html?session=<?sock_setsend(login_data)?>' target = showframe> General Settings </a> <br>
 	<br>
@@ -93,8 +94,6 @@ skip_gprs:
 	<br>
 	<a href = 'route_ports.html?session=<?sock_setsend(login_data)?>' target = showframe> Port-based Routing </a> <br>
 	<br>
-	<a href = 'routing_status.html?ch=0' target = showframe> Routing Status </a> <br>
-	<br>
 	<a href = 'leftpane.html?session=<?sock_setsend(login_data)?>' onclick='init_confirm()'> Initialize </a>  <br>
 	<br>
 	<a href = 'leftpane.html?session=<?sock_setsend(login_data)?>' onclick='reboot_confirm()'> Reboot </a>  <br>
@@ -106,13 +105,12 @@ skip_gprs:
 <?
 else
 ?>
-	<a href = 'routing_status.html?ch=0' target = showframe> Routing Status </a> <br>
-	<br>
 	<a href = 'index.html' target = _top> Login </a> <br>
 	<br>
 	<br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 <?
 end if
+	sock_setsend("Firmware: " + FIRMWARE_VERSION + "<br>")
 	sock_setsend("Owner Name: "+stg_get("ON",0)+"<br>")
 	sock_setsend("Device Name: "+stg_get("DN",0)+"<br>")
 	

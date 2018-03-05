@@ -33,7 +33,6 @@
 >>RB	E	B	8	0	255	A	255/0/0/0/0/0/0/0	Route ID rules, field TO
 >>RE	E	B	8	0	255	A	0/0/0/0/0/0/0/0	Route ID rules, fields Channel
 >>RD	E	B	8	0	255	A	0/0/0/0/0/0/0/0	Route ID rules, fields ShiftID
->>RF	E	W	4	0	65535	A	0/0/0/0	Route Port rules, fields TCPPort
 >>RG	E	B	4	0	255	A	0/0/0/0	Route Port rules, fields ShiftID
 >>RH	E	B	4	0	255	A	0/0/0/0	Route Port rules, fields ChannelU
 >>RI	E	B	4	0	3	A	2/2/2/2	Serial channels type
@@ -46,7 +45,7 @@
 >>SL	E	S	1	0	20	A	^	SNMP Location
 >>SP	E	S	1	0	20	A	public	SNMP public
 #define STG_DESCRIPTOR_FILE "settings_4p_4c.xtxt"
-#define STG_MAX_NUM_SETTINGS 47
+#define STG_MAX_NUM_SETTINGS 46
 #define STG_RAM_ARRAY_SIZE 0
 #define STG_MAX_SETTING_NAME_LEN 2
 #define STG_MAX_SETTING_VALUE_LEN 32

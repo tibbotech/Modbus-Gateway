@@ -18,6 +18,7 @@ font-family: arial, 'sans serif';
 
 h1,h2,h3,hr
 {
+margin: 0;
 color: #E0D6B8;
 }
 body
@@ -57,22 +58,24 @@ li {display:inline;}
 			<br>
 			<table width=40% align=center cellspacing="5" cellpadding="5">
 			<tr align=center>
-			<td><h1><b>Tibbo Modbus Gateway</b></h1></td>
-			</tr>
-			<tr> <td>
+			<td>
+			<table align=center width=100% border='0' cellspacing="0" cellpadding="0"><tr align=center ><td>
+				<h1><b>Tibbo Modbus Gateway</h1></td></tr>
+				<tr align=center>
+				<td><?sock_setsend("Firmware version " + FIRMWARE_VERSION)?></td></tr>
+			</table>
+			</td></tr>
+			<tr align=center cellpadding="5" cellspacing="5"><td>
 			<table align=center width=100% border='0'>
 			<form action='login.html' method='post'>
-			<tr align=center><td width=40%><b>Please Enter Password</b></td></tr>			
+			<tr align=center><td width=40%><b>Please Enter Password</b></td></tr>
 			<tr><td><br></td></tr>
 			<tr align=center><td><input type='password' size = '15' maxlength = '6' name='pw' value='' tabindex = 1></td></tr>
 			<tr><td><br></td></tr>
 			<tr align=center><td><input type = 'submit' value = '        Log In      ' align = left tabindex = 2></td></tr></form></table>	
 			</td></tr>
+			<tr></tr>
 			</table>
-			<br>
-			<table width = 40% align= center border = "0" class = 'message'>
-				<tr><td align=center><a href = 'rs_page.html'> Routing Status </a></td></tr>
-			</table>			
 			<br><br>
 			<table width = 40% align= center border = "0" class = 'message'>
 				<tr><td align=center><?print_login_state ?></td></tr>

@@ -74,18 +74,14 @@
 >>&b00000000	I=RE@8;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
 
 >>&b00000000	I=$ROUTEPORT;D=Routing By Port;T=GROUP
->>&b00000000	I=RF@1;D=1- TCP Port;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@1>65535?"Maximum TCP port is 65535":""
->>&b00000000	I=RG@1;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
->>&b00000000	I=RH@1;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
->>&b00000000	I=RF@2;D=2- TCP Port;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@1>65535?"Maximum TCP port is 65535":""
->>&b00000000	I=RG@2;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
->>&b00000000	I=RH@2;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
->>&b00000000	I=RF@3;D=3- TCP Port;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@1>65535?"Maximum TCP port is 65535":""
->>&b00000000	I=RG@3;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
->>&b00000000	I=RH@3;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
->>&b00000000	I=RF@4;D=4- TCP Port;T=INT;C=EDIT/SPIN/0/1/1/10;O=0- Disabled/0;V=RA@1>65535?"Maximum TCP port is 65535":""
->>&b00000000	I=RG@4;E=1;D=ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
->>&b00000000	I=RH@4;E=1;D=Destination;T=INT;C=STATIC;O=0- Serial 1/0/4- TCP slave device 1/4/5- TCP slave device 2/5/6- TCP slave device 3/6/7- TCP slave device 4/7
+>>&b00000000	I=RG@1;E=1;D=1- ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
+>>&b00000000	I=RH@1;E=1;D=Destination;T=INT;C=STATIC;O=0- None/0/1- Serial 1/1/5- TCP slave device 1/5/6- TCP slave device 2/6/7- TCP slave device 3/7/8- TCP slave device 4/8
+>>&b00000000	I=RG@2;E=1;D=2- ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
+>>&b00000000	I=RH@2;E=1;D=Destination;T=INT;C=STATIC;O=0- None/0/1- Serial 1/1/5- TCP slave device 1/5/6- TCP slave device 2/6/7- TCP slave device 3/7/8- TCP slave device 4/8
+>>&b00000000	I=RG@3;E=1;D=3- ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
+>>&b00000000	I=RH@3;E=1;D=Destination;T=INT;C=STATIC;O=0- None/0/1- Serial 1/1/5- TCP slave device 1/5/6- TCP slave device 2/6/7- TCP slave device 3/7/8- TCP slave device 4/8
+>>&b00000000	I=RG@4;E=1;D=4- ID shift;T=INT;C=EDIT;MAXLEN=4;F=R*
+>>&b00000000	I=RH@4;E=1;D=Destination;T=INT;C=STATIC;O=0- None/0/1- Serial 1/1/5- TCP slave device 1/5/6- TCP slave device 2/6/7- TCP slave device 3/7/8- TCP slave device 4/8
 
 >>&b00000000	I=$TCPSLAVE;D=TCP Slaves;T=GROUP
 >>&b00000000	I=RK@1;D=1- TCP IP-address;T=STRING;C=IPCTRL;S=DH==1?"a":"e";F=R*
