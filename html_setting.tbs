@@ -9,6 +9,15 @@ dim it_was_save as no_yes
 dim html_setting_status as en_stg_status_codes(MAX_HTML_NUM_SETTINGS)
 
 '=============================================================
+public sub html_print_setting_odd_even(html_descr_file_odd as string(30), html_descr_file_even as string(30), config_data as word)
+	
+	if html_channel_index mod 2 <> 0 then	' odd
+		html_print_setting(html_descr_file_odd, config_data)
+	else									' even
+		html_print_setting(html_descr_file_even, config_data)
+	end if
+end sub
+
 public sub html_print_setting(html_descr_file as string(30),config_data as word)
 'Read the html_descr_file and print the settings that is in the file. 
 	dim i,b as word

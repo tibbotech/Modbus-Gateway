@@ -4,6 +4,7 @@ declare sub html_channel_selected
 declare sub html_rules_selected
 declare sub html_rules_port_selected
 declare sub html_slave_selected
+declare sub html_print_setting_odd_even(html_descr_file_odd as string(30), html_descr_file_even as string(30), config_data as word)
 declare sub html_print_setting(html_descr_file as string(30),config_data as word)
 CONST MAX_HTML_NUM_SETTINGS = STG_MAX_NUM_SETTINGS+2
 
