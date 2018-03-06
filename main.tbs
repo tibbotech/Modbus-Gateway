@@ -161,12 +161,12 @@ sub on_pat()
 	else
 		if modbus_tcp_connecting = true then
 			modbus_tcp_connecting = false
-			pat.play(PAT_THREE_SHORT_GREEN, PL_PAT_CANINT)			' connection established
+			pat.play(PAT_THREE_SHORT_GREEN, PL_PAT_NOINT)			' connection established
 		else
 			if modbus_tcp_closing = true then
 				modbus_tcp_closing = false
 				'connection was reset by the other end
-				pat.play(PAT_THREE_SHORT_RED, PL_PAT_CANINT)		' connection down
+				pat.play(PAT_THREE_SHORT_RED, PL_PAT_NOINT)		' connection down
 			else
 				if modbus_tcp_established = true then
 					if overrun_buffer = true then
@@ -425,9 +425,9 @@ sub on_sock_event(newstate as pl_sock_state, newstatesimple as pl_sock_state_sim
 	case PL_SSTS_PO, PL_SSTS_AO:
 		for f = 0 to modbus_socks_number - 1
 			if sock.num = modbus_socks(f) then
-				'modbus_tcp_connecting = true
-				sock.txclear()
+				modbus_tcp_connecting = true
 				pat.play(PAT_THREE_SHORT_GREEN, PL_PAT_CANINT)
+				sock.txclear()
 			end if	
 		next f
 
@@ -457,7 +457,7 @@ sub on_sock_event(newstate as pl_sock_state, newstatesimple as pl_sock_state_sim
 		for f = 0 to modbus_socks_number - 1
 			if sock.num = modbus_socks(f) then
 				'modbus_tcp_closing = true
-				pat.play(PAT_THREE_SHORT_RED, PL_PAT_CANINT)
+				'pat.play(PAT_THREE_SHORT_RED, PL_PAT_CANINT)
 			end if	
 		next f
 
@@ -468,6 +468,8 @@ sub on_sock_event(newstate as pl_sock_state, newstatesimple as pl_sock_state_sim
 		
 		for f = 0 to modbus_socks_number - 1
 			if sock.num = modbus_socks(f) then
+				modbus_tcp_closing = true
+				pat.play(PAT_THREE_SHORT_RED, PL_PAT_CANINT)
 				sock.txclear()
 				sock.rxclear()
 				modbus_tcp_est_counter = modbus_tcp_est_counter - 1
