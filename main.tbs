@@ -157,62 +157,28 @@ sub on_pat()
 	#endif
 
 	if port_in_use(channel)=NO then	
-		pat.play("-~",PL_PAT_CANINT)
+		pat.play("-~", PL_PAT_CANINT)
 	else
 		if modbus_tcp_connecting = true then
 			modbus_tcp_connecting = false
-			pat.play(PAT_THREE_SHORT_GREEN,PL_PAT_CANINT)
+			pat.play(PAT_THREE_SHORT_GREEN, PL_PAT_CANINT)			' connection established
 		else
 			if modbus_tcp_closing = true then
 				modbus_tcp_closing = false
 				'connection was reset by the other end
-				pat.play(PAT_THREE_SHORT_RED,PL_PAT_CANINT)
+				pat.play(PAT_THREE_SHORT_RED, PL_PAT_CANINT)		' connection down
 			else
 				if modbus_tcp_established = true then
 					if overrun_buffer = true then
-						pat.play(PAT_BOTH_LOOP,PL_PAT_CANINT) 'no data transmissionin progress, got overruns
+						pat.play(PAT_BOTH_LOOP, PL_PAT_CANINT) 		'no data transmissionin progress, got overruns
 					else
-						pat.play(PAT_GREEN_LOOP,PL_PAT_CANINT) 'no data transmissionin progress, got overruns
+						pat.play(PAT_GREEN_LOOP, PL_PAT_CANINT) 	'no data transmissionin progress, not overruns
 					end if
-					
+				else
+					pat.play(PAT_TWO_SHORT_GREEN, PL_PAT_CANINT)	' idle status
 				end if
 			end if
 		end if
-'		select case sock.statesimple
-'		case PL_SSTS_CLOSED, PL_SSTS_PC, PL_SSTS_AC:
-'			'no connection at this time
-'			select case sock.state
-'			case PL_SST_CL_PRESET_POPENING,
-'				 PL_SST_CL_PRESET_AOPENING,
-'				 PL_SST_CL_PRESET_EST,
-'				 PL_SST_CL_PRESET_PCLOSING,
-'				 PL_SST_CL_PRESET_ACLOSING,
-'				 PL_SST_CL_PRESET_STRANGE:
-'				'connection was reset by the other end
-'				pat.play(PAT_THREE_SHORT_RED,PL_PAT_CANINT)
-'			case else:
-'				'idle (and not because it was reset by other end)
-'				pat.play(PAT_TWO_SHORT_GREEN,PL_PAT_CANINT)
-'			end select
-
-'		case PL_SSTS_ARP:
-'			'connection is being established
-'			pat.play(PAT_BLINK_GREEN,PL_PAT_CANINT)
-		
-'		case PL_SSTS_PO, PL_SSTS_AO:
-'			pat.play(PAT_THREE_SHORT_GREEN,PL_PAT_CANINT)
-		
-'		case PL_SSTS_EST:
-			
-'			'try this!	
-'			can_show_data_transmission(channel)=YES
-''			if overrun_es(channel)=YES or overrun_se(channel)=YES then
-''				pat.play(PAT_BOTH_LOOP,PL_PAT_CANINT) 'no data transmissionin progress, got overruns
-''			else
-'				pat.play(PAT_GREEN_LOOP,PL_PAT_CANINT) 'no data transmissionin progress, got overruns
-''			end if
-'			exit sub
-'		end select
 	end if
 end sub
 
