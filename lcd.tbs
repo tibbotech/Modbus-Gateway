@@ -26,9 +26,15 @@ dim lcd_current_page as enum_lcd_pages
 dim lcd_on_ctr as word
 dim user_uses_button as no_yes
 
+#if PLATFORM_ID=TPP2WG2 or PLATFORM_ID=TPP2W
+	dim lcd_error_mode as boolean
+#endif
+
 sub lcd_init()
 
 #if PLATFORM_ID=TPP2WG2 or PLATFORM_ID=TPP2W
+	lcd_error_mode = false
+	
 	lcd.width=320
 	lcd.height=240
 	
@@ -436,117 +442,122 @@ end sub
 
 sub lcd_display_page(page as enum_lcd_pages, mode as enum_lcd_print_modes, element as enum_lcd_print_elements)
 
-	select case page
-	case LCD_PAGE_NET:
-		lcd_clear(0, 0, 106, 80)
-		if net.linkstate = PL_NET_LINKSTAT_NOLINK then
-			lcd_print_icon("ethernet_unplugged.bmp", 3, 5)
-			lcd_print_top_text("UNPLUGGED", 30, 8, 106 - 30, 8)
-		else
-			lcd_print_icon("ethernet_plugged.bmp", 3, 5)
-			lcd_print_dhcp(PL_SOCK_INTERFACE_NET, 3, 5)
-			lcd_print_ip(net.ip, 3, 5)
-		end if
-
-	case LCD_PAGE_WLN:
-		lcd_clear(106, 0, 106, 80)
-		if wln_already_started = YES then	
-			dim s as string(30)
-
-			if wln_error <> NO then
-
-				select case wln_recent_status
-				case WLN_STATUS_BOOT_FAILURE:		s = "Wi-Fi interface not present"
-				case WLN_STATUS_INVALID_WEP_KEY:	s = "Invalid WEP password"
-				case else:							s = "Firmware error"
-				end select
-			
-				lcd_print_icon("wifi_error.bmp", 106, 5)
-				lcd_print_top_text("Wi-Fi ERROR", 126, 7, 106 - 20, 8)
-				lcd_print_top_text(s, 106, 21, 106, 20)
+	if lcd_error_mode = false then
+		select case page
+		case LCD_PAGE_NET:
+			lcd_clear(0, 0, 106, 80)
+			if net.linkstate = PL_NET_LINKSTAT_NOLINK then
+				lcd_print_icon("ethernet_unplugged.bmp", 3, 5)
+				lcd_print_top_text("UNPLUGGED", 30, 8, 106 - 30, 8)
 			else
-				if interface_ready(PL_SOCK_INTERFACE_WLN)=NO then
+				lcd_print_icon("ethernet_plugged.bmp", 3, 5)
+				lcd_print_dhcp(PL_SOCK_INTERFACE_NET, 3, 5)
+				lcd_print_ip(net.ip, 3, 5)
+			end if
+
+		case LCD_PAGE_WLN:
+			lcd_clear(106, 0, 106, 80)
+			if wln_already_started = YES then	
+				dim s as string(30)
+
+				if wln_error <> NO then
 
 					select case wln_recent_status
-					case WLN_STATUS_OK:							s = " "
-					case WLN_STATUS_SCANNING_FAILURE:			s = "AP not found"
-					case WLN_STATUS_ASSOCIATION_FAILURE:		s = "Association failure"
-					case WLN_STATUS_DISASSOCIATION:				s = "Disassociated"
-					case WLN_STATUS_UNEXPECTED_ERROR:			s = "Unexpected error"
-					case else:									s = "Firmware error"
+					case WLN_STATUS_BOOT_FAILURE:		s = "Wi-Fi interface not present"
+					case WLN_STATUS_INVALID_WEP_KEY:	s = "Invalid WEP password"
+					case else:							s = "Firmware error"
 					end select
-					
-					lcd_print_icon("wifi_connecting.bmp", 106, 5)
-					lcd_print_top_text(param_wa, 126, 7, 106 - 20, 8)
-					lcd_print_top_text("CONNECTING...`" + s, 106, 21, 106, 20)
+				
+					lcd_print_icon("wifi_error.bmp", 106, 5)
+					lcd_print_top_text("Wi-Fi ERROR", 126, 7, 106 - 20, 8)
+					lcd_print_top_text(s, 106, 21, 106, 20)
 				else
-					dim x as byte
-					x = (wln.rssi / 40) + 1
-					if x > 5 then x = 5
-					select case x
-					case 1:	lcd_print_icon("wifi_signal_1.bmp", 106, 5)
-					case 2: lcd_print_icon("wifi_signal_2.bmp", 106, 5)
-					case 3:	lcd_print_icon("wifi_signal_3.bmp", 106, 5)
-					case 4:	lcd_print_icon("wifi_signal_4.bmp", 106, 5)
-					case 5:	lcd_print_icon("wifi_signal_5.bmp", 106, 5)
-					end select
+					if interface_ready(PL_SOCK_INTERFACE_WLN)=NO then
 
-					lcd_print_dhcp(PL_SOCK_INTERFACE_WLN, 106, 5)
-					lcd_print_ip(wln.ip, 106, 5)
+						select case wln_recent_status
+						case WLN_STATUS_OK:							s = " "
+						case WLN_STATUS_SCANNING_FAILURE:			s = "AP not found"
+						case WLN_STATUS_ASSOCIATION_FAILURE:		s = "Association failure"
+						case WLN_STATUS_DISASSOCIATION:				s = "Disassociated"
+						case WLN_STATUS_UNEXPECTED_ERROR:			s = "Unexpected error"
+						case else:									s = "Firmware error"
+						end select
+						
+						lcd_print_icon("wifi_connecting.bmp", 106, 5)
+						lcd_print_top_text(param_wa, 126, 7, 106 - 20, 8)
+						lcd_print_top_text("CONNECTING...`" + s, 106, 21, 106, 20)
+					else
+						dim x as byte
+						x = (wln.rssi / 40) + 1
+						if x > 5 then x = 5
+						select case x
+						case 1:	lcd_print_icon("wifi_signal_1.bmp", 106, 5)
+						case 2: lcd_print_icon("wifi_signal_2.bmp", 106, 5)
+						case 3:	lcd_print_icon("wifi_signal_3.bmp", 106, 5)
+						case 4:	lcd_print_icon("wifi_signal_4.bmp", 106, 5)
+						case 5:	lcd_print_icon("wifi_signal_5.bmp", 106, 5)
+						end select
+
+						lcd_print_dhcp(PL_SOCK_INTERFACE_WLN, 106, 5)
+						lcd_print_ip(wln.ip, 106, 5)
+					end if
+				end if
+			else
+				lcd_print_icon("wifi_off.bmp", 106, 5)
+				lcd_print_top_text("Wi-Fi OFF", 126, 7, 106 - 20, 8)
+			end if
+
+		case LCD_PAGE_GPRS:
+			lcd_clear(212, 0, 106, 80)
+			if param_ge = GE_DISABLED then
+				lcd_print_icon("wifi_off.bmp", 212, 5)
+				lcd_print_top_text("GPRS OFF", 232, 7, 106 - 20, 8)
+			else
+				if gprs_connected = YES then
+					' GPRS is connected
+					lcd_print_icon("antenna.bmp", 212, 5)
+					lcd_print_top_text("GPRS ONLINE", 232, 7, 106 - 20, 8)
+					lcd_print_dhcp(PL_SOCK_INTERFACE_PPP, 212, 5)
+				else
+					' GPRS connection is lost
+					lcd_print_icon("wifi_error.bmp", 212, 5)
+					lcd_print_top_text("GPRS OFFLINE", 232, 7, 106 - 20, 8)
+					lcd_print_top_text("Not connection", 212, 21, 106, 20)
 				end if
 			end if
-		else
-			lcd_print_icon("wifi_off.bmp", 106, 5)
-			lcd_print_top_text("Wi-Fi OFF", 126, 7, 106 - 20, 8)
-		end if
+		
+		case LCD_PAGE_CH1:
+			lcd_display_channel(0)
 
-	case LCD_PAGE_GPRS:
-		lcd_clear(212, 0, 106, 80)
-		if param_ge = GE_DISABLED then
-			lcd_print_icon("wifi_off.bmp", 212, 5)
-			lcd_print_top_text("GPRS OFF", 232, 7, 106 - 20, 8)
-		else
-			if gprs_connected = YES then
-				' GPRS is connected
-				lcd_print_icon("antenna.bmp", 212, 5)
-				lcd_print_top_text("GPRS ONLINE", 232, 7, 106 - 20, 8)
-				lcd_print_dhcp(PL_SOCK_INTERFACE_PPP, 212, 5)
-			else
-				' GPRS connection is lost
-				lcd_print_icon("wifi_error.bmp", 212, 5)
-				lcd_print_top_text("GPRS OFFLINE", 232, 7, 106 - 20, 8)
-				lcd_print_top_text("Not connection", 212, 21, 106, 20)
+		case LCD_PAGE_CH2:
+			lcd_display_channel(1)
+			
+		case LCD_PAGE_CH3:
+			lcd_display_channel(2)
+			
+		case LCD_PAGE_CH4:
+			lcd_display_channel(3)
+			
+		case LCD_PAGE_ERROR:
+			if lcd_error_mode = false then
+				lcd_display_tibbo("ERROR MODE!`Press & hold to reinitialize the device.")
+				lcd_error_mode = true
 			end if
-		end if
-	
-	case LCD_PAGE_CH1:
-		lcd_display_channel(0)
+			
+		case LCD_PAGE_LOGO:
+			lcd_display_tibbo("Booting...")	
 
-	case LCD_PAGE_CH2:
-		lcd_display_channel(1)
+		case LCD_PAGE_LOGO_WORK:
+			lcd_display_tibbo("Modbus Gateway")	
 		
-	case LCD_PAGE_CH3:
-		lcd_display_channel(2)
+		case LCD_PAGE_INIT_START:
+			lcd_display_tibbo("INIT IN PROGRESS`Do not power off the device!")
 		
-	case LCD_PAGE_CH4:
-		lcd_display_channel(3)
-		
-	case LCD_PAGE_ERROR:
-		lcd_display_tibbo("ERROR MODE!`Press & hold to reinitialize the device.")
-		
-	case LCD_PAGE_LOGO:
-		lcd_display_tibbo("Booting...")	
-
-	case LCD_PAGE_LOGO_WORK:
-		lcd_display_tibbo("Modbus Gateway")	
-	
-	case LCD_PAGE_INIT_START:
-		lcd_display_tibbo("INIT IN PROGRESS`Do not power off the device!")
-	
-	case LCD_PAGE_INIT_DONE
-		lcd_display_tibbo("INIT COMPLETE`Reboot the device now")
-		
-	end select
+		case LCD_PAGE_INIT_DONE
+			lcd_display_tibbo("INIT COMPLETE`Reboot the device now")
+			
+		end select
+	end if
 	
 end sub
 

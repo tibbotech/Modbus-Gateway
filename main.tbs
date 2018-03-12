@@ -186,6 +186,49 @@ end sub
 sub on_sys_timer()
 	dim f,x as byte
 
+	if button.pressed<>NO then
+		if button_pressed_ctr>0 then
+			button_pressed_ctr=button_pressed_ctr-1
+			if button_pressed_ctr=0 then
+				'long press detected, what now?
+				if error_mode<>NO then
+					'init
+					#if SUPPORTS_DISPLAY
+						if display_installed=YES then
+							#if PLATFORM_ID = TPP2WG2 or PLATFORM_ID = TPP2W
+								lcd_error_mode = false
+							#endif
+							lcd_display_page(LCD_PAGE_INIT_START, LCD_PRINT_MODE_AGGRESSIVE, LCD_PRINT_ELEMENT_ALL)
+						end if
+					#endif
+					#if BEEP_AVAILABLE
+						beep.play(BEEP_SHORT, PL_BEEP_CANINT)
+					#endif
+					
+					pat.play(PAT_GAP, PL_PAT_CANINT)
+					if stg_restore_multiple(EN_STG_INIT_MODE_OVERRIDE) <> EN_STG_STATUS_OK then
+						quick_init_flag = QI_NG
+						#if BEEP_AVAILABLE
+							beep.play(BEEP_LONG, PL_BEEP_CANINT)
+						#endif
+					else
+						quick_init_flag = QI_OK
+						#if SUPPORTS_DISPLAY
+							if display_installed = YES then
+								lcd_display_page(LCD_PAGE_INIT_DONE, LCD_PRINT_MODE_AGGRESSIVE, LCD_PRINT_ELEMENT_ALL)
+							end if
+						#endif
+						#if BEEP_AVAILABLE
+							beep.play(BEEP_SHORT, PL_BEEP_CANINT)
+						#endif
+					end if	
+				end if
+			end if
+		end if
+	else
+		button_pressed_ctr = LONG_PRESS_CONST
+	end if
+
 	' MODBUS
 	modbus_timeout()
 	

@@ -34,6 +34,11 @@ end enum
 declare lcd_on_ctr as word
 declare user_uses_button as no_yes
 
+#if PLATFORM_ID=TPP2WG2 or PLATFORM_ID=TPP2W
+	declare lcd_error_mode as boolean
+#endif
+
+
 #define LCD_FORECOLOR 65535
 #define LCD_BACKCOLOR 0
 

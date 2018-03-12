@@ -428,9 +428,9 @@ sub callback_dhcp_buff_released()
 end sub
 
 sub callback_stg_error(byref stg_name_or_num as string,index as byte,status as en_stg_status_codes)
-	error_mode=YES
+	error_mode = YES
 	#if SUPPORTS_DISPLAY
-		lcd_display_page(LCD_PAGE_ERROR,LCD_PRINT_MODE_AGGRESSIVE,LCD_PRINT_ELEMENT_ALL)
+		lcd_display_page(LCD_PAGE_ERROR, LCD_PRINT_MODE_AGGRESSIVE, LCD_PRINT_ELEMENT_ALL)
 	#endif
 end sub
 
