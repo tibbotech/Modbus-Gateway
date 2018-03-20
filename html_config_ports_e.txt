@@ -1,0 +1,24 @@
+bit0	multi-port configuration
+bit1	multi-channel configuration
+bit2	Power on pin 9 available
+bit3	Wi-Fi available
+bit4	GPRS available
+bit5	serial port modes are 232, 485, and 422 (used for ports 2, 3, 4)
+bit6	serial port modes are full-duplex and half-duples (used for ports 2, 3, 4)
+bit7	serial port supports baudrates up to 115200	
+bit8	serial port supports all baudrates
+bit9	TPS2
+bit10	unused
+
+bits09876543210
+
+>>&b00000100000	SI	Serial Interface 								B,L,0-Full-duplex (RS232);1-Half-duplex (RS485);2-Full-duplex (RS422);	^
+>>&b10000000000	SI	Serial Interface 								B,L,0-None;1-Tibbit #01, RS232 (full-duplex);2-Tibbit #02, RS232(full-duplex);3-Tibbit #02, RS485 (half-duplex);4-Tibbit #02, RS422 (full-duplex);5-Tibbit #05, RS485 (half-duplex);	^
+>>&b00000000000	RI	Modbus Serial Type								B,L,0-Master RTU;1-Master ASCII;2-Slave RTU;3-Slave ASCII;	^
+>>&b00000000000	CT	Reply Timeout (1/2 sec. int.)					S,I,2	^
+>>&b00000000000	FC	Flow Control									B,L,0-Disabled;1-Enabled, RTS/CTS;	^
+>>&b00010000000	BR	Baudrate										B,L,0-1200bps;1-2400bps;2-4800bps;3-9600bps;4-19200bps;5-38400bps;6-57600bps;7-115200bps;8-150bps;9-300bps;10-600bps;11-28800bps;	^
+>>&b00100000000	BR	Baudrate										B,L,0-1200bps;1-2400bps;2-4800bps;3-9600bps;4-19200bps;5-38400bps;6-57600bps;7-115200bps;8-150bps;9-300bps;10-600bps;11-28800bps;12-230400bps;13-460800bps;	^
+>>&b00000000000	PR	Parity											B,L,0-None;1-Even;2-Odd;3-Mark;4-Space;	^
+>>&b00000000000	BB	Data Bits										B,L,0-7 bits;1-8 bits;	^
+>>&b00000000000	MD	Max Intercharacter Delay						S,I,3	^
