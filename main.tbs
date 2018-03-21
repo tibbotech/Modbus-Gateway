@@ -157,7 +157,8 @@ sub on_pat()
 	#endif
 
 	if port_in_use(channel)=NO then	
-		pat.play("-~", PL_PAT_CANINT)
+		'pat.play("-~", PL_PAT_CANINT)
+		pat.play(PAT_TWO_SHORT_GREEN, PL_PAT_CANINT)	' idle status
 	else
 		if modbus_tcp_connecting = true then
 			modbus_tcp_connecting = false
