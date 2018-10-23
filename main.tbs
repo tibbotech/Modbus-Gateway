@@ -546,15 +546,6 @@ sub on_sock_event(newstate as pl_sock_state, newstatesimple as pl_sock_state_sim
 		sock_closed_check_net_login(sock.num) 'maybe need to close login
 	end if
 	
-	'this is for comm channel sockets only
-	for f = 0 to modbus_socks_number - 1
-		if sock.num = modbus_socks(f) then
-			#if SUPPORTS_DISPLAY
-				lcd_display_page(LCD_PAGE_CH1+f,LCD_PRINT_MODE_GENTLE,LCD_PRINT_ELEMENT_CH_OTF)
-			#endif
-		end if	
-	next f
-	
 	if sock.num = index_page_socknum and newstate = PL_SST_CL_ACLOSED then
 		if html_reboot_flag = YES then 
 			sys.reboot

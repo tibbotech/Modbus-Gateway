@@ -703,6 +703,7 @@ sub modbus_send_serial_ascii(byref packet as string, channelSerial as byte, shif
 		ser.num = channelSerial
 		ser.enabled = YES
 		ser.setdata(modbus_str)
+		
 		ser.send
 		
 		snmp_counter_out_serial(channelSerial) = snmp_counter_out_serial(channelSerial) + len(modbus_str)

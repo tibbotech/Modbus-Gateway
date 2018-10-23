@@ -18,7 +18,7 @@ address=0.36.119.82.112.35
 [address3]
 platform=DS1102W
 transport=udp_winpcap
-address=0.36.119.82.110.206
+address=0.36.119.82.110.205
 [address4]
 platform=DS1202
 transport=udp_winpcap
@@ -98,7 +98,7 @@ address=0.17.107.27.190.187
 [address23]
 platform=TPP2W(G2)
 transport=udp_winpcap
-address=0.36.119.85.251.40
+address=0.36.119.82.191.246
 [address24]
 platform=EM2000W
 transport=udp_winpcap
