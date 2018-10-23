@@ -17,11 +17,6 @@ public sub boot
 		lcd_display_page(LCD_PAGE_LOGO,LCD_PRINT_MODE_AGGRESSIVE,LCD_PRINT_ELEMENT_ALL)
 	#endif
 
-	' TEST
-'	pat.play(PAT_TWO_SHORT_RED, PL_PAT_CANINT)
-'test0:	goto test0
-
-
 	for f=0 to MAX_NUM_INTERFACES-1
 		interface_ready(f)=NO
 	next f
@@ -30,10 +25,6 @@ public sub boot
 		goto boot_failed
 	end if
 
-	#if PLATFORM_ID <> TPP3W or PLATFORM_ID <> TPP3WG2 or PLATFORM_ID <> TPP2W or PLATFORM_ID <> TPP2WG2
-		stg_set("PC", 0, 4)
-	#endif
-	
 	'form configuration words for descriptor files
 	dsman_config=0
 	html_print_setting_flags_settings_page=0

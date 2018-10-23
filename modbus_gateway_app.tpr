@@ -1,11 +1,11 @@
 [project]
 version=1
-platform=TPP2W(G2)
+platform=DS1102W
 src_lib_ver=2_00
 name=modbus_gateway_app
 output=modbus_gateway_app.tpc
 debug=off
-defines= /dLCD_TYPE=SOLOMON_SSD1305 /dOBJECT_LCD=LCD_ENABLED /dOBJECT_FD=FD_ENABLED /dOBJECT_KP=KP_ENABLED /dOBJECT_WLN=WLN_ENABLED
+defines=/dLCD_TYPE=SOLOMON_SSD1305 /dOBJECT_LCD=LCD_ENABLED /dOBJECT_FD=FD_ENABLED /dOBJECT_WLN=WLN_ENABLED /dOBJECT_KP=KP_ENABLED
 transport=udp_winpcap
 [address1]
 platform=DS1100
