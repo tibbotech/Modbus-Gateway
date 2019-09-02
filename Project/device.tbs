@@ -67,7 +67,7 @@ sub ethernet_link_state_change(new_state as pl_net_linkstate)
 						dev_debugprint("Start Wi-Fi")
 					#endif
 					num_wln_failures=0
-					if wln_start(param_wa,param_ws,wln_password,PL_WLN_DOMAIN_FCC)<>WLN_STATUS_OK then
+					if wln_start(param_wa,param_ws,wln_password,PL_WLN_DOMAIN_FCC,YES,PL_WLN_ASCAN_INFRASTRUCTURE)<>WLN_STATUS_OK then
 						#if DEV_DEBUG_PRINT
 							dev_debugprint("Wi-Fi MALFUNCTIONED (could not start)")
 						#endif
@@ -182,10 +182,6 @@ sub callback_wln_ok()
 		#endif
 	end if
 end sub
-#endif
-
-
-#if WLN_AVAILABLE
 
 sub callback_wln_failure(wln_state as en_wln_status_codes)
 
@@ -232,27 +228,25 @@ lbl1:
 		lcd_display_page(LCD_PAGE_WLN,LCD_PRINT_MODE_GENTLE,LCD_PRINT_ELEMENT_ALL)
 	#endif
 end sub
-#endif
 
-
-#if WLN_AVAILABLE
 sub callback_wln_mkey_progress_update(progress as byte)
 	#if SUPPORTS_DISPLAY
 		lcd_show_wln_mkey_progress(progress)
 	#endif
 end sub
-#endif
 
-
-#if WLN_AVAILABLE
 sub callback_wln_pre_buffrq(required_buff_pages as byte)
 end sub
-#endif
 
-
-#if WLN_AVAILABLE
 sub callback_wln_rescan_result(current_rssi as byte, scan_rssi as byte, different_ap as no_yes)
 end sub
+
+sub callback_wln_starting_association()
+end sub
+
+sub callback_wln_rescan_for_better_ap()
+end sub
+
 #endif
 
 
@@ -1263,7 +1257,7 @@ lb1:
 
 end function
 
-#if PLATFORM_ID=DS1101W or PLATFORM_ID=DS1102W
+#if PLATFORM_ID=DS1101W or PLATFORM_ID=DS1102W or PLATFORM_ID=DS1102N
 function test_io_pair(line_out as pl_io_num, line_in as pl_io_num) as ok_ng
 'added by Steve
 	dim	f as byte
