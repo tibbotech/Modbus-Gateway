@@ -494,7 +494,7 @@ public sub boot
 					dev_debugprint("Start Wi-Fi")
 				#endif
 				
-				wln_recent_status=wln_start(param_wa,param_ws,wln_password,PL_WLN_DOMAIN_FCC)
+				wln_recent_status=wln_start(param_wa,param_ws,wln_password,PL_WLN_DOMAIN_FCC,YES,PL_WLN_ASCAN_INFRASTRUCTURE)
 				if wln_recent_status<>WLN_STATUS_OK then
 					#if DEV_DEBUG_PRINT
 						dev_debugprint("Wi-Fi MALFUNCTIONED (could not start)")
