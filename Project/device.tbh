@@ -7,14 +7,20 @@ const DEV_CR_LF=chr(13)+chr(10)
 const LONG_PRESS_CONST=6		'in 0.5 sec intervals -- for how long the MD button should be pressed to be considered "long-pressed"
 
 
-#if(PLATFORM_ID=TPP3WG2)
+#if(PLATFORM_ID=TPP3WG2 OR PLATFORM_ID=TPP2WG2)
 	const SOCK_UDP_TXBUFF_SIZE=3	'this is for the RX buffer for UDP commands (change not recommended)
 	const SOCK_UDP_RXBUFF_SIZE=2	'this is for the TX buffer for UDP replies  (change not recommended)
 	const SOCK_HTTP_TXBUFF_SIZE=4	'number of buffer pages allocated for HTTP sockets (change not recommended)
+	const NUM_HTTP_SOCKETS = 3
+	const SERIAL_TX_BUFFER_SIZE = 4
+	const SERIAL_RX_BUFFER_SIZE = 4
 #else
-	const SOCK_UDP_TXBUFF_SIZE=2	'this is for the RX buffer for UDP commands (change not recommended)
-	const SOCK_UDP_RXBUFF_SIZE=2	'this is for the TX buffer for UDP replies  (change not recommended)
-	const SOCK_HTTP_TXBUFF_SIZE=2	'number of buffer pages allocated for HTTP sockets (change not recommended)
+	const SOCK_UDP_TXBUFF_SIZE = 2	'this is for the RX buffer for UDP commands (change not recommended)
+	const SOCK_UDP_RXBUFF_SIZE = 2	'this is for the TX buffer for UDP replies  (change not recommended)
+	const SOCK_HTTP_TXBUFF_SIZE = 1	'number of buffer pages allocated for HTTP sockets (change not recommended)
+	const NUM_HTTP_SOCKETS = 2
+	const SERIAL_TX_BUFFER_SIZE = 1
+	const SERIAL_RX_BUFFER_SIZE = 1
 #endif
 
 const BUTTON_CONST_QUICK_INIT=5 'in 0.5 intervals -- how long you need to press button for quick init
@@ -57,9 +63,6 @@ const NOTIF_BIT_POSITION_DSR=&b00000100
 const NOTIF_BIT_POSITION_DTR=&b00001000
 const NOTIF_BIT_POSITION_CTS=&b00010000
 const NOTIF_BIT_POSITION_RTS=&b00100000
-
-
-CONST NUM_HTTP_SOCKETS=3
 
 enum bb_modes
 	BB_7,

@@ -1,7 +1,7 @@
 'SUPPORTED PLATFORMS & RELATED CAPABILITIES--------------------------
 
-#define DHCP_DEBUG_PRINT 0
-#define DEV_DEBUG_PRINT 0
+#define DHCP_DEBUG_PRINT 1
+#define DEV_DEBUG_PRINT 1
 
 #define SIMULATE_ETHER_OFF_BY_BUTTON 0 'set to 1 to use button for simulating unplugged Ethernet cable
 
@@ -63,6 +63,7 @@
 	#define SUPPORTS_GPRS 0
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
 	#define WLN_WPA 1
+	#define GA1000 1
 	#define SUPPORTS_DISPLAY 0
 	#define SNMP_INTERFACE_COUNT_VALUE 7
 	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Gateway EM1000W EM2000W"
@@ -92,6 +93,7 @@
 	#define SUPPORTS_GPRS 0
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
 	#define WLN_WPA 1
+	#define GA1000 1
 	#define SUPPORTS_DISPLAY 0
 	#define SNMP_INTERFACE_COUNT_VALUE 7
 	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Gateway EM1202W"
@@ -121,6 +123,7 @@
 	#define SUPPORTS_GPRS 0
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
 	#define WLN_WPA 1
+	#define GA1000 1
 	#define SUPPORTS_DISPLAY 0
 	#define SNMP_INTERFACE_COUNT_VALUE 7
 	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Gateway EM1206W"
@@ -179,6 +182,7 @@
 	#define SUPPORTS_GPRS 0
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
 	#define WLN_WPA 1
+	#define GA1000 1
 	#define SUPPORTS_DISPLAY 0
 	#define SNMP_INTERFACE_COUNT_VALUE 7
 	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Gateway NB1010W"
@@ -194,11 +198,12 @@
 	#define SUPPORTS_GPRS 0
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
 	#define WLN_WPA 1
+	#define GA1000 1
 	#define SUPPORTS_DISPLAY 1
 	#define SNMP_INTERFACE_COUNT_VALUE 7
 	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Gateway DS1102W"
 
-#elif PLATFORM_ID=DS1101W or PLATFORM_ID=DS1102N
+#elif PLATFORM_ID=DS1101W
 	#define SUPPORTS_422_485_4 0
 	#define SUPPORTS_422_485_1 0
 	#define SUPPORTS_OVER_115200 1
@@ -209,6 +214,7 @@
 	#define SUPPORTS_GPRS 0
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
 	#define WLN_WPA 1
+	#define GA1000 1
 	#define SUPPORTS_DISPLAY 1
 	#define SNMP_INTERFACE_COUNT_VALUE 7
 	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Gateway DS1101W"
@@ -227,7 +233,7 @@
 	#define SNMP_INTERFACE_COUNT_VALUE 4
 	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Gateway DS1100"
 
-#elif PLATFORM_ID=TPP3W or PLATFORM_ID=TPP3N or PLATFORM_ID=TPP3WG2
+#elif PLATFORM_ID = TPP3WG2
 	#define SUPPORTS_422_485_4 1
 	#define SUPPORTS_422_485_1 0
 	#define SUPPORTS_OVER_115200 1
@@ -242,7 +248,23 @@
 	#define SNMP_INTERFACE_COUNT_VALUE 7
 	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Gateway TPP3W"
 	
-#elif PLATFORM_ID=TPP2WG2 or PLATFORM_ID=TPP2W or PLATFORM_ID=TPP2N
+#elif PLATFORM_ID=TPP3W
+	#define SUPPORTS_422_485_4 1
+	#define SUPPORTS_422_485_1 0
+	#define SUPPORTS_OVER_115200 1
+	#define PER_CHANNEL_STATUS_INDICATION 0
+	#define SIGNAL_STRENGTH_INDICATION 1
+	#define DEVICE_PORT_SCHEME PORT_SCHEME_4P
+	#define POWER_ON_PIN9 0
+	#define SUPPORTS_GPRS 0
+	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
+	#define WLN_WPA 1
+	#define GA1000 1
+	#define SUPPORTS_DISPLAY 0
+	#define SNMP_INTERFACE_COUNT_VALUE 7
+	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Gateway TPP3W"
+	
+#elif PLATFORM_ID=TPP2WG2
 	#define SUPPORTS_422_485_4 1
 	#define SUPPORTS_422_485_1 0
 	#define SUPPORTS_OVER_115200 1
@@ -334,7 +356,7 @@ const MAX_NUM_SERIAL_PORTS=4 'do not change this, array declarations are made wi
 		#define WLN_DI PL_IO_NULL
 		#define WLN_DO PL_IO_NULL
 		#define WLN_CLK PL_IO_NULL
-	#elif PLATFORM_ID=EM1206W or PLATFORM_ID=DS1101W or PLATFORM_ID=DS1102W  or PLATFORM_ID=DS1102N
+	#elif PLATFORM_ID=EM1206W or PLATFORM_ID=DS1101W or PLATFORM_ID=DS1102W
 		#define WLN_RST PL_IO_NUM_11
 		#define WLN_CS PL_IO_NUM_15
 		#define WLN_DI PL_IO_NUM_12
@@ -453,7 +475,7 @@ const MAX_NUM_SERIAL_PORTS=4 'do not change this, array declarations are made wi
 #define SOCK_MAX_SIGNATURE_LEN 4
 #define GPRS_PAYLOAD_SIZE 2
 
-#if PLATFORM_ID=DS1101W or PLATFORM_ID=DS1102W  or PLATFORM_ID=DS1102N
+#if PLATFORM_ID=DS1101W or PLATFORM_ID=DS1102W
 	#define BEEP_DIVIDER 16203
 #else
 	#define BEEP_DIVIDER 21600
@@ -519,6 +541,7 @@ declare manufacture_login as no_yes 'special flag, this flag used for led test,.
 #endif
 
 declare function validate_ip(byref ip as string) as string
+declare dhcp_used as no_yes
 declare ip_configured(MAX_NUM_INTERFACES) as no_yes
 declare dhcp_failed(MAX_NUM_INTERFACES) as no_yes
 declare sub signal_strength_indication_init()
@@ -535,3 +558,4 @@ declare sub dev_debugprint(byref print_data as string)
 declare sub enable_comm_channels(pages_to_distribute as byte)
 declare sub set_comm_channel_buffers(channel_num as byte, num_buffers as byte, ser_port_in_prog_mode as no_yes) '<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+

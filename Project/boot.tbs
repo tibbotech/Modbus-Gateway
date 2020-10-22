@@ -1,11 +1,12 @@
 include "global.tbh"
 
+	dim dhcp_used as no_yes
+
 '====================================================================
 public sub boot
 	dim f,x as byte
 	dim dsman_config as word
 	dim num_ports_in_use as byte
-	dim dhcp_used as no_yes
 
 	#if DEV_DEBUG_PRINT
 		dev_debugprint("sys.freebuffpages " + str(sys.freebuffpages))
@@ -494,7 +495,7 @@ public sub boot
 					dev_debugprint("Start Wi-Fi")
 				#endif
 				
-				wln_recent_status=wln_start(param_wa,param_ws,wln_password,PL_WLN_DOMAIN_FCC,YES,PL_WLN_ASCAN_INFRASTRUCTURE)
+				wln_recent_status=wln_start(param_wa,param_ws,wln_password,PL_WLN_DOMAIN_FCC,no,PL_WLN_ASCAN_INFRASTRUCTURE)
 				if wln_recent_status<>WLN_STATUS_OK then
 					#if DEV_DEBUG_PRINT
 						dev_debugprint("Wi-Fi MALFUNCTIONED (could not start)")
@@ -556,18 +557,18 @@ public sub boot
 	sys.buffalloc
 
 	'TELNET socket
-	sock_telnet=sock_get("TLNT")
-	sock.num=sock_telnet
-	sock.protocol=PL_SOCK_PROTOCOL_TCP
-	sock.localportlist="23"
-	sock.connectiontout=600
-	sock.allowedinterfaces="NET,WLN,PPP"
-	sock.inconmode=PL_SOCK_INCONMODE_ANY_IP_ANY_PORT
-	sock.reconmode= PL_SOCK_RECONMODE_3
-	if sock.txbuffrq(1)<>1 or sock.rxbuffrq(1)<>1 then
-		goto boot_failed
-	end if
-	sys.buffalloc	
+	'sock_telnet=sock_get("TLNT")
+	'sock.num=sock_telnet
+	'sock.protocol=PL_SOCK_PROTOCOL_TCP
+	'sock.localportlist="23"
+	'sock.connectiontout=600
+	'sock.allowedinterfaces="NET,WLN,PPP"
+	'sock.inconmode=PL_SOCK_INCONMODE_ANY_IP_ANY_PORT
+	'sock.reconmode= PL_SOCK_RECONMODE_3
+	'if sock.txbuffrq(1)<>1 or sock.rxbuffrq(1)<>1 then
+	'	goto boot_failed
+	'end if
+	'sys.buffalloc	
 
 	'HTTP sockets
 	for f=0 to NUM_HTTP_SOCKETS-1
@@ -640,8 +641,8 @@ public sub boot
 
 				can_show_data_transmission(f) = YES
 
-				ser.txbuffrq(2)
-				ser.rxbuffrq(2)
+				ser.txbuffrq(SERIAL_TX_BUFFER_SIZE)
+				ser.rxbuffrq(SERIAL_RX_BUFFER_SIZE)
 				sys.buffalloc
 				ser.enabled = YES
 			else

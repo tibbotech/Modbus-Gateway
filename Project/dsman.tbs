@@ -871,7 +871,7 @@ d1:			if x>=num_sdf then goto reply_err
 				param_wa=right(s,len(s)-2)
 				param_ws=WLN_SECURITY_MODE_DISABLED
 				wln_password=""
-				wln_recent_status=wln_start(param_wa,param_ws,wln_password,PL_WLN_DOMAIN_FCC,YES,PL_WLN_ASCAN_INFRASTRUCTURE)
+				wln_recent_status=wln_start(param_wa, param_ws, wln_password, PL_WLN_DOMAIN_FCC, no, PL_WLN_ASCAN_INFRASTRUCTURE)
 				if wln_recent_status<>WLN_STATUS_OK then
 					goto reply_failed
 				end if
@@ -947,7 +947,7 @@ d1:			if x>=num_sdf then goto reply_err
 					#if PLATFORM_ID=DS1100
 						ser.rtsmap=PL_IO_NUM_2_RTS
 						io.num=PL_IO_NUM_2_RTS
-					#elif PLATFORM_ID=DS1101W or PLATFORM_ID=DS1102W  or PLATFORM_ID=DS1102N
+					#elif PLATFORM_ID=DS1101W or PLATFORM_ID=DS1102W
 						ser.rtsmap=PL_IO_NUM_3_TX1_INT3
 						io.num=PL_IO_NUM_3_TX1_INT3
 					#endif
@@ -957,7 +957,7 @@ d1:			if x>=num_sdf then goto reply_err
 					' set DSR as input
 					#if PLATFORM_ID=DS1100
 						io.num=PL_IO_NUM_1_DSR_INT1
-					#elif PLATFORM_ID=DS1101W or PLATFORM_ID=DS1102W or PLATFORM_ID=DS1102N
+					#elif PLATFORM_ID=DS1101W or PLATFORM_ID=DS1102W
 						io.num=PL_IO_NUM_4_RX2_INT4
 					#endif
 					io.enabled=NO
@@ -965,7 +965,7 @@ d1:			if x>=num_sdf then goto reply_err
 					' set DTR as output
 					#if PLATFORM_ID=DS1100
 						io.num=PL_IO_NUM_3_DTR
-					#elif PLATFORM_ID=DS1101W or PLATFORM_ID=DS1102W or PLATFORM_ID=DS1102N
+					#elif PLATFORM_ID=DS1101W or PLATFORM_ID=DS1102W
 						io.num=PL_IO_NUM_5_TX2_INT5
 					#endif
 					io.enabled=YES
@@ -973,7 +973,7 @@ d1:			if x>=num_sdf then goto reply_err
 
 					ser.enabled=YES
 
-			#if PLATFORM_ID=DS1102W 
+			#if PLATFORM_ID=DS1102W
 				case "1": 'RS485
 					ser.num=0
 					ser.enabled=NO
@@ -1110,7 +1110,7 @@ d1:			if x>=num_sdf then goto reply_err
 			manufacture_flag=0
 			goto reply_ok
 
-		#if PLATFORM_ID=DS1101W or PLATFORM_ID=DS1102W or PLATFORM_ID=DS1102N
+		#if PLATFORM_ID=DS1101W or PLATFORM_ID=DS1102W
 		case "B":
 			io.num=PL_IO_NUM_19_SB1
 			io.enabled=YES
@@ -1173,7 +1173,7 @@ d1:			if x>=num_sdf then goto reply_err
 			goto reply_ok
 		#endif
 
-		#if PLATFORM_ID=DS1101W or PLATFORM_ID=DS1102W or PLATFORM_ID=DS1102N
+		#if PLATFORM_ID=DS1101W or PLATFORM_ID=DS1102W
 		case "U":
 			select case mid(s,3,1)
 			case "0":
@@ -1194,7 +1194,7 @@ d1:			if x>=num_sdf then goto reply_err
 			reply_str=net.mac
 			goto reply_ok_have_data
 
-		#if PLATFORM_ID=DS1101W or PLATFORM_ID=DS1102W or PLATFORM_ID=DS1102N
+		#if PLATFORM_ID=DS1101W or PLATFORM_ID=DS1102W
 		case "o":
 			if test_io_pair(PL_IO_NUM_24_OLED_D0,PL_IO_NUM_25_OLED_D1)=NG then goto reply_failed
 			if test_io_pair(PL_IO_NUM_26_OLED_D2,PL_IO_NUM_27_OLED_D3)=NG then goto reply_failed
