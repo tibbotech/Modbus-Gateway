@@ -1,7 +1,7 @@
 'SUPPORTED PLATFORMS & RELATED CAPABILITIES--------------------------
 
-#define DHCP_DEBUG_PRINT 1
-#define DEV_DEBUG_PRINT 1
+#define DHCP_DEBUG_PRINT 0
+#define DEV_DEBUG_PRINT 0
 
 #define SIMULATE_ETHER_OFF_BY_BUTTON 0 'set to 1 to use button for simulating unplugged Ethernet cable
 
@@ -244,6 +244,7 @@
 	#define SUPPORTS_GPRS 0
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
 	#define WLN_WPA 1
+	'#define GA1000 1
 	#define SUPPORTS_DISPLAY 0
 	#define SNMP_INTERFACE_COUNT_VALUE 7
 	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Gateway TPP3W"
@@ -275,6 +276,7 @@
 	#define SUPPORTS_GPRS 0
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
 	#define WLN_WPA 1
+	'#define GA1000 1
 	#define SUPPORTS_DISPLAY 1
 	#define SNMP_INTERFACE_COUNT_VALUE 7
 	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Gateway TPP2W"

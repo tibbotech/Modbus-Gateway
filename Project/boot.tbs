@@ -557,18 +557,18 @@ public sub boot
 	sys.buffalloc
 
 	'TELNET socket
-	'sock_telnet=sock_get("TLNT")
-	'sock.num=sock_telnet
-	'sock.protocol=PL_SOCK_PROTOCOL_TCP
-	'sock.localportlist="23"
-	'sock.connectiontout=600
-	'sock.allowedinterfaces="NET,WLN,PPP"
-	'sock.inconmode=PL_SOCK_INCONMODE_ANY_IP_ANY_PORT
-	'sock.reconmode= PL_SOCK_RECONMODE_3
-	'if sock.txbuffrq(1)<>1 or sock.rxbuffrq(1)<>1 then
-	'	goto boot_failed
-	'end if
-	'sys.buffalloc	
+	sock_telnet=sock_get("TLNT")
+	sock.num=sock_telnet
+	sock.protocol=PL_SOCK_PROTOCOL_TCP
+	sock.localportlist="23"
+	sock.connectiontout=600
+	sock.allowedinterfaces="NET,WLN,PPP"
+	sock.inconmode=PL_SOCK_INCONMODE_ANY_IP_ANY_PORT
+	sock.reconmode= PL_SOCK_RECONMODE_3
+	if sock.txbuffrq(1)<>1 or sock.rxbuffrq(1)<>1 then
+		goto boot_failed
+	end if
+	sys.buffalloc	
 
 	'HTTP sockets
 	for f=0 to NUM_HTTP_SOCKETS-1
