@@ -160,13 +160,19 @@ public sub boot
 		param_ge = GE_DISABLED
 	#endif
 
+	
 	'we need to pre-read this now 
 	#if DEVICE_PORT_SCHEME = PORT_SCHEME_1P
 		param_si(0)=val(stg_get("SI",0))
 	#else
+		dim port_used_count as byte = 0
 		for f=0 to MAX_NUM_SERIAL_PORTS - 1
 			param_si(f)=val(stg_get("SI",f))
+			if(param_si(f) > 0) then
+				port_used_count = port_used_count + 1
+			end if
 		next f
+		stg_set("PC",0,str(port_used_count))		
 	#endif
 
 	#if DEVICE_PORT_SCHEME=PORT_SCHEME_4P or DEVICE_PORT_SCHEME=PORT_SCHEME_4P2 or DEVICE_PORT_SCHEME=PORT_SCHEME_1P
