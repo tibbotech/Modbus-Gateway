@@ -142,7 +142,7 @@
 	#define SNMP_INTERFACE_COUNT_VALUE 4
 	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Gateway EM500"
 
-#elif PLATFORM_ID=EM500W
+#elif PLATFORM_ID=EM500W or PLATFORM_ID=EM510W
 	#define SUPPORTS_422_485_4 0
 	#define SUPPORTS_422_485_1 0
 	#define SUPPORTS_OVER_115200 0
@@ -456,7 +456,7 @@ const MAX_NUM_SERIAL_PORTS=4 'do not change this, array declarations are made wi
 		const I7=PL_IO_NULL                                            'PL_INT_NUM_7
 	#endif
 
-#elif PLATFORM_ID=EM500W
+#elif PLATFORM_ID=EM500W or PLATFORM_ID=EM510W
 	const BASE_OF_INT_LINES=PL_IO_NUM_0_INT0
 	const SER0_CTS_INT=PL_IO_NUM_0_INT0	'must be from pl_int_num range (NOT pl_io_num)
 	const SER0_RTS=PL_IO_NUM_2			'must be from pl_io_num range

@@ -193,9 +193,9 @@ function modbus_initialize() as boolean
 	
 	' MODBUS TCP
 	if dhcp_used = YES then
-		modbus_socks_number = (sys.freebuffpages - 12) / 2	' 12 buffers must be left free for Serial ports and DHCP
+		modbus_socks_number = (sys.freebuffpages - (NUM_SERIAL_PORTS * 2) - 6) / 2
 	else
-		modbus_socks_number = (sys.freebuffpages - 6) / 2	' 6 buffers must be left free for Serial ports
+		modbus_socks_number = (sys.freebuffpages - (NUM_SERIAL_PORTS * 2)) / 2
 	end if
 	
 	if modbus_socks_number > MODBUS_SOCKET_MAX_NUMBERS then modbus_socks_number = MODBUS_SOCKET_MAX_NUMBERS
