@@ -165,6 +165,11 @@ public sub boot
 	#if DEVICE_PORT_SCHEME = PORT_SCHEME_1P
 		param_si(0)=val(stg_get("SI",0))
 	#else
+	#if DEVICE_PORT_SCHEME <> PORT_SCHEME_4P2 and PLATFORM_ID <> TPP3W and PLATFORM_ID <> TPP3WG2
+		for f=0 to MAX_NUM_SERIAL_PORTS - 1
+			param_si(f)=val(stg_get("SI",f))
+		next f
+	#else
 		dim port_used_count as byte = 0
 		for f=0 to MAX_NUM_SERIAL_PORTS - 1
 			param_si(f)=val(stg_get("SI",f))
@@ -173,6 +178,7 @@ public sub boot
 			end if
 		next f
 		stg_set("PC",0,str(port_used_count))		
+	#endif
 	#endif
 
 	#if DEVICE_PORT_SCHEME=PORT_SCHEME_4P or DEVICE_PORT_SCHEME=PORT_SCHEME_4P2 or DEVICE_PORT_SCHEME=PORT_SCHEME_1P
