@@ -1,7 +1,7 @@
 [project]
 version=1
 platform=TPP3W(G2)
-src_lib_ver=2_01_03
+src_lib_ver=2_01_05
 name=modbus_gateway_app
 output=modbus_gateway_app.tpc
 debug=off
@@ -123,6 +123,18 @@ address=0.36.119.86.164.110
 platform=EM510W
 transport=udp_broadcast
 address=0.36.119.86.88.187
+[address30]
+platform=DS1101N
+transport=udp_broadcast
+address=0.36.119.82.112.35
+[address31]
+platform=DS1101W2
+transport=udp_broadcast
+address=0.36.119.82.112.35
+[address32]
+platform=DS1102N
+transport=udp_broadcast
+address=0.36.119.82.112.35
 [file1]
 path=main.tbs
 type=basic
