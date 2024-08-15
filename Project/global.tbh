@@ -307,7 +307,8 @@
 	#define SUPPORTS_APP_UPGR_BY_DSMAN 1
 	#define WLN_WPA 1
 	'#define GA1000 1
-	#define SUPPORTS_DISPLAY 1
+'	#define SUPPORTS_DISPLAY 1
+	#define SUPPORTS_DISPLAY 0	'0523_24
 	#define SNMP_INTERFACE_COUNT_VALUE 7
 	#define SNMP_SET_DESCRIPTION "Tibbo Modbus Gateway TPP2W"
 
@@ -552,6 +553,7 @@ include "error.tbh"
 include "html_common.tbh"
 include "dsman.tbh"
 include "lcd.tbh"
+include "modbus_lib.tbh"
 
 ' SNMP
 include "snmp.tbh"

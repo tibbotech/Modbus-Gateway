@@ -211,7 +211,7 @@ function modbus_initialize() as boolean
 		sock.connectiontout = 600
 		sock.allowedinterfaces = "NET,WLN,PPP"
 		sock.inconmode = PL_SOCK_INCONMODE_ANY_IP_ANY_PORT
-		sock.reconmode = PL_SOCK_RECONMODE_0
+		sock.reconmode = PL_SOCK_RECONMODE_3 '0 to 3
 		if sock.txbuffrq(1) <> 1 or sock.rxbuffrq(1) <> 1 then
 			result = false
 		end if
@@ -695,7 +695,7 @@ sub modbus_send_serial_ascii(byref packet as string, channelSerial as byte, shif
 		end if
 
 		' Calc LRC
-		lrc = LRC8(packet, len(packet))
+		'lrc = LRC8(packet, len(packet))
 		
 		modbus_str = ":"
 		
@@ -747,7 +747,7 @@ sub modbus_send_serial_rtu(byref packet as string, channelSerial as byte, shiftI
 		end if
 		
 		' Calc CRC16
-		crc = CRC16(packet, len(packet))
+		crc = modbus_crc16(packet, len(packet))
 
 		modbus_str = packet + chr(crc shr 8) + chr(crc and 255)
 		ser.num = channelSerial
@@ -1052,7 +1052,7 @@ sub modbus_serial_receive(byref data as string, channelSerial as byte)
 
 		' Check CRC
 		dim crc as word
-		crc = CRC16(data, len(data)-2)
+		crc = modbus_crc16(data, len(data)-2)
 		
 		if asc(mid(data, len(data)-1, 1)) = (crc shr 8) and asc(mid(data, len(data), 1)) = (crc and 255) then
 			' CRC OK
@@ -1140,7 +1140,7 @@ sub modbus_serial_receive(byref data as string, channelSerial as byte)
 
 		' Check CRC
 		dim crc as word
-		crc = CRC16(data, len(data)-2)
+		crc = modbus_crc16(data, len(data)-2)
 		
 		if asc(mid(data, len(data)-1, 1)) = (crc shr 8) and asc(mid(data, len(data), 1)) = (crc and 255) then
 			' CRC OK

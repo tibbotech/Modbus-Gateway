@@ -1,0 +1,62 @@
+include "global.tbh"
+
+
+dim _crc_table_hi as byte(256) = {
+	&H00,&HC1,&H81,&H40,&H01,&HC0,&H80,&H41,&H01,&HC0,&H80,&H41,&H00,&HC1,&H81,&H40,
+	&H01,&HC0,&H80,&H41,&H00,&HC1,&H81,&H40,&H00,&HC1,&H81,&H40,&H01,&HC0,&H80,&H41,
+	&H01,&HC0,&H80,&H41,&H00,&HC1,&H81,&H40,&H00,&HC1,&H81,&H40,&H01,&HC0,&H80,&H41,
+	&H00,&HC1,&H81,&H40,&H01,&HC0,&H80,&H41,&H01,&HC0,&H80,&H41,&H00,&HC1,&H81,&H40,
+	&H01,&HC0,&H80,&H41,&H00,&HC1,&H81,&H40,&H00,&HC1,&H81,&H40,&H01,&HC0,&H80,&H41,
+	&H00,&HC1,&H81,&H40,&H01,&HC0,&H80,&H41,&H01,&HC0,&H80,&H41,&H00,&HC1,&H81,&H40,
+	&H00,&HC1,&H81,&H40,&H01,&HC0,&H80,&H41,&H01,&HC0,&H80,&H41,&H00,&HC1,&H81,&H40,
+	&H01,&HC0,&H80,&H41,&H00,&HC1,&H81,&H40,&H00,&HC1,&H81,&H40,&H01,&HC0,&H80,&H41,
+	&H01,&HC0,&H80,&H41,&H00,&HC1,&H81,&H40,&H00,&HC1,&H81,&H40,&H01,&HC0,&H80,&H41,
+	&H00,&HC1,&H81,&H40,&H01,&HC0,&H80,&H41,&H01,&HC0,&H80,&H41,&H00,&HC1,&H81,&H40,
+	&H00,&HC1,&H81,&H40,&H01,&HC0,&H80,&H41,&H01,&HC0,&H80,&H41,&H00,&HC1,&H81,&H40,
+	&H01,&HC0,&H80,&H41,&H00,&HC1,&H81,&H40,&H00,&HC1,&H81,&H40,&H01,&HC0,&H80,&H41,
+	&H00,&HC1,&H81,&H40,&H01,&HC0,&H80,&H41,&H01,&HC0,&H80,&H41,&H00,&HC1,&H81,&H40,
+	&H01,&HC0,&H80,&H41,&H00,&HC1,&H81,&H40,&H00,&HC1,&H81,&H40,&H01,&HC0,&H80,&H41,
+	&H01,&HC0,&H80,&H41,&H00,&HC1,&H81,&H40,&H00,&HC1,&H81,&H40,&H01,&HC0,&H80,&H41,
+	&H00,&HC1,&H81,&H40,&H01,&HC0,&H80,&H41,&H01,&HC0,&H80,&H41,&H00,&HC1,&H81,&H40
+}
+
+dim _crc_table_lo as byte(256) = {
+	&H00,&HC0,&HC1,&H01,&HC3,&H03,&H02,&HC2,&HC6,&H06,&H07,&HC7,&H05,&HC5,&HC4,&H04,
+	&HCC,&H0C,&H0D,&HCD,&H0F,&HCF,&HCE,&H0E,&H0A,&HCA,&HCB,&H0B,&HC9,&H09,&H08,&HC8,
+	&HD8,&H18,&H19,&HD9,&H1B,&HDB,&HDA,&H1A,&H1E,&HDE,&HDF,&H1F,&HDD,&H1D,&H1C,&HDC,
+	&H14,&HD4,&HD5,&H15,&HD7,&H17,&H16,&HD6,&HD2,&H12,&H13,&HD3,&H11,&HD1,&HD0,&H10,
+	&HF0,&H30,&H31,&HF1,&H33,&HF3,&HF2,&H32,&H36,&HF6,&HF7,&H37,&HF5,&H35,&H34,&HF4,
+	&H3C,&HFC,&HFD,&H3D,&HFF,&H3F,&H3E,&HFE,&HFA,&H3A,&H3B,&HFB,&H39,&HF9,&HF8,&H38,
+	&H28,&HE8,&HE9,&H29,&HEB,&H2B,&H2A,&HEA,&HEE,&H2E,&H2F,&HEF,&H2D,&HED,&HEC,&H2C,
+	&HE4,&H24,&H25,&HE5,&H27,&HE7,&HE6,&H26,&H22,&HE2,&HE3,&H23,&HE1,&H21,&H20,&HE0,
+	&HA0,&H60,&H61,&HA1,&H63,&HA3,&HA2,&H62,&H66,&HA6,&HA7,&H67,&HA5,&H65,&H64,&HA4,
+	&H6C,&HAC,&HAD,&H6D,&HAF,&H6F,&H6E,&HAE,&HAA,&H6A,&H6B,&HAB,&H69,&HA9,&HA8,&H68,
+	&H78,&HB8,&HB9,&H79,&HBB,&H7B,&H7A,&HBA,&HBE,&H7E,&H7F,&HBF,&H7D,&HBD,&HBC,&H7C,
+	&HB4,&H74,&H75,&HB5,&H77,&HB7,&HB6,&H76,&H72,&HB2,&HB3,&H73,&HB1,&H71,&H70,&HB0,
+	&H50,&H90,&H91,&H51,&H93,&H53,&H52,&H92,&H96,&H56,&H57,&H97,&H55,&H95,&H94,&H54,
+	&H9C,&H5C,&H5D,&H9D,&H5F,&H9F,&H9E,&H5E,&H5A,&H9A,&H9B,&H5B,&H99,&H59,&H58,&H98,
+	&H88,&H48,&H49,&H89,&H4B,&H8B,&H8A,&H4A,&H4E,&H8E,&H8F,&H4F,&H8D,&H4D,&H4C,&H8C,
+	&H44,&H84,&H85,&H45,&H87,&H47,&H46,&H86,&H82,&H42,&H43,&H83,&H41,&H81,&H80,&H40,
+}
+
+
+function modbus_crc16(data as byte(255), byte_cnt as byte) as word
+	if byte_cnt = 0 then
+		modbus_crc16 = 0
+		exit function
+	end if
+	dim crc_hi as byte = &HFF
+	dim crc_lo as byte = &HFF
+	dim i as byte
+	dim idx as word
+	dim data_index as byte = 0
+	for i=0 to byte_cnt-1
+		idx = crc_hi xor data(data_index)
+		data_index = data_index + 1
+		crc_hi = crc_lo xor _crc_table_hi(idx)
+		crc_lo = _crc_table_lo(idx)
+	next i
+	
+	modbus_crc16 = (crc_hi shl 8) or crc_lo
+	
+end function

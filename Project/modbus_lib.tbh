@@ -1,0 +1,1 @@
+declare function modbus_crc16(data as byte(255), byte_cnt as byte) as word

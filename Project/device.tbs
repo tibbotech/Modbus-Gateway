@@ -67,7 +67,8 @@ sub ethernet_link_state_change(new_state as pl_net_linkstate)
 						dev_debugprint("Start Wi-Fi")
 					#endif
 					num_wln_failures=0
-					if wln_start(param_wa,param_ws,wln_password,PL_WLN_DOMAIN_FCC,no,PL_WLN_ASCAN_INFRASTRUCTURE) <> WLN_STATUS_OK then
+'					if wln_start(param_wa,param_ws,wln_password,PL_WLN_DOMAIN_FCC,no,PL_WLN_ASCAN_INFRASTRUCTURE) <> WLN_STATUS_OK then
+					if wln_start(param_wa,param_ws,wln_password,PL_WLN_DOMAIN_FCC,yes,PL_WLN_ASCAN_INFRASTRUCTURE) <> WLN_STATUS_OK then
 						#if DEV_DEBUG_PRINT
 							dev_debugprint("Wi-Fi MALFUNCTIONED (could not start)")
 						#endif
@@ -147,6 +148,24 @@ sub ethernet_link_state_change(new_state as pl_net_linkstate)
 	end if
 end sub
 
+sub send_test_data()	'0603_24
+	sock.num=16
+	sock.targetinterface=PL_SOCK_INTERFACE_WLN
+	sock.targetip=wln.gatewayip
+	sock.targetport=81
+	sock.protocol=PL_SOCK_PROTOCOL_TCP
+	sock.txbuffrq(1)
+	sock.rxbuffrq(1)
+	sys.buffalloc()
+	sock.rxclear()
+	sock.txclear()
+	sock.connect()
+	dim timeout as dword=sys.timercountms+3000
+	while sys.timercountms<timeout AND sock.statesimple<>PL_SSTS_EST
+	wend
+	sock.setdata(".")
+	sock.send()
+end sub
 
 #if WLN_AVAILABLE
 sub callback_wln_ok()
@@ -164,7 +183,9 @@ sub callback_wln_ok()
 			lcd_display_page(LCD_PAGE_WLN,LCD_PRINT_MODE_GENTLE,LCD_PRINT_ELEMENT_ALL)
 		end if
 	#endif
-
+	close_interface_sockets(PL_SOCK_INTERFACE_WLN)
+	'send_test_data()	'0603_24
+	
 	'Should Wi-Fi become our current interface?
 	if interface_ready(PL_SOCK_INTERFACE_NET)=NO then
 		change_current_interface(PL_SOCK_INTERFACE_WLN)
@@ -190,6 +211,8 @@ end sub
 sub callback_wln_failure(wln_state as en_wln_status_codes)
 
 	wln_recent_status=wln_state
+	
+	interface_ready(PL_SOCK_INTERFACE_WLN)=NO	'0517_24
 
 	if num_wln_failures=255 then goto lbl1
 

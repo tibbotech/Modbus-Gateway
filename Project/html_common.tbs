@@ -209,6 +209,7 @@ public sub html_proc_cmd
 		case "reboot":
 			html_reboot_flag = YES
 			sock_setsend("onload = IndexPage()")
+			sys.reboot '0620_24
 	end select
 end sub
 
